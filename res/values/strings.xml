@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bankomat Card Infos</string>
+    <string name="action_settings">Settings</string>
+    <string name="your_card_please">Please hold your card close to the back side of your device&#8230;</string>
+    <string name="nfc_logo_description">NFC Logo</string>
+    <string name="read_card_progress_status">Reading card&#8230;</string>
+
+    <!-- error alert dialogs -->
+    <string name="dialog_title_error_no_maestro_or_quick">Unknown Card</string>
+    <string name="dialog_text_error_no_maestro_or_quick">This card is no Maestro or Paylife QUICK card.</string>
+    <string name="dialog_title_error_card_lost">Card lost</string>
+    <string name="dialog_text_error_card_lost">Lost the connection to the card during reading.\n\nDid you remove the card?</string>
+    <string name="dialog_title_error_no_smartcard">No SmartCard</string>
+    <string name="dialog_text_error_no_smartcard">This NFC tag is no valid ISO 7816 compliant SmartCard.</string>
+    <string name="dialog_title_error_ioexception">IO Exception</string>
+    <string name="dialog_text_error_ioexception">IOException during reading the card. Look into logcat for details.</string>
+    <string name="dialog_title_error_unknown">Unknown Exception</string>
+    <string name="dialog_text_error_unknown">Unknown error during reading the card. Look into logcat for details.</string>
+    
+    <!-- No NFC available.. -->
+    <string name="title_activity_nfc_disabled">NFC not available</string>
+    <string name="nfc_not_available">NFC not available on this device or disabled in Android system settings.</string>
+
+    <!-- Result activity -->
+    <string name="title_activity_result">Results</string>
+    <string name="title_section1">Infos</string>
+    <string name="title_section2">Transactions</string>
+    
+    <!-- General results -->
+    
+    <string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
+    <string name="lbl_is_quick_card">Is a QUICK card:</string>
+    <string name="lbl_is_maestro_card">Is a Maestro (Bankomat) card:</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+    <string name="lbl_quick_balance">QUICK balance:</string>
+    <string name="lbl_quick_currency">QUICK currency:</string>
+    
+    <!-- Transaction List: -->
+    <string name="tx_list_no_tx_found">No transactions found</string>
+    
+    
+    
+</resources>

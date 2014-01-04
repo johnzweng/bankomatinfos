@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background_list_views" >
+
+    <TextView
+        android:id="@+id/txListItemTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="8dp"
+        android:maxLines="1"
+        android:text="23.12.2013  07:12:23"
+        android:textAppearance="@style/TransactionListTimestamp" />
+
+    <TextView
+        android:id="@+id/txListItemAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:maxLines="1"
+        android:text="-xxxxx,xx DUMMY"
+        android:textAppearance="@style/TransactionListAmount" />
+    
+    <TextView
+        android:id="@+id/txListRawData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txListItemAmount"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="18dp"
+        android:background="#666666"
+        android:padding="10dp"
+        android:text="00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00"
+        android:textAppearance="@style/TransactionListHexData" />
+
+</RelativeLayout>

@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NfcDisabledActivity" >
+
+    <ImageView
+        android:id="@+id/imageViewNfcNotAvailableLogo"
+        android:layout_width="260dp"
+        android:layout_height="182dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/nfc_logo_description"
+        android:src="@drawable/no_nfc" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageViewNfcNotAvailableLogo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="41dp"
+        android:gravity="center_horizontal"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="@string/nfc_not_available"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>

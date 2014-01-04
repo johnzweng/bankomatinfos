@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bankomatkarten Infos</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="your_card_please">Bitte halten Sie Ihre Bankomatkarte an die Rückseite des Geräts&#8230;</string>
+    <string name="nfc_logo_description">NFC Logo</string>
+    <string name="read_card_progress_status">Bitte warten, lese Karte&#8230;</string>
+
+    <!-- error alert dialogs -->
+    <string name="dialog_title_error_no_maestro_or_quick">Unbekannte Karte</string>
+    <string name="dialog_text_error_no_maestro_or_quick">Diese Karte ist keine Maestro (Bankomat) oder Paylife QUICK Karte.</string>
+    <string name="dialog_title_error_card_lost">Karte verloren</string>
+    <string name="dialog_text_error_card_lost">Die Verbindung zur Karte wurde während des Lesevorgangs unterbrochen.\n\nHaben Sie die Karte vom Gerät entfernt?</string>
+    <string name="dialog_title_error_no_smartcard">Keine SmartCard</string>
+    <string name="dialog_text_error_no_smartcard">Dieser NFC Tag ist keine gültige ISO 7816 SmartCard).</string>
+    <string name="dialog_title_error_ioexception">Eingabe-Ausgabe-Fehler</string>
+    <string name="dialog_text_error_ioexception">Während des Lesevorgangs ist eine \'IOException\' aufgetreten. Bitte sehen Sie in \'logcat\' für mehr Details.</string>
+    <string name="dialog_title_error_unknown">Unbekannter Fehler</string>
+    <string name="dialog_text_error_unknown">Während des Lesevorgangs ist ein unbekannter Fehler bzw. eine unbekannte Exception aufgetreten. error during reading the card. Bitte sehen Sie in \'logcat\' für mehr Details.</string>
+    
+    <!-- No NFC available.. -->
+    <string name="title_activity_nfc_disabled">NFC nicht verfügbar</string>
+    <string name="nfc_not_available">NFC ist auf diesem Gerät entweder nicht verfügbar oder in den Systemeinstellungen deaktiviert.</string>
+
+    <!-- Result activity -->
+    <string name="title_activity_result">Ergebnisse</string>
+    <string name="title_section1">Infos</string>
+    <string name="title_section2">Transaktionen</string>
+    
+    <!-- General results -->
+    
+    <string name="lbl_nfc_tag_id">NFC Tag ID dieser Karte\n(Dies ist nicht die Kartennummer!):</string>
+    <string name="lbl_is_quick_card">Hat diese Karte eine QUICK Funktion:</string>
+    <string name="lbl_is_maestro_card">Ist das eine Maestro (Bankomat) Karte:</string>
+    <string name="yes">JA</string>
+    <string name="no">NEIN</string>
+
+    <string name="lbl_quick_balance">QUICK Guthaben auf der Karte:</string>
+    <string name="lbl_quick_currency">QUICK Währung:</string>
+
+        
+    <!-- Transaction List: -->
+    <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
+    
+    
+    
+</resources>
