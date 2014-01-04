@@ -11,6 +11,11 @@ Sollte auf Android 4.0.3 oder höher funktionieren und benötigt ein Gerät mit 
 
 Diese App versucht die letzten x Transaktionen sowie einige andere Infos aus einer NFC-aktivierten Bankomatkarte via NFC auszulesen. Es kann durchaus sein, dass es nicht mit allen Karten funktioniert. Getestet bisher nur mit einer Bank Austria Bankomatkarte.
 
+### Screenshots
+
+![Algmeine Infos zur Karte](screenshots/results1.png)
+![Liste der letzten Transaktionen](screenshots/results2.png)
+
 
 ### Details
 
