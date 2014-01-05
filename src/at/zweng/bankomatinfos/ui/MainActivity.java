@@ -1,6 +1,8 @@
 package at.zweng.bankomatinfos.ui;
 
-import static at.zweng.bankomatinfos.util.Utils.*;
+import static at.zweng.bankomatinfos.util.Utils.TAG;
+import static at.zweng.bankomatinfos.util.Utils.displaySimpleAlertDialog;
+import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
 
 import java.io.IOException;
 
@@ -14,6 +16,8 @@ import android.nfc.TagLostException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.R;
@@ -61,11 +65,6 @@ public class MainActivity extends Activity {
 		_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onResume()
-	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -84,7 +83,10 @@ public class MainActivity extends Activity {
 		Intent intent = getIntent();
 		if (intent != null
 				&& NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-			handleTag(intent);
+			Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+			if (tag != null) {
+				handleTag(tag);
+			}
 		}
 	}
 
@@ -104,9 +106,29 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.result, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_about:
+			showAboutDialog(getFragmentManager());
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	public void onNewIntent(Intent intent) {
 		Log.d(TAG, "onNewIntent()");
-		handleTag(intent);
+		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+		if (tag != null) {
+			handleTag(tag);
+		}
 	}
 
 	/**
@@ -134,12 +156,11 @@ public class MainActivity extends Activity {
 	 * 
 	 * @param intent
 	 */
-	private void handleTag(Intent intent) {
+	private void handleTag(Tag tag) {
 		showProgressAnimation(true);
 		if (_readCardTask != null) {
 			return;
 		}
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 		showProgressAnimation(true);
 		_readCardTask = new ReadNfcCardTask(tag);
 		_readCardTask.execute((Void) null);
@@ -174,12 +195,18 @@ public class MainActivity extends Activity {
 				AppController.getInstance().setCardInfo(_cardReadingResults);
 				reader.disconnectIsoDep();
 			} catch (NoSmartCardException nsce) {
+				Log.w(TAG,
+						"Catched NoSmartCardException during reading the card",
+						nsce);
 				error = ERROR_NO_SMARTCARD;
 				return false;
 			} catch (TagLostException tle) {
+				Log.w(TAG, "Catched TagLostException during reading the card",
+						tle);
 				error = ERROR_TAG_LOST;
 				return false;
 			} catch (IOException e) {
+				Log.e(TAG, "Catched IOException during reading the card", e);
 				error = ERROR_IO_EX;
 				return false;
 			}

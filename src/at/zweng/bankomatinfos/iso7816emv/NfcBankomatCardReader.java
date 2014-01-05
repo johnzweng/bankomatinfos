@@ -7,7 +7,9 @@ import java.util.List;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.util.Log;
+import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
+import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
 import static at.zweng.bankomatinfos.util.Utils.*;
@@ -21,6 +23,7 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.*;
 public class NfcBankomatCardReader {
 	private Tag _nfcTag;
 	private IsoDep _localIsoDep;
+	private AppController _ctl;
 
 	/**
 	 * Constructor
@@ -30,6 +33,7 @@ public class NfcBankomatCardReader {
 	public NfcBankomatCardReader(Tag nfcTag) {
 		super();
 		this._nfcTag = nfcTag;
+		this._ctl = AppController.getInstance();
 	}
 
 	/**
@@ -56,16 +60,53 @@ public class NfcBankomatCardReader {
 
 	/**
 	 * Try to read all bankomat card data<br>
-	 * TODO: read all the other EMV stuff too..
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	public CardInfo readAllCardData() throws IOException {
+		_ctl.clearLog();
 		CardInfo result = new CardInfo();
+		_ctl.log("Starting to read data from card..");
 		result.setNfcTagId(_nfcTag.getId());
-		readQuickInfos(result);
-		readMaestroCardInfos(result);
+		_ctl.log("NFC Tag ID: "
+				+ prettyPrintHexString(bytesToHex(_nfcTag.getId())));
+		_ctl.log("Historical bytes: "
+				+ prettyPrintHexString(bytesToHex(_localIsoDep
+						.getHistoricalBytes())));
+		result = readQuickInfos(result);
+		result = readMaestroCardInfos(result);
+		_ctl.log("FINISHED! :-)");
+		return result;
+	}
+
+	/**
+	 * Read QUICK card infos from card
+	 * 
+	 * @param result
+	 * @throws IOException
+	 */
+	private CardInfo readQuickInfos(CardInfo result) throws IOException {
+		Log.d(TAG, "check if card contains QUICK AID..");
+		_ctl.log("Trying to select QUICK AID..");
+		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_QUICK);
+		boolean isQuickCard = isStatusSuccess(getLast2Bytes(selectAidResponse));
+		_ctl.log("is a Quick card: " + isQuickCard);
+		result.setQuickCard(isQuickCard);
+		if (!isQuickCard) {
+			return result;
+		}
+		// ok, so let's catch exceptions here, instead of just letting the whole
+		// scan abort, so that the user gets at least some infos where the
+		// parsing failed:
+		try {
+			result.setQuickBalance(getQuickCardBalance());
+			result.setQuickCurrency(getCurrencyAsString(getQuickCardCurrencyBytes()));
+		} catch (RuntimeException re) {
+			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n"
+					+ re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading QUICK infos: ", re);
+		}
 		return result;
 	}
 
@@ -75,63 +116,120 @@ public class NfcBankomatCardReader {
 	 * @param result
 	 * @throws IOException
 	 */
-	private void readMaestroCardInfos(CardInfo result) throws IOException {
+	private CardInfo readMaestroCardInfos(CardInfo result) throws IOException {
 		Log.d(TAG, "check if card contains MAESTRO AID..");
-		boolean isMaestroCard = testIfAidExists(APPLICATION_ID_EMV_MAESTRO_BANKOMAT);
+		_ctl.log("Trying to select Maestro AID..");
+		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_MAESTRO_BANKOMAT);
+		logBerTlvResponse(selectAidResponse);
+		boolean isMaestroCard = isStatusSuccess(getLast2Bytes(selectAidResponse));
+		_ctl.log("is a MAESTRO card: " + isMaestroCard);
 		result.setMaestroCard(isMaestroCard);
 		if (!isMaestroCard) {
-			return;
+			return result;
 		}
-		readMaestroTransactions(result);
+		// ok, so let's catch exceptions here, instead of just letting the whole
+		// scan abort, so that the user gets at least some infos where the
+		// parsing failed:
+		try {
+			result = readMaestroEmvData(selectAidResponse, result);
+		} catch (RuntimeException re) {
+			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
+					+ re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading Maestro infos: ", re);
+		}
+		return result;
 	}
 
 	/**
-	 * Tries to read the Maestro transaction log from the card and stores it
-	 * into the CardInfo object
+	 * Try to read some EMV data
 	 * 
+	 * @param selectAidResponse
 	 * @param result
-	 * @return the {@link CardInfo} object
+	 * @return
 	 * @throws IOException
 	 */
-	private CardInfo readMaestroTransactions(CardInfo result)
-			throws IOException {
-		//
-		// ***************************************************
-		//
-		// on my Bank Austria Card the Transaction log
-		// was in short EF identifier 11, in record 1-11
-		// I don't know if this is the same on other cards!!
-		//
-		// ***************************************************
-		//
-		int shortEfFileIdentifier = 11;
+	private CardInfo readMaestroEmvData(byte[] selectAidResponse,
+			CardInfo result) throws IOException {
+		// send GET PROCESSING OPTIONS
+		_ctl.log("trying to send GET PROCESSING OPTIONS command..");
+		byte[] processingOptionsApdu = createGetProcessingOptionsApdu(selectAidResponse);
+		_ctl.log("sent: " + bytesToHex(processingOptionsApdu));
+		byte[] resultPdu = _localIsoDep.transceive(processingOptionsApdu);
+		logResultPdu(resultPdu);
+		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
+			Log.w(TAG,
+					"GET PROCESSING OPTIONS: Response status word was not ok! Error: "
+							+ statusToString(getLast2Bytes(resultPdu))
+							+ ". In hex: " + bytesToHex(resultPdu));
+			Log.w(TAG, "will not read EMV data");
+			_ctl.log("GET PROCESSING OPTIONS did not return successfully..");
+			return result;
+		}
+		logBerTlvResponse(resultPdu);
+		result = searchForFiles(result);
+		return result;
+	}
 
+	/**
+	 * Just try reading all EF files from 0 to 10 and see if there will be emv
+	 * data returned.
+	 * 
+	 * @param result
+	 * @return
+	 * @throws IOException
+	 */
+	private CardInfo searchForFiles(CardInfo result) throws IOException {
+		_ctl.log("We ignore the cards 'Application File Locator' and just iterate over files here..");
+
+		// we now simply check in 2 loops a lot of files and records if they
+		// return BER-TLV encoded data or Transaction Logs
+
+		// On my Bank Austria card there are more EMV records than reported in
+		// the 'Application File Locator', also there is one log entry more than
+		// reported in the "9F4D Log Entry" Tag. So I think it's not so bad to
+		// just iterate over everything.
+
+		// if we find something looking like a TX log, add it to TX list
 		List<TransactionLogEntry> txList = new ArrayList<TransactionLogEntry>();
 
-		// On my Bank Austria card I just get results for records 1-11, but
-		// maybe other cards return more (just geussing). So we request here
-		// records 0-20, and silently ignore errors (just log return value in
-		// logcat)
-		for (int currentRecord = 0; currentRecord < 21; currentRecord++) {
-			Log.d(TAG, "reading tx log: READ RECORD for EF "
-					+ shortEfFileIdentifier + " and RECORD " + currentRecord);
-			byte[] rawRecord = readRecord(shortEfFileIdentifier, currentRecord);
-			if (!isStatusSuccess(getLast2Bytes(rawRecord))) {
-				Log.w(TAG, "READ RECORD for EF " + shortEfFileIdentifier
-						+ " and RECORD " + currentRecord
-						+ " failed. The card returned:\n"
-						+ prettyPrintHexString(bytesToHex(rawRecord)));
-				// if card returns error for this record, just try the next...
-				continue;
+		int consecutiveErrorRecords = 0;
+
+		// iterate over EFs
+		for (int shortEfFileIdentifier = 0; shortEfFileIdentifier < 32; shortEfFileIdentifier++) {
+			// for each new EF set the consecutive error counter to 0
+			consecutiveErrorRecords = 0;
+
+			Log.d(TAG, "Trying now to read EF " + shortEfFileIdentifier + "...");
+
+			// iterate over records within EF
+			for (int currentRecord = 0; currentRecord < 256; currentRecord++) {
+				if (consecutiveErrorRecords > 6) {
+					// if we had 6 errors in a row we assume that no more
+					// records will come and just leave this EF and go
+					// to the next
+					break;
+				}
+				byte[] responsePdu = readRecord(shortEfFileIdentifier,
+						currentRecord, false);
+				if (isStatusSuccess(getLast2Bytes(responsePdu))) {
+					// also if we find a record set counter to 0
+					consecutiveErrorRecords = 0;
+					if (responsePduLooksLikeTxLogEntry(responsePdu)) {
+						TransactionLogEntry entry = tryParseTxLogEntryFromByteArray(responsePdu);
+						if (entry != null) {
+							txList.add(entry);
+						}
+					} else {
+						logBerTlvResponse(responsePdu);
+					}
+				} else {
+					consecutiveErrorRecords++;
+					// if card returns error for this record, just try the
+					// next...
+					continue;
+				}
 			}
-			TransactionLogEntry entry = parseTxLogEntryFromByteArray(rawRecord);
-			if (entry != null) {
-				txList.add(entry);
-			} else {
-				Log.w(TAG, "Could not parse transaction item, record num: "
-						+ currentRecord + ", raw byte array:\n"
-						+ prettyPrintHexString(bytesToHex(rawRecord)));
-			}
+
 		}
 		result.setTransactionLog(txList);
 		return result;
@@ -144,7 +242,14 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private TransactionLogEntry parseTxLogEntryFromByteArray(byte[] rawRecord) {
+	private TransactionLogEntry tryParseTxLogEntryFromByteArray(byte[] rawRecord) {
+		if (rawRecord.length < 26) {
+			// only continue if record is at least 24(+2 status) bytes long
+			Log.w(TAG,
+					"parseTxLogEntryFromByteArray: byte array is not long enough:\n"
+							+ prettyPrintHexString(bytesToHex(rawRecord)));
+			return null;
+		}
 		if (!"400000".equals(bytesToHex(getByteArrayPart(rawRecord, 0, 2)))) {
 			// only continue if record starts with 40 00 00
 			Log.w(TAG,
@@ -177,30 +282,27 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @param shortEfFileIdentifier
 	 * @param recordNumber
+	 * @param logAlways
+	 *            if <code>true</code> log always, otherwise log only on
+	 *            successful response
+	 * 
 	 * @return
 	 * @throws IOException
 	 */
-	private byte[] readRecord(int shortEfFileIdentifier, int recordNumber)
-			throws IOException {
-		return _localIsoDep.transceive(createReadRecordApdu(
-				shortEfFileIdentifier, recordNumber));
-	}
-
-	/**
-	 * Read QUICK card infos from card
-	 * 
-	 * @param result
-	 * @throws IOException
-	 */
-	private void readQuickInfos(CardInfo result) throws IOException {
-		Log.d(TAG, "check if card contains QUICK AID..");
-		boolean isQuickCard = testIfAidExists(APPLICATION_ID_QUICK);
-		result.setQuickCard(isQuickCard);
-		if (!isQuickCard) {
-			return;
+	private byte[] readRecord(int shortEfFileIdentifier, int recordNumber,
+			boolean logAlways) throws IOException {
+		byte[] readRecordApdu = createReadRecordApdu(shortEfFileIdentifier,
+				recordNumber);
+		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
+		if (logAlways || isStatusSuccess(getLast2Bytes(resultPdu))) {
+			String msg = "READ RECORD for EF " + shortEfFileIdentifier
+					+ " and RECORD " + recordNumber;
+			Log.d(TAG, msg);
+			_ctl.log(msg);
+			_ctl.log("sent: " + bytesToHex(readRecordApdu));
+			logResultPdu(resultPdu);
 		}
-		result.setQuickBalance(getQuickCardBalance());
-		result.setQuickCurrency(getCurrencyAsString(getQuickCardCurrencyBytes()));
+		return resultPdu;
 	}
 
 	/**
@@ -208,16 +310,22 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private long getQuickCardBalance() throws IOException {
+		_ctl.log("Reading QUICK balance");
+		_ctl.log("sent: " + bytesToHex(ISO_COMMAND_QUICK_READ_BALANCE));
 		byte[] resultPdu = _localIsoDep
 				.transceive(ISO_COMMAND_QUICK_READ_BALANCE);
+		logResultPdu(resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
 			Log.w(TAG,
 					"getQuickCardBalance: Response status word was not ok! Error: "
 							+ statusToString(getLast2Bytes(resultPdu))
 							+ ". In hex: " + bytesToHex(resultPdu));
+			_ctl.log("will return balance -1");
 			return -1;
 		}
-		return getAmountFromBytes(resultPdu);
+		long balance = getAmountFromBytes(resultPdu);
+		_ctl.log("QUICK balance = " + balance);
+		return balance;
 	}
 
 	/**
@@ -225,8 +333,11 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private byte[] getQuickCardCurrencyBytes() throws IOException {
+		_ctl.log("Reading QUICK currency");
+		_ctl.log("sent: " + bytesToHex(ISO_COMMAND_QUICK_READ_CURRENCY));
 		byte[] resultPdu = _localIsoDep
 				.transceive(ISO_COMMAND_QUICK_READ_CURRENCY);
+		logResultPdu(resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
 			String msg = "getQuickCardCurrencyBytes: Response status word was not ok! Error: "
 					+ statusToString(getLast2Bytes(resultPdu))
@@ -237,6 +348,9 @@ public class NfcBankomatCardReader {
 		}
 		byte[] rawCurrency = new byte[2];
 		System.arraycopy(resultPdu, 0, rawCurrency, 0, 2);
+		_ctl.log("QUICK currency = "
+				+ prettyPrintHexString(bytesToHex(rawCurrency)));
+		_ctl.log("QUICK currency = " + getCurrencyAsString(rawCurrency));
 		return rawCurrency;
 	}
 
@@ -252,36 +366,42 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(appId));
 		byte[] command = createSelect(appId);
 		Log.d(TAG, "will send byte array: " + bytesToHex(command));
+		_ctl.log("sent: " + bytesToHex(command));
 		byte[] resultPdu = _localIsoDep.transceive(command);
+		logResultPdu(resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		return resultPdu;
 	}
 
 	/**
-	 * Selects an application on the card
+	 * log result pdu
 	 * 
-	 * @return <code>true</code> if successful
-	 * 
-	 * @throws IOException
+	 * @param resultPdu
 	 */
-	private boolean selectApplication(byte[] appId) throws IOException {
-		byte[] resultPdu = selectApplicationGetBytes(appId);
-		return isStatusSuccess(getLast2Bytes(resultPdu));
-
+	private void logResultPdu(byte[] resultPdu) {
+		_ctl.log("received: " + bytesToHex(resultPdu));
+		_ctl.log("status: "
+				+ prettyPrintHexString(bytesToHex(getLast2Bytes(resultPdu))));
+		_ctl.log("status: " + statusToString(getLast2Bytes(resultPdu)));
 	}
 
 	/**
-	 * @param aid
-	 *            application identifier
-	 * @return <code>true</code> if application exists on SmartCard,
-	 *         <code>false</code> otherwise
-	 * @throws IOException
+	 * Try to decode a response PDU as BER TLV encoded data and log it
+	 * 
+	 * @param resultPdu
 	 */
-	private boolean testIfAidExists(byte[] aid) throws IOException {
-		if (selectApplication(aid)) {
-			return true;
-		} else {
-			return false;
+	private void logBerTlvResponse(byte[] resultPdu) {
+		if (resultPdu.length > 2) {
+			try {
+				_ctl.log("Trying to decode response as BER-TLV..");
+				_ctl.log(prettyPrintBerTlvAPDUResponse(
+						cutoffLast2Bytes(resultPdu), 0));
+			} catch (TlvParsingException e) {
+				_ctl.log("decoding error... maybe this data is not BER-TLV encoded?");
+				Log.w(TAG, "exception while parsing BER-TLV PDU response\n"
+						+ prettyPrintHexString(bytesToHex(resultPdu)), e);
+			}
 		}
 	}
+
 }

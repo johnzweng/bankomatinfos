@@ -3,6 +3,8 @@
 
     <string name="app_name">Bankomatkarten Infos</string>
     <string name="action_settings">Einstellungen</string>
+    <string name="action_about">Infos</string>
+    <string name="action_share">Teilen</string>
     <string name="your_card_please">Bitte halten Sie Ihre Bankomatkarte an die Rückseite des Geräts&#8230;</string>
     <string name="nfc_logo_description">NFC Logo</string>
     <string name="read_card_progress_status">Bitte warten, lese Karte&#8230;</string>
@@ -27,6 +29,8 @@
     <string name="title_activity_result">Ergebnisse</string>
     <string name="title_section1">Infos</string>
     <string name="title_section2">Transaktionen</string>
+    <string name="title_section3">Log</string>
+    
     
     <!-- General results -->
     
@@ -43,6 +47,13 @@
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
     
+       <!-- Share Subject -->
+    <string name="action_share_subject">Bankomatkarten Infos - Ergebnisse</string>
+    
+	<!-- label for the button -->
+	<string name="about_dialog_btnOk">OK</string>
+	<string name="about_dialog_title">Infos</string>
+	<string name="about_dialog_image_description">App logo</string>
     
     
 </resources>

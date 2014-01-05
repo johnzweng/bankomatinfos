@@ -1,12 +1,27 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
-import static at.zweng.bankomatinfos.util.Utils.*;
+import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
+import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
+import static at.zweng.bankomatinfos.util.Utils.compare2byteArrays;
+import static at.zweng.bankomatinfos.util.Utils.fromHexString;
+import static at.zweng.bankomatinfos.util.Utils.getByteArrayPart;
+import static at.zweng.bankomatinfos.util.Utils.getSpaces;
+import static at.zweng.bankomatinfos.util.Utils.int2Hex;
+import static at.zweng.bankomatinfos.util.Utils.intToByteArray;
+import static at.zweng.bankomatinfos.util.Utils.isBitSet;
+import static at.zweng.bankomatinfos.util.Utils.prettyPrintHex;
+import static at.zweng.bankomatinfos.util.Utils.prettyPrintHexString;
+import static at.zweng.bankomatinfos.util.Utils.readLongFromBytes;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 
 /**
  * Util functions around EMV (https://en.wikipedia.org/wiki/EMV) standard and
@@ -100,6 +115,8 @@ public class EmvUtils {
 			(byte) 0x81 };
 	public static final byte[] SW_FILE_NOT_FOUND = { (byte) 0x6A, (byte) 0x82 };
 	public static final byte[] SW_RECORD_NOT_FOUND = { (byte) 0x6A, (byte) 0x83 };
+	public static final byte[] SW_INCORRECT_PARAMETERS_P1_P2 = { (byte) 0x6A,
+			(byte) 0x86 };
 	// ..
 	public static final byte[] SW_CMD_CLASS_NOT_SUPPORTED = { (byte) 0x6E,
 			(byte) 0x00 };
@@ -112,10 +129,8 @@ public class EmvUtils {
 	public static final short SW_SECURITY_STATUS_NOT_SATISFIED = 0x6982;
 	public static final short SW_DATA_INVALID = 0x6984;
 	public static final short SW_CONDITIONS_NOT_SATISFIED = 0x6985;
-	public static final short SW_INCORRECT_P1P2 = 0x6A86;
 	public static final short SW_WRONG_LENGTH = 0x6700;
 	public static final short SW_WRONG_DATA = 0x6A80;
-	public static final short FILE_NOT_FOUND = 0x6A82;
 	public static final short SW_WRONG_P1P2 = 0x6B00;
 	public static final short SW_UNKNOWN = 0x6F00;
 
@@ -201,6 +216,62 @@ public class EmvUtils {
 	}
 
 	/**
+	 * Calculates a (hopefully) correct APDU for the EMV GET PROCESSING OPTIONS
+	 * command, based on the result of the select application response of the
+	 * card.
+	 * 
+	 * @param selectionResponse
+	 * @return
+	 */
+	public static byte[] createGetProcessingOptionsApdu(byte[] selectionResponse) {
+		// TODO implement createGetProcessingOptionsApdu!!
+
+		// This method currently returns a static value, which I manually
+		// computed based on the data of my test card. May NOT WORK with other
+		// cards which send different PDOL
+		// IMPLEMENT ME!!
+
+		// In short:
+		// ----------
+		// When selecting an application the card includes in its response the
+		// tag 9F38 "Processing Options Data Object List (PDOL)" (see also
+		// http://www.eftlab.co.uk/index.php/site-map/knowledge-base/145-emv-nfc-tags)
+		//
+		// The card declares with the PDOL a number of tags and their expected
+		// lengths which it wants to see in a following GET PROCESSING OPTIONS
+		// command.
+		//
+		// EXAMPLE:
+		// My card returns a PDOL of "9f 5c 08".
+		// This contains only a single tag (9f 5c) with a length value of 08.
+		// "9f 5c" is the tag "Cumulative Total Transaction Amount Upper Limit"
+		// (CTTAUL)". So my card only wants to get 8 bytes in the GET PROCESSING
+		// OPTIONS which represent the CTTAUL value.
+		// EMV cards may also request more than 1 tag, for example terminal's
+		// country or currency code.. or a random number.. etc.
+
+		//
+		// Manually building my GET PROCESSING OPTIONS command:
+		//
+
+		// "9f 5c 08" = PDOL as returned on app selection in Tag 9f38
+
+		// Manually constructed command:
+		// 80A80000 0A 83 08 FFFFFFFFFFFFFFFF 00
+		// In detail:
+		// 80A80000 is GET PROCESSING OPTIONS
+		// 0A is total length of following PDOL (=11 bytes)
+		// 83 is Tag "command template" and "Identifies the data field of a
+		// command message"
+		// 08 is the length of the following data
+		// FFFFFFFFFFFFFFFF is the data (CTTAUL value in my case)
+		// 00 is expected response length (unlimited)
+
+		// return fromHexString("80A800000A8308000000000000000000");
+		return fromHexString("80A800000A8308FFFFFFFFFFFFFFFF00");
+	}
+
+	/**
 	 * Check if the given 2 bytes status words mean SUCCESS
 	 * 
 	 * @param statusWord
@@ -279,6 +350,8 @@ public class EmvUtils {
 			return "file not found";
 		} else if (compare2byteArrays(statusWord, SW_RECORD_NOT_FOUND)) {
 			return "record not found";
+		} else if (compare2byteArrays(statusWord, SW_INCORRECT_PARAMETERS_P1_P2)) {
+			return "incorrect parameters p1/p2";
 		} else if (statusWord[0] == (byte) 0x6C) {
 			return "incorrect length, second byte specifies correct length";
 		} else if (compare2byteArrays(statusWord, SW_DATA_FAILURE)) {
@@ -363,6 +436,386 @@ public class EmvUtils {
 					"getAmountFromBcdBytes: needs 4 bytes");
 		}
 		return Long.parseLong(bytesToHex(amount));
+	}
+
+	/**
+	 * check if a response PDU looks like an TX log entry
+	 * 
+	 * @param responsePdu
+	 * @return
+	 */
+	public static boolean responsePduLooksLikeTxLogEntry(byte[] responsePdu) {
+		if (responsePdu == null) {
+			return false;
+		}
+		// 24 bytes minimum for parsing tx log + 2 bytes status word
+		if (responsePdu.length < 26) {
+			return false;
+		}
+		// starts with bytes 40 00?
+		if (!"4000".equals(bytesToHex(getByteArrayPart(responsePdu, 0, 1)))) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws NfcException
+	 */
+	public static BERTLV getNextTLV(ByteArrayInputStream stream)
+			throws TlvParsingException {
+		if (stream.available() < 2) {
+			throw new TlvParsingException(
+					"Error parsing data. Available bytes < 2 . Length="
+							+ stream.available());
+		}
+
+		// ISO/IEC 7816 uses neither '00' nor 'FF' as tag value.
+		// Before, between, or after TLV-coded data objects,
+		// '00' or 'FF' bytes without any meaning may occur
+		// (for example, due to erased or modified TLV-coded data objects).
+
+		stream.mark(0);
+		int peekInt = stream.read();
+		byte peekByte = (byte) peekInt;
+		// peekInt == 0xffffffff indicates EOS
+		while (peekInt != -1
+				&& (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
+			stream.mark(0); // Current position
+			peekInt = stream.read();
+			peekByte = (byte) peekInt;
+		}
+		stream.reset(); // Reset back to the last known position without 0x00 or
+						// 0xFF
+
+		if (stream.available() < 2) {
+			throw new TlvParsingException(
+					"Error parsing data. Available bytes < 2 . Length="
+							+ stream.available());
+		}
+
+		byte[] tagIdBytes = readTagIdBytes(stream);
+
+		// We need to get the raw length bytes.
+		// Use quick and dirty workaround
+		stream.mark(0);
+		int posBefore = stream.available();
+		// Now parse the lengthbyte(s)
+		// This method will read all length bytes. We can then find out how many
+		// bytes was read.
+		int length = readTagLength(stream);
+		// Now find the raw length bytes
+		int posAfter = stream.available();
+		stream.reset();
+		byte[] lengthBytes = new byte[posBefore - posAfter];
+		stream.read(lengthBytes, 0, lengthBytes.length);
+
+		int rawLength = byteArrayToInt(lengthBytes);
+
+		byte[] valueBytes = null;
+
+		EmvTag tag = EMVTags.getNotNull(tagIdBytes);
+
+		// Find VALUE bytes
+		if (rawLength == 128) { // 1000 0000
+			// indefinite form
+			stream.mark(0);
+			int prevOctet = 1;
+			int curOctet = 0;
+			int len = 0;
+			while (true) {
+				len++;
+				curOctet = stream.read();
+				if (curOctet < 0) {
+					throw new TlvParsingException(
+							"Error parsing data. TLV "
+									+ "length byte indicated indefinite length, but EOS "
+									+ "was reached before 0x0000 was found"
+									+ stream.available());
+				}
+				if (prevOctet == 0 && curOctet == 0) {
+					break;
+				}
+				prevOctet = curOctet;
+			}
+			len -= 2;
+			valueBytes = new byte[len];
+			stream.reset();
+			stream.read(valueBytes, 0, len);
+			length = len;
+		} else {
+			// definite form
+			valueBytes = new byte[length];
+			stream.read(valueBytes, 0, length);
+		}
+
+		// Remove any trailing 0x00 and 0xFF
+		stream.mark(0);
+		peekInt = stream.read();
+		peekByte = (byte) peekInt;
+		while (peekInt != -1
+				&& (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
+			stream.mark(0);
+			peekInt = stream.read();
+			peekByte = (byte) peekInt;
+		}
+		stream.reset(); // Reset back to the last known position without 0x00 or
+						// 0xFF
+
+		BERTLV tlv = new BERTLV(tag, length, lengthBytes, valueBytes);
+		return tlv;
+	}
+
+	/**
+	 * Tries to parse a byte array as EMV BER-TLV encoded data and returns a
+	 * pretty formatted string (useful for logging and debugging output)<br>
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param data
+	 * @param indentLength
+	 * @return
+	 * @throws NfcException
+	 */
+	public static String prettyPrintBerTlvAPDUResponse(byte[] data,
+			int indentLength) throws TlvParsingException {
+		StringBuilder buf = new StringBuilder();
+
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
+
+		while (stream.available() > 0) {
+			buf.append("\n");
+
+			buf.append(getSpaces(indentLength));
+
+			BERTLV tlv = getNextTLV(stream);
+
+			// Log.debug(tlv.toString());
+
+			byte[] tagBytes = tlv.getTagBytes();
+			byte[] lengthBytes = tlv.getRawEncodedLengthBytes();
+			byte[] valueBytes = tlv.getValueBytes();
+
+			EmvTag tag = tlv.getTag();
+
+			// buf.append(" TAG: ");
+			buf.append(prettyPrintHexString(bytesToHex(tagBytes)));
+			buf.append("  -  ");
+			buf.append(prettyPrintHexString(bytesToHex(lengthBytes)));
+			buf.append(" bytes: ");
+			buf.append(tag.getName());
+
+			// int extraIndent = (lengthBytes.length * 3) + (tagBytes.length *
+			// 3);
+			int extraIndent = (lengthBytes.length * 2) + (tagBytes.length * 2);
+			// int extraIndent = 2;
+
+			if (tag.isConstructed()) {
+				// indentLength += extraIndent;
+				// Recursion
+				buf.append(prettyPrintBerTlvAPDUResponse(valueBytes,
+						indentLength + extraIndent));
+			} else {
+				buf.append("\n");
+				if (tag.getTagValueType() == TagValueType.DOL) {
+					buf.append(getFormattedTagAndLength(valueBytes,
+							indentLength + extraIndent));
+				} else {
+					buf.append(getSpaces(indentLength + extraIndent));
+
+					buf.append(prettyPrintHex(bytesToHex(valueBytes),
+							indentLength + extraIndent));
+
+					buf.append(" (");
+					buf.append(getTagValueAsString(tag, valueBytes));
+					buf.append(")");
+				}
+			}
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * read tag id bytes from EMV tag bytestream
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param stream
+	 * @return
+	 */
+	private static byte[] readTagIdBytes(ByteArrayInputStream stream) {
+		ByteArrayOutputStream tagBAOS = new ByteArrayOutputStream();
+		byte tagFirstOctet = (byte) stream.read();
+		tagBAOS.write(tagFirstOctet);
+
+		// Find TAG bytes
+		byte MASK = (byte) 0x1F;
+		if ((tagFirstOctet & MASK) == MASK) { // EMV book 3, Page 178 or Annex
+												// B1 (EMV4.3)
+			// Tag field is longer than 1 byte
+			do {
+				int nextOctet = stream.read();
+				if (nextOctet < 0) {
+					break;
+				}
+				byte tlvIdNextOctet = (byte) nextOctet;
+
+				tagBAOS.write(tlvIdNextOctet);
+
+				if (!isBitSet(tlvIdNextOctet, 8)) {
+					break;
+				}
+			} while (true);
+		}
+		return tagBAOS.toByteArray();
+	}
+
+	/**
+	 * read length value from EMV tag bytestream
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param stream
+	 * @return
+	 */
+	private static int readTagLength(ByteArrayInputStream stream) {
+		// Find LENGTH bytes
+		int length;
+		int tmpLength = stream.read();
+
+		if (tmpLength <= 127) { // 0111 1111
+			// short length form
+			length = tmpLength;
+		} else if (tmpLength == 128) { // 1000 0000
+			// length identifies indefinite form, will be set later
+			length = tmpLength;
+		} else {
+			// long length form
+			int numberOfLengthOctets = tmpLength & 127; // turn off 8th bit
+			tmpLength = 0;
+			for (int i = 0; i < numberOfLengthOctets; i++) {
+				int nextLengthOctet = stream.read();
+				tmpLength <<= 8;
+				tmpLength |= nextLengthOctet;
+			}
+			length = tmpLength;
+		}
+		return length;
+	}
+
+	/**
+	 * Returns a string representation of a list of Tag and Lengths (eg DOLs)<br>
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param data
+	 * @param indentLength
+	 * @return
+	 */
+	private static String getFormattedTagAndLength(byte[] data, int indentLength) {
+		StringBuilder buf = new StringBuilder();
+		String indent = getSpaces(indentLength);
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
+
+		boolean firstLine = true;
+		while (stream.available() > 0) {
+			if (firstLine) {
+				firstLine = false;
+			} else {
+				buf.append("\n");
+			}
+			buf.append(indent);
+
+			EmvTag tag = EMVTags.getNotNull(readTagIdBytes(stream));
+			int length = readTagLength(stream);
+
+			buf.append(prettyPrintHexString(bytesToHex(tag.getTagBytes())));
+			buf.append(" (");
+			buf.append(bytesToHex(intToByteArray(length)));
+			buf.append(" bytes) -> ");
+			buf.append(tag.getName());
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Tag value as string
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param tag
+	 * @param value
+	 * @return
+	 */
+	private static String getTagValueAsString(EmvTag tag, byte[] value) {
+		StringBuilder buf = new StringBuilder();
+		switch (tag.getTagValueType()) {
+		case TEXT:
+			buf.append("=");
+			buf.append(new String(value));
+			break;
+		case NUMERIC:
+			buf.append("NUMERIC");
+			break;
+		case BINARY:
+			buf.append("BINARY");
+			break;
+
+		case MIXED:
+			buf.append("=");
+			buf.append(getSafePrintChars(value));
+			break;
+
+		case DOL:
+			buf.append("");
+			break;
+		default:
+			buf.append("");
+			break;
+		}
+		return buf.toString();
+	}
+
+	// This prints all non-control characters common to all parts of ISO/IEC
+	// 8859
+	// See EMV book 4 Annex B: Table 36: Common Character Set
+	// source: https://code.google.com/p/javaemvreader/
+	private static String getSafePrintChars(byte[] byteArray) {
+		if (byteArray == null) {
+			// return "" instead?
+			throw new IllegalArgumentException(
+					"Argument 'byteArray' cannot be null");
+		}
+		return getSafePrintChars(byteArray, 0, byteArray.length);
+	}
+
+	// source: https://code.google.com/p/javaemvreader/
+	private static String getSafePrintChars(byte[] byteArray, int startPos,
+			int length) {
+		if (byteArray == null) {
+			// return "" instead?
+			throw new IllegalArgumentException(
+					"Argument 'byteArray' cannot be null");
+		}
+		if (byteArray.length < startPos + length) {
+			throw new IllegalArgumentException("startPos(" + startPos
+					+ ")+length(" + length + ") > byteArray.length("
+					+ byteArray.length + ")");
+		}
+		StringBuilder buf = new StringBuilder();
+		for (int i = startPos; i < length; i++) {
+			if (byteArray[i] >= (byte) 0x20 && byteArray[i] < (byte) 0x7F) {
+				buf.append((char) byteArray[i]);
+			} else {
+				buf.append(".");
+			}
+		}
+		return buf.toString();
 	}
 
 }

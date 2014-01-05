@@ -15,6 +15,7 @@ public class CardInfo {
 	private boolean _maestroCard;
 	private long _quickBalance;
 	private String _quickCurrency;
+
 	private List<TransactionLogEntry> _transactionLog;
 
 	/**

@@ -1,5 +1,6 @@
 package at.zweng.bankomatinfos;
 
+import static at.zweng.bankomatinfos.util.Utils.getFullTimestampString;
 import at.zweng.bankomatinfos.model.CardInfo;
 
 /**
@@ -16,6 +17,7 @@ public class AppController {
 	private static volatile AppController _instance = null;
 
 	private CardInfo _cardInfo;
+	private StringBuilder _log;
 
 	/**
 	 * Get singleton object
@@ -36,7 +38,8 @@ public class AppController {
 	 * @param ctx
 	 */
 	private AppController() {
-		_cardInfo = null;
+		this._cardInfo = null;
+		this._log = new StringBuilder();
 	}
 
 	/**
@@ -54,4 +57,29 @@ public class AppController {
 		this._cardInfo = cardInfo;
 	}
 
+	/**
+	 * Append line to log
+	 * 
+	 * @param msg
+	 */
+	public void log(String msg) {
+		_log.append(getFullTimestampString());
+		_log.append(": ");
+		_log.append(msg);
+		_log.append("\n");
+	}
+
+	/**
+	 * @return full log
+	 */
+	public String getLog() {
+		return _log.toString();
+	}
+
+	/**
+	 * clear log
+	 */
+	public void clearLog() {
+		_log = new StringBuilder();
+	}
 }

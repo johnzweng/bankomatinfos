@@ -1,15 +1,22 @@
 package at.zweng.bankomatinfos.ui;
 
+import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
+
 import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ShareActionProvider;
+import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.R;
 
 /**
@@ -22,6 +29,7 @@ public class ResultActivity extends FragmentActivity implements
 
 	private Fragment _fragmentResultInfos;
 	private Fragment _fragmentResultTxList;
+	private Fragment _fragmentResultLog;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -45,6 +53,7 @@ public class ResultActivity extends FragmentActivity implements
 
 		_fragmentResultInfos = new ResultInfosFragment();
 		_fragmentResultTxList = new ResultTxListFragment();
+		_fragmentResultLog = new ResultLogFragment();
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -82,12 +91,52 @@ public class ResultActivity extends FragmentActivity implements
 		}
 	}
 
-	// @Override
-	// public boolean onCreateOptionsMenu(Menu menu) {
-	// // Inflate the menu; this adds items to the action bar if it is present.
-	// getMenuInflater().inflate(R.menu.result, menu);
-	// return true;
-	// }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.result, menu);
+		// Locate MenuItem with ShareActionProvider
+		MenuItem item = menu.findItem(R.id.action_share);
+		// Fetch and store ShareActionProvider
+		ShareActionProvider shareActionProvider = (ShareActionProvider) item
+				.getActionProvider();
+
+		// set the log content as share content
+		Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+				getResources().getString(R.string.action_share_subject));
+		shareIntent.putExtra(Intent.EXTRA_TEXT, AppController.getInstance()
+				.getLog());
+		shareIntent.setType("text/plain");
+		shareActionProvider.setShareIntent(shareIntent);
+		return true;
+	}
+
+	/**
+	 * Called whenever we call invalidateOptionsMenu()
+	 */
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		// show share action only on Tab 2 (Log)
+		// (tab index starts with 0)
+		if (_viewPager.getCurrentItem() == 2) {
+			menu.findItem(R.id.action_share).setVisible(true);
+		} else {
+			menu.findItem(R.id.action_share).setVisible(false);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_about:
+			showAboutDialog(getFragmentManager());
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
@@ -95,6 +144,8 @@ public class ResultActivity extends FragmentActivity implements
 		// When the given tab is selected, switch to the corresponding page in
 		// the ViewPager.
 		_viewPager.setCurrentItem(tab.getPosition());
+		invalidateOptionsMenu(); // creates call to
+		// onPrepareOptionsMenu()
 	}
 
 	@Override
@@ -121,25 +172,29 @@ public class ResultActivity extends FragmentActivity implements
 		public Fragment getItem(int position) {
 			if (position == 0) {
 				return _fragmentResultInfos;
-			} else {
+			} else if (position == 1) {
 				return _fragmentResultTxList;
+			} else {
+				return _fragmentResultLog;
 			}
 		}
 
 		@Override
 		public int getCount() {
-			// Show 2 total pages.
-			return 2;
+			// Show 3 total pages.
+			return 3;
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
+			Locale locale = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return getString(R.string.title_section1).toUpperCase(l);
+				return getString(R.string.title_section1).toUpperCase(locale);
 			case 1:
-				return getString(R.string.title_section2).toUpperCase(l);
+				return getString(R.string.title_section2).toUpperCase(locale);
+			case 2:
+				return getString(R.string.title_section3).toUpperCase(locale);
 			}
 			return null;
 		}
