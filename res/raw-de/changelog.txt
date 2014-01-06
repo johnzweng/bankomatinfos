@@ -1,0 +1,48 @@
+﻿<html>
+  <head>
+    <style type='text/css'>
+      a            { color:#a0a0e0 }
+      div.title    { 
+          color:#C0F0C0; 
+          font-size:1.2em; 
+          font-weight:bold; 
+          margin-top:2em; 
+          margin-bottom:0.5em; 
+          text-align:center }
+      div.subtitle { 
+          color:#C0F0C0; 
+          font-size:0.8em; 
+          margin-bottom:1em; 
+          text-align:center }
+      div.freetext { color:#F0F0F0 }
+      div.list     { color:#C0C0F0 }
+    </style>
+  </head>
+  <body>
+$ 1.2.1
+  % Version 1.2.1
+  _ 2014-01-06
+    * neue Erkenntnis, dass das Transaktions-Log Format laut EMV Standard frei wählbar ist (jeder Kartenhersteller anders) --> dh. die Transaktionsliste funktioniert wahrscheinlich nicht bei allen Karten!
+    * sende jetzt auch ein "read log format" Kommando an die Karte, um das Tx-Format zu erhalten (allerdings vorerst nur im "Log" Tab ersichtlich)
+    * neue <a href="https://code.google.com/p/android-change-log/">Changelog Funktion (von Karsten Priegnitz)</a> zum Anzeigen der letzten Änderungen nach Updates eingebaut
+$ 1.2.0
+  % Version 1.2.0
+  _ 2014-01-05
+  ! Esrte Version im <a href="https://play.google.com/store/apps/details?id=at.zweng.bankomatinfos">Google Play Store</a>
+    * versucht ab jetzt auch EMV Daten von der Karte zu lesen und zu parsen (allerdings erst sehr rudimentär)
+    * neuer "Log" Tab zum Anzeigen aller empfangenen Daten im Detail
+    * ab sofort iterieren wir über alle EFs und lesen die ersten paar Records (nicht nur die welche die Karte anpreist)
+	* versuche alles was wie ein Transaktions-Log Eintrag aussieht zu parsen
+	* neue "Share" Funktion zum Senden des Scan-Ergebnisses per E-Mail o.ä.
+$ 1.0.1
+  % Version 1.0.1
+  _ 2014-01-04
+  ! Code aufgeräumt und re-organisiert für Veröffentlichung auf <a href="https://github.com/johnzweng/bankomatinfos">GitHub</a>
+$ 1.0
+  % Version 1.0
+  _ 2014-01-03
+  ! Erste Version, veröffentlicht hier auf <a href="https://plus.google.com/+JohannesZweng/posts/X1Pe2gnH7ZC">Google+</a>
+$ END_OF_CHANGE_LOG
+  </body>
+</html>
+

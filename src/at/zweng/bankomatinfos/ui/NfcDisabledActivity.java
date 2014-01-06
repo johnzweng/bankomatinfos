@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
+import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -24,7 +25,7 @@ public class NfcDisabledActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.result, menu);
+		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
 	}
 
@@ -33,6 +34,9 @@ public class NfcDisabledActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
+			return true;
+		case R.id.action_changelog:
+			showChangelogDialog(getFragmentManager(), true);
 			return true;
 		}
 		return false;

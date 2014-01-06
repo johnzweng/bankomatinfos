@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <style type='text/css'>
+      a            { color:#a0a0e0 }
+      div.title    { 
+          color:#C0F0C0; 
+          font-size:1.2em; 
+          font-weight:bold; 
+          margin-top:2em; 
+          margin-bottom:0.5em; 
+          text-align:center }
+      div.subtitle { 
+          color:#C0F0C0; 
+          font-size:0.8em; 
+          margin-bottom:1em; 
+          text-align:center }
+      div.freetext { color:#F0F0F0 }
+      div.list     { color:#C0C0F0 }
+    </style>
+  </head>
+  <body>
+$ 1.2.1
+  % Version 1.2.1
+  _ 2014-01-06
+    * learned that format of transaction records may be dynamic (according to EMV standards). So transaction may not be displayed correctly for most of the cards for now.
+    * added "read log format" command (but result only visible in "Log" tab for now) 
+    * added <a href="https://code.google.com/p/android-change-log/">changelog feature by Karsten Priegnitz</a> for displaying changelog on updates
+$ 1.2.0
+  % Version 1.2.0
+  _ 2014-01-05
+  ! First version published in <a href="https://play.google.com/store/apps/details?id=at.zweng.bankomatinfos">Google Play Store</a>
+    * added support for reading EMV data from card (just beginning)
+    * added new "Log" tab for displaying all read data in detail
+    * iterate over all EF files to find records with data (not only the ones advertised by card)
+    * try to parse everything that looks like a transaction log entry
+    * added share feature to send output
+$ 1.0.1
+  % Version 1.0.1
+  _ 2014-01-04
+  ! Cleaned up and re-organised sourcecode for publishing on <a href="https://github.com/johnzweng/bankomatinfos">GitHub</a>
+$ 1.0
+  % Version 1.0
+  _ 2014-01-03
+  ! First version pubished on <a href="https://plus.google.com/+JohannesZweng/posts/X1Pe2gnH7ZC">Google+</a>
+$ END_OF_CHANGE_LOG
+  </body>
+</html>
+

@@ -1,8 +1,6 @@
 package at.zweng.bankomatinfos.ui;
 
-import static at.zweng.bankomatinfos.util.Utils.TAG;
-import static at.zweng.bankomatinfos.util.Utils.displaySimpleAlertDialog;
-import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
+import static at.zweng.bankomatinfos.util.Utils.*;
 
 import java.io.IOException;
 
@@ -24,6 +22,7 @@ import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.iso7816emv.NfcBankomatCardReader;
 import at.zweng.bankomatinfos.model.CardInfo;
+import at.zweng.bankomatinfos.util.ChangeLog;
 
 /**
  * Startup activity
@@ -63,6 +62,10 @@ public class MainActivity extends Activity {
 				NfcAdapter.ACTION_TECH_DISCOVERED) };
 		_techLists = new String[][] { { "android.nfc.tech.NfcA" } };
 		_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+		// create last changes dialog if needed
+		displayWhatsNew();
+
 	}
 
 	@Override
@@ -108,7 +111,7 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.result, menu);
+		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
 	}
 
@@ -117,6 +120,9 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
+			return true;
+		case R.id.action_changelog:
+			showChangelogDialog(getFragmentManager(), true);
 			return true;
 		}
 		return false;
@@ -137,6 +143,16 @@ public class MainActivity extends Activity {
 	 */
 	private boolean isNfcAvailable() {
 		return (_nfcAdapter != null && _nfcAdapter.isEnabled());
+	}
+
+	/**
+	 * display changelog dialog (if not seen yet)
+	 */
+	private void displayWhatsNew() {
+		ChangeLog cl = new ChangeLog(this);
+		if (cl.firstRun()) {
+			showChangelogDialog(getFragmentManager(), false);
+		}
 	}
 
 	/**
@@ -189,10 +205,14 @@ public class MainActivity extends Activity {
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			try {
+				AppController ctl = AppController.getInstance();
+				ctl.clearLog();
+				ctl.log(getResources().getString(R.string.app_name)
+						+ " version " + getAppVersion(MainActivity.this));
 				NfcBankomatCardReader reader = new NfcBankomatCardReader(nfcTag);
 				reader.connectIsoDep();
 				_cardReadingResults = reader.readAllCardData();
-				AppController.getInstance().setCardInfo(_cardReadingResults);
+				ctl.setCardInfo(_cardReadingResults);
 				reader.disconnectIsoDep();
 			} catch (NoSmartCardException nsce) {
 				Log.w(TAG,

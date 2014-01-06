@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos;
 
-import static at.zweng.bankomatinfos.util.Utils.getFullTimestampString;
+
+import static at.zweng.bankomatinfos.util.Utils.*;
 import at.zweng.bankomatinfos.model.CardInfo;
 
 /**

@@ -115,6 +115,8 @@ public class EmvUtils {
 			(byte) 0x81 };
 	public static final byte[] SW_FILE_NOT_FOUND = { (byte) 0x6A, (byte) 0x82 };
 	public static final byte[] SW_RECORD_NOT_FOUND = { (byte) 0x6A, (byte) 0x83 };
+	public static final byte[] SW_REFERENCED_DATA_NOT_FOUND = { (byte) 0x6A,
+			(byte) 0x88 };
 	public static final byte[] SW_INCORRECT_PARAMETERS_P1_P2 = { (byte) 0x6A,
 			(byte) 0x86 };
 	// ..
@@ -272,6 +274,44 @@ public class EmvUtils {
 	}
 
 	/**
+	 * creates a GET DATA apdu for reading the Log Format Data object list (9F
+	 * 4F is the tag "Log Format")
+	 */
+	public static byte[] createGetLogFormatApdu() {
+		return fromHexString("80 CA 9F 4F 00");
+	}
+
+	/**
+	 * creates a GET DATA apdu for
+	 * "obtaining all the common BER-TLV data objects readable in the context" .
+	 * --> http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
+	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
+	 */
+	public static byte[] createGetAllCommonBerTlvApdu() {
+		return fromHexString("80 CA 00 FF 00");
+	}
+
+	/**
+	 * creates a GET DATA apdu for
+	 * "obtaining all the common SIMPLE-TLV data objects readable in the context"
+	 * . --> http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
+	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
+	 */
+	public static byte[] createGetAllCommonSimpleTlvApdu() {
+		return fromHexString("80 CA 02 FF 00");
+	}
+
+	/**
+	 * creates a GET DATA apdu for reading the Cardholder Name (5F 20 is the tag
+	 * "Cardholder Name" ->
+	 * http://www.eftlab.co.uk/index.php/site-map/knowledge-
+	 * base/145-emv-nfc-tags)
+	 */
+	public static byte[] createGetCardholderNameApdu() {
+		return fromHexString("80 CA 5F 20 00");
+	}
+
+	/**
 	 * Check if the given 2 bytes status words mean SUCCESS
 	 * 
 	 * @param statusWord
@@ -350,6 +390,8 @@ public class EmvUtils {
 			return "file not found";
 		} else if (compare2byteArrays(statusWord, SW_RECORD_NOT_FOUND)) {
 			return "record not found";
+		} else if (compare2byteArrays(statusWord, SW_REFERENCED_DATA_NOT_FOUND)) {
+			return "referenced data (data objects) not found";
 		} else if (compare2byteArrays(statusWord, SW_INCORRECT_PARAMETERS_P1_P2)) {
 			return "incorrect parameters p1/p2";
 		} else if (statusWord[0] == (byte) 0x6C) {

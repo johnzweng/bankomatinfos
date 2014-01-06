@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
+import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
 
 import java.util.Locale;
 
@@ -94,7 +95,7 @@ public class ResultActivity extends FragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.result, menu);
+		getMenuInflater().inflate(R.menu.main_menu, menu);
 		// Locate MenuItem with ShareActionProvider
 		MenuItem item = menu.findItem(R.id.action_share);
 		// Fetch and store ShareActionProvider
@@ -133,6 +134,9 @@ public class ResultActivity extends FragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
+			return true;
+		case R.id.action_changelog:
+			showChangelogDialog(getFragmentManager(), true);
 			return true;
 		}
 		return false;

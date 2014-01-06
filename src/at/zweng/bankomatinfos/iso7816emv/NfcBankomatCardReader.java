@@ -65,7 +65,6 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	public CardInfo readAllCardData() throws IOException {
-		_ctl.clearLog();
 		CardInfo result = new CardInfo();
 		_ctl.log("Starting to read data from card..");
 		result.setNfcTagId(_nfcTag.getId());
@@ -166,8 +165,61 @@ public class NfcBankomatCardReader {
 			return result;
 		}
 		logBerTlvResponse(resultPdu);
+
+		tryToReadLogFormat();
+		tryToReadCardHolderName();
+		tryToReadAllCommonSimpleTlvTags();
+		tryToReadAllCommonBerTlvTags();
 		result = searchForFiles(result);
 		return result;
+	}
+
+	/**
+	 * Try to send command for reading LOG FORMAT tag
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadLogFormat() throws IOException {
+		_ctl.log("trying to send command for getting 'Log Format'...");
+		byte[] resultPdu = _localIsoDep.transceive(createGetLogFormatApdu());
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	/**
+	 * Try to send command for reading Cardholder Name tag
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadCardHolderName() throws IOException {
+		_ctl.log("trying to send command for getting 'Cardholder Name'...");
+		byte[] resultPdu = _localIsoDep.transceive(createGetCardholderNameApdu());
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	/**
+	 * Tries to read all common simple TLV tags 
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadAllCommonSimpleTlvTags() throws IOException {
+		_ctl.log("trying to send command for getting all common simple TLV tags...");
+		byte[] resultPdu = _localIsoDep.transceive(createGetAllCommonSimpleTlvApdu());
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	/**
+	 * Tries to read all common BER TLV tags 
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadAllCommonBerTlvTags() throws IOException {
+		_ctl.log("trying to send command for getting all common BER TLV tags...");
+		byte[] resultPdu = _localIsoDep.transceive(createGetAllCommonBerTlvApdu());
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
 	}
 
 	/**

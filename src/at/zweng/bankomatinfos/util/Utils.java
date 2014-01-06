@@ -22,6 +22,7 @@ import android.text.Spanned;
 import android.util.Log;
 import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.ui.AboutDialogFragment;
+import at.zweng.bankomatinfos.ui.ChangelogDialogFragment;
 
 /**
  * Some static helper methods
@@ -571,7 +572,21 @@ public class Utils {
 	 */
 	public static void showAboutDialog(FragmentManager fm) {
 		DialogFragment aboutFragment = new AboutDialogFragment();
-		aboutFragment.show(fm, "dialog");
+		aboutFragment.show(fm, "dialog_about");
+	}
+
+	/**
+	 * show changelog dialog
+	 * 
+	 * @param <code>true</code> if full changelog should be shown,
+	 *        <code>false</code> if only changes since last installed app
+	 *        version should be shown
+	 */
+	public static void showChangelogDialog(FragmentManager fm,
+			boolean fullChangelog) {
+		DialogFragment changelogFragment = ChangelogDialogFragment
+				.newInstance(fullChangelog);
+		changelogFragment.show(fm, "dialog_changelog");
 	}
 
 	/**
@@ -601,14 +616,22 @@ public class Utils {
 		sb.append("android-dev@zweng.at</a>");
 		sb.append("<br/><br/>");
 
+		// SOURCECODE
 		sb.append("<b><font color=\"#ff3232\">Sourcecode:</font></b>");
 		sb.append("<br/>Sourcecode of this app: https://github.com/johnzweng/bankomatinfos");
-		sb.append("<br/><br/>");
+		sb.append("<br/><br/><br/>");
 
+		// CREDITS
 		sb.append("<b><font color=\"#ff3232\">Credits:</font></b>");
-		sb.append("<br/>Uses some classes from http://code.google.com/p/javaemvreader/ ");
-		// sb.append("<br/>Uses some classes from <a href=\"http://code.google.com/p/javaemvreader/\">javaemvreader</a> ");
+
+		// javaemvreader
+		sb.append("<br/>&#8226; Uses some classes from http://code.google.com/p/javaemvreader/ ");
 		sb.append("project (licensed under Apache 2.0 license). Many thanks! :-)");
+		sb.append("<br/>");
+
+		// changelog
+		sb.append("<br/>&#8226; Thanks to Karsten Priegnitz for his easy-to-use changelog builder: https://code.google.com/p/android-change-log/");
+
 		sb.append("<br/>");
 		return Html.fromHtml(sb.toString());
 	}
