@@ -1,5 +1,6 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +136,10 @@ public class NfcBankomatCardReader {
 			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
 					+ re + "\n" + re.getMessage());
 			Log.w(TAG, "Catched Exception while reading Maestro infos: ", re);
+		} catch (TlvParsingException tle) {
+			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
+					+ tle + "\n" + tle.getMessage());
+			Log.w(TAG, "Catched Exception while reading Maestro infos: ", tle);
 		}
 		return result;
 	}
@@ -146,9 +151,16 @@ public class NfcBankomatCardReader {
 	 * @param result
 	 * @return
 	 * @throws IOException
+	 * @throws TlvParsingException
 	 */
 	private CardInfo readMaestroEmvData(byte[] selectAidResponse,
-			CardInfo result) throws IOException {
+			CardInfo result) throws IOException, TlvParsingException {
+
+		// reading transaction logs is WRONG implemented (currently hardcoded
+		// for Bank Austria style)
+		// TODO: read cards FCI for getting locataion and format of log entries
+		// and parse transaction log dynamically based on Log format
+
 		// send GET PROCESSING OPTIONS
 		_ctl.log("trying to send GET PROCESSING OPTIONS command..");
 		byte[] processingOptionsApdu = createGetProcessingOptionsApdu(selectAidResponse);
@@ -167,9 +179,12 @@ public class NfcBankomatCardReader {
 		logBerTlvResponse(resultPdu);
 
 		tryToReadLogFormat();
-		tryToReadCardHolderName();
+		result = tryToReadPinRetryCounter(result);
+		tryToReadCurrentAtcValue();
+		tryToReadLastOnlineAtcRegisterValue();
 		tryToReadAllCommonSimpleTlvTags();
 		tryToReadAllCommonBerTlvTags();
+		// tryreadingTests();
 		result = searchForFiles(result);
 		return result;
 	}
@@ -180,44 +195,139 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private void tryToReadLogFormat() throws IOException {
-		_ctl.log("trying to send command for getting 'Log Format'...");
-		byte[] resultPdu = _localIsoDep.transceive(createGetLogFormatApdu());
+		_ctl.log("trying to send GET DATA to get 'Log Format' tag from  card...");
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
 
 	/**
-	 * Try to send command for reading Cardholder Name tag
+	 * Try to send command for reading PIN RETRY counter
+	 * 
+	 * @throws IOException
+	 * @throws TlvParsingException
+	 */
+	private CardInfo tryToReadPinRetryCounter(CardInfo result)
+			throws IOException, TlvParsingException {
+		_ctl.log("trying to read PIN retry counter from card...");
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+		if (isStatusSuccess(getLast2Bytes(resultPdu))) {
+			BERTLV tlv = getNextTLV(new ByteArrayInputStream(resultPdu));
+			int pinRetryCounter = tlv.getValueBytes()[0];
+			_ctl.log("Current PIN retry counter: >>>>> " + pinRetryCounter
+					+ " <<<<<");
+			result.setPinRetryCounter(pinRetryCounter);
+		}
+		return result;
+	}
+
+	/**
+	 * Try to send GET DATA for ATC
 	 * 
 	 * @throws IOException
 	 */
-	private void tryToReadCardHolderName() throws IOException {
-		_ctl.log("trying to send command for getting 'Cardholder Name'...");
-		byte[] resultPdu = _localIsoDep.transceive(createGetCardholderNameApdu());
+	private void tryToReadCurrentAtcValue() throws IOException {
+		_ctl.log("trying to send GET DATA for getting 'ATC' (current application transaction counter)...");
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
 
 	/**
-	 * Tries to read all common simple TLV tags 
+	 * Try to send GET DATA for ATC
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadLastOnlineAtcRegisterValue() throws IOException {
+		_ctl.log("trying to send GET DATA for getting 'Last online ATC Register' (application transaction counter of last online transaction)...");
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	// /**
+	// * CAUTION!!! If run out o PIN retries the app will be BLOCKED and your
+	// card
+	// * UNUSABLE!!! Try to send VERIFY PIN <br>
+	// * Only works if playntext pin is allowed in the cards CVM (cardholder
+	// * verification methods) methods. See tag 8E "CVM List" if it is allowed
+	// on
+	// * your card.
+	// *
+	// * @throws IOException
+	// */
+	// private void tryToVerifyPlaintextPin(String pin) throws IOException {
+	// _ctl.log("trying to VERIFY PIN: " + pin);
+	// byte[] resultPdu = _localIsoDep.transceive(createApduVerifyPIN(pin,
+	// true));
+	// logResultPdu(resultPdu);
+	// logBerTlvResponse(resultPdu);
+	// }
+
+	// /**
+	// * some tests
+	// * @throws IOException
+	// */
+	// private void tryreadingTests() throws IOException {
+	// String cmd;
+	// byte[] resultPdu;
+	//
+	//
+	// _ctl.log("trying to send command GET CHALLENGE: ");
+	// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
+	// logResultPdu(resultPdu);
+	//
+	// _ctl.log("trying to send command GET CHALLENGE: ");
+	// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
+	// logResultPdu(resultPdu);
+	//
+	// _ctl.log("trying to send command GET CHALLENGE: ");
+	// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
+	// logResultPdu(resultPdu);
+	//
+	// _ctl.log("trying to send command GET CHALLENGE: ");
+	// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
+	// logResultPdu(resultPdu);
+	//
+	// _ctl.log("trying to send command GET CHALLENGE: ");
+	// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
+	// logResultPdu(resultPdu);
+	//
+	// // cmd="80 CA XX XX 00";
+	// // _ctl.log("trying to send command (): "+cmd);
+	// // resultPdu = _localIsoDep.transceive(fromHexString(cmd));
+	// // logResultPdu(resultPdu);
+	// // logBerTlvResponse(resultPdu);
+	// }
+
+	/**
+	 * Tries to read all common simple TLV tags
 	 * 
 	 * @throws IOException
 	 */
 	private void tryToReadAllCommonSimpleTlvTags() throws IOException {
 		_ctl.log("trying to send command for getting all common simple TLV tags...");
-		byte[] resultPdu = _localIsoDep.transceive(createGetAllCommonSimpleTlvApdu());
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
 
 	/**
-	 * Tries to read all common BER TLV tags 
+	 * Tries to read all common BER TLV tags
 	 * 
 	 * @throws IOException
 	 */
 	private void tryToReadAllCommonBerTlvTags() throws IOException {
 		_ctl.log("trying to send command for getting all common BER TLV tags...");
-		byte[] resultPdu = _localIsoDep.transceive(createGetAllCommonBerTlvApdu());
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -295,6 +405,12 @@ public class NfcBankomatCardReader {
 	 *         parsed
 	 */
 	private TransactionLogEntry tryParseTxLogEntryFromByteArray(byte[] rawRecord) {
+		// TODO: transaction log parsing is INCORRECT!!
+		// according to EMV the format may be dynamic and is specified by the
+		// card in the "Log format" tag.
+		// TODO: change this method to parse tx log entries dynamically based on
+		// format as specified by card
+
 		if (rawRecord.length < 26) {
 			// only continue if record is at least 24(+2 status) bytes long
 			Log.w(TAG,

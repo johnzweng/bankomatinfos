@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -14,6 +15,7 @@ public class CardInfo {
 	private boolean _quickCard;
 	private boolean _maestroCard;
 	private long _quickBalance;
+	private int _pinRetryCounter;
 	private String _quickCurrency;
 
 	private List<TransactionLogEntry> _transactionLog;
@@ -24,6 +26,7 @@ public class CardInfo {
 	public CardInfo() {
 		// create empty list
 		this._transactionLog = new ArrayList<TransactionLogEntry>();
+		this._pinRetryCounter = -1;
 	}
 
 	/**
@@ -116,6 +119,21 @@ public class CardInfo {
 		this._quickCurrency = quickCurrency;
 	}
 
+	/**
+	 * @return the _pinRetryCounter
+	 */
+	public int getPinRetryCounter() {
+		return _pinRetryCounter;
+	}
+
+	/**
+	 * @param _pinRetryCounter
+	 *            the _pinRetryCounter to set
+	 */
+	public void setPinRetryCounter(int pinRetryCounter) {
+		this._pinRetryCounter = pinRetryCounter;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -123,10 +141,12 @@ public class CardInfo {
 	 */
 	@Override
 	public String toString() {
-		return "CardInfo [_nfcTagId=" + _nfcTagId + ", _quickCard="
-				+ _quickCard + ", _maestroCard=" + _maestroCard
-				+ ", _quickBalance=" + _quickBalance + ", _quickCurrency="
-				+ _quickCurrency + ", _transactionLog=" + _transactionLog + "]";
+		return "CardInfo [_nfcTagId=" + Arrays.toString(_nfcTagId)
+				+ ", _quickCard=" + _quickCard + ", _maestroCard="
+				+ _maestroCard + ", _quickBalance=" + _quickBalance
+				+ ", _pinRetryCounter=" + _pinRetryCounter
+				+ ", _quickCurrency=" + _quickCurrency + ", _transactionLog="
+				+ _transactionLog + "]";
 	}
 
 }

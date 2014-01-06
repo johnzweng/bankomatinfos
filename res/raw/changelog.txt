@@ -19,11 +19,15 @@
     </style>
   </head>
   <body>
+$ 1.2.2
+  % Version 1.2.2
+  _ 2014-01-06
+    * reading current PIN retry counter value
 $ 1.2.1
   % Version 1.2.1
   _ 2014-01-06
     * learned that format of transaction records may be dynamic (according to EMV standards). So transaction may not be displayed correctly for most of the cards for now.
-    * added "read log format" command (but result only visible in "Log" tab for now) 
+    * sending GET DATA "Log format" command (but result only visible in "Log" tab for now) 
     * added <a href="https://code.google.com/p/android-change-log/">changelog feature by Karsten Priegnitz</a> for displaying changelog on updates
 $ 1.2.0
   % Version 1.2.0

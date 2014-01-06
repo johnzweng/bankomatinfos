@@ -1,23 +1,13 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
-import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
-import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
-import static at.zweng.bankomatinfos.util.Utils.compare2byteArrays;
-import static at.zweng.bankomatinfos.util.Utils.fromHexString;
-import static at.zweng.bankomatinfos.util.Utils.getByteArrayPart;
-import static at.zweng.bankomatinfos.util.Utils.getSpaces;
-import static at.zweng.bankomatinfos.util.Utils.int2Hex;
-import static at.zweng.bankomatinfos.util.Utils.intToByteArray;
-import static at.zweng.bankomatinfos.util.Utils.isBitSet;
-import static at.zweng.bankomatinfos.util.Utils.prettyPrintHex;
-import static at.zweng.bankomatinfos.util.Utils.prettyPrintHexString;
-import static at.zweng.bankomatinfos.util.Utils.readLongFromBytes;
+import static at.zweng.bankomatinfos.util.Utils.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -37,6 +27,7 @@ public class EmvUtils {
 	/**
 	 * ISO command SELECT
 	 */
+
 	public static final byte[] ISO_COMMAND_SELECT = { (byte) 0x00, (byte) 0xA4,
 			(byte) 0x04, (byte) 0x00 };
 
@@ -53,6 +44,54 @@ public class EmvUtils {
 	 */
 	public static final byte[] ISO_COMMAND_QUICK_READ_CURRENCY = { (byte) 0x00,
 			(byte) 0xB0, (byte) 0x81, (byte) 0x15, (byte) 0x02 };
+
+	/**
+	 * EMV command GET CHALLENGE (returns 8 byte random number)
+	 */
+	public static final byte[] EMV_COMMAND_GET_CHALLENGE = { (byte) 0x00,
+			(byte) 0x84, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag "ATC" (Tag 9F 36)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_APP_TX_COUNTER = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x36, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag "Last Online ATC Register" (Tag 9F
+	 * 13)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA__LAST_ONLINE_APP_TX_COUNTER = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x13, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag "PIN retry counter" (Tag 9F 17)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x17, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag "Log format" (Tag 9F 4F)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_LOG_FORMAT = { (byte) 0x80,
+			(byte) 0xCA, (byte) 0x9F, (byte) 0x4F, (byte) 0x00 };
+
+	/**
+	 * EMV command for GET DATA
+	 * "all the common BER-TLV data objects readable in the context" -->
+	 * http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
+	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xFF, (byte) 0x00 };
+	/**
+	 * EMV command for GET DATA
+	 * "all the common SIMPLE-TLV data objects readable in the context" -->
+	 * http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
+	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x02, (byte) 0xFF, (byte) 0x00 };
 
 	/**
 	 * Application ID for Quick (IEP): D040000001000002
@@ -124,10 +163,12 @@ public class EmvUtils {
 			(byte) 0x00 };
 	public static final byte[] SW_CMD_ABORTED_UNKNOWN_ERR = { (byte) 0x6F,
 			(byte) 0x00 };
+	public static final byte[] SW_INS_NOT_SUPPORTED = { (byte) 0x6D,
+			(byte) 0x00 };
+	public static final byte[] SW_COMMAND_NOT_ALLOWED = { (byte) 0x69,
+			(byte) 0x86 };
 	public static final short SW_APPLET_SELECT_FAILED = 0x6999;
 	public static final short SW_CLA_NOT_SUPPORTED = 0x6E00;
-	public static final short SW_INS_NOT_SUPPORTED = 0x6D00;
-	public static final short SW_COMMAND_NOT_ALLOWED = 0x6986;
 	public static final short SW_SECURITY_STATUS_NOT_SATISFIED = 0x6982;
 	public static final short SW_DATA_INVALID = 0x6984;
 	public static final short SW_CONDITIONS_NOT_SATISFIED = 0x6985;
@@ -274,41 +315,80 @@ public class EmvUtils {
 	}
 
 	/**
-	 * creates a GET DATA apdu for reading the Log Format Data object list (9F
-	 * 4F is the tag "Log Format")
+	 * The VERIFY command is used for OFFLINE authentication. The Transaction
+	 * PIN Data (input) is compared with the Reference PIN Data stored in the
+	 * application (ICC).
+	 * 
+	 * NOTE: The EMV command "Offline PIN" is vulnerable to a Man-in-the-middle
+	 * attack. Terminals should request online pin verification instead!!
+	 * 
+	 * 
+	 * Case 3 C-APDU
+	 * 
+	 * @param pin
+	 *            the PIN to verify
+	 * @param transmitInPlaintext
+	 * @return
 	 */
-	public static byte[] createGetLogFormatApdu() {
-		return fromHexString("80 CA 9F 4F 00");
-	}
+	public static byte[] createApduVerifyPIN(String pin,
+			boolean transmitInPlaintext) {
+		int pinLength = pin.length();
+		if (pinLength < 4 || pinLength > 12) { // 0x0C
+			throw new IllegalArgumentException(
+					"Invalid PIN length. Must be in the range 4 to 12. Length="
+							+ pinLength);
+		}
+		StringBuilder builder = new StringBuilder("00 20 00 ");
 
-	/**
-	 * creates a GET DATA apdu for
-	 * "obtaining all the common BER-TLV data objects readable in the context" .
-	 * --> http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
-	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
-	 */
-	public static byte[] createGetAllCommonBerTlvApdu() {
-		return fromHexString("80 CA 00 FF 00");
-	}
+		// EMV book 3 Table 23 (page 88) lists 7 qualifiers,
+		// but only 2 are relevant in our case (hence the use of boolean)
+		byte p2QualifierPlaintextPIN = (byte) 0x80;
+		byte p2QualifierEncipheredPIN = (byte) 0x88;
+		if (transmitInPlaintext) {
+			builder.append(byte2Hex(p2QualifierPlaintextPIN));
+			byte[] tmp = new byte[8]; // Plaintext Offline PIN Block. This block
+										// is split into nibbles (4 bits)
+			tmp[0] = (byte) 0x20; // Control field (binary 0010xxxx)
+			tmp[0] |= pinLength;
+			Arrays.fill(tmp, 1, tmp.length, (byte) 0xFF); // Filler bytes
 
-	/**
-	 * creates a GET DATA apdu for
-	 * "obtaining all the common SIMPLE-TLV data objects readable in the context"
-	 * . --> http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
-	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
-	 */
-	public static byte[] createGetAllCommonSimpleTlvApdu() {
-		return fromHexString("80 CA 02 FF 00");
-	}
+			boolean highNibble = true; // Alternate between high and low nibble
+			for (int i = 0; i < pinLength; i++) { // Put each PIN digit into its
+													// own nibble
+				int pos = i / 2;
+				int digit = Integer.parseInt(pin.substring(i, i + 1)); // Safe
+																		// to
+																		// use
+																		// parseInt
+																		// here,
+																		// since
+																		// the
+																		// original
+																		// String
+																		// data
+																		// came
+																		// from
+																		// a
+																		// 'long'
+				if (highNibble) {
+					tmp[1 + pos] &= (byte) 0x0F; // Clear bits
+					tmp[1 + pos] |= (byte) (digit << 4);
 
-	/**
-	 * creates a GET DATA apdu for reading the Cardholder Name (5F 20 is the tag
-	 * "Cardholder Name" ->
-	 * http://www.eftlab.co.uk/index.php/site-map/knowledge-
-	 * base/145-emv-nfc-tags)
-	 */
-	public static byte[] createGetCardholderNameApdu() {
-		return fromHexString("80 CA 5F 20 00");
+				} else {
+					tmp[1 + pos] &= (byte) 0xF0; // Clear bits
+					tmp[1 + pos] |= (byte) (digit);
+				}
+				highNibble = !highNibble;
+			}
+			builder.append(" 08 "); // Lc length
+			builder.append(bytesToHex(tmp)); // block
+		} else {
+			builder.append(byte2Hex(p2QualifierEncipheredPIN));
+			// TODO Enciphered PIN not supported
+			throw new UnsupportedOperationException(
+					"Enciphered PIN not implemented");
+		}
+		return fromHexString(builder.toString());
 	}
 
 	/**
@@ -402,6 +482,10 @@ public class EmvUtils {
 			return "this command class (CLA) is not supported";
 		} else if (compare2byteArrays(statusWord, SW_CMD_ABORTED_UNKNOWN_ERR)) {
 			return "command aborted with unknown errors";
+		} else if (compare2byteArrays(statusWord, SW_INS_NOT_SUPPORTED)) {
+			return "instruction not supported";
+		} else if (compare2byteArrays(statusWord, SW_CMD_NOT_ALLOWED)) {
+			return "command not allowed";
 		}
 		return "----- UNKNOWN RETURN CODE!!! ------";
 	}
@@ -481,12 +565,15 @@ public class EmvUtils {
 	}
 
 	/**
-	 * check if a response PDU looks like an TX log entry
+	 * check if a response PDU looks like an TX log entry<br>
 	 * 
 	 * @param responsePdu
 	 * @return
 	 */
 	public static boolean responsePduLooksLikeTxLogEntry(byte[] responsePdu) {
+		// TODO: this is wrong! The log format may be custom format.
+		// TODO: read cards FCI for getting locataion and format of log entries
+
 		if (responsePdu == null) {
 			return false;
 		}

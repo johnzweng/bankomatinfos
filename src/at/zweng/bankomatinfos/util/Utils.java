@@ -72,6 +72,19 @@ public class Utils {
 	}
 
 	/**
+	 * @param b
+	 * @return hex representation as string
+	 */
+	public static String byte2Hex(byte b) {
+		String[] HEX_DIGITS = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
+				"9", "A", "B", "C", "D", "E", "F" };
+		int nb = b & 0xFF;
+		int i_1 = (nb >> 4) & 0xF;
+		int i_2 = nb & 0xF;
+		return HEX_DIGITS[i_1] + HEX_DIGITS[i_2];
+	}
+
+	/**
 	 * Takes an string and inserts a whitespace every second char
 	 * 
 	 * @param in

@@ -30,6 +30,9 @@ Die App versucht eine SmartCard via NFC zu lesen. Dazu prüft sie ob entweder di
 
 ### Wo findet man weitere Infos:
 
+- [Offizielle EMV Spezifikationen](http://www.emvco.com/specifications.aspx?id=155)
+- [EMVCo FAQ](http://www.emvco.com/faq.aspx?id=37)
+- [EMV Ressourcen auf smartcardalliance.org](http://www.smartcardalliance.org/pages/publications-emv-faq)
 - Wikipedia über [EMV](https://en.wikipedia.org/wiki/EMV)
 - [EMV Tutorial von opemnSCDP.org](http://www.openscdp.org/scripts/tutorial/emv/reademv.html)
 - Sehr gute undd komplette [Auflistung und Erklärung von EMV Tags](http://www.eftlab.co.uk/index.php/site-map/knowledge-base/145-emv-nfc-tags)
@@ -71,6 +74,9 @@ This android app tries to read a SmartCard via NFC. It checks if the card contai
 
 ### Where to look for further info:
 
+- [Official EMV Specifications](http://www.emvco.com/specifications.aspx?id=155)
+- [EMVCo FAQ](http://www.emvco.com/faq.aspx?id=37)
+- [EMV resources at smartcardalliance.org](http://www.smartcardalliance.org/pages/publications-emv-faq)
 - Wikipedia on [EMV](https://en.wikipedia.org/wiki/EMV)
 - [EMV Tutorial from opemnSCDP.org](http://www.openscdp.org/scripts/tutorial/emv/reademv.html)
 - Very good and complete [list of EMV Tags](http://www.eftlab.co.uk/index.php/site-map/knowledge-base/145-emv-nfc-tags)
