@@ -10,6 +10,16 @@
 
     <uses-permission android:name="android.permission.NFC" />
 
+    <!-- Only offer it to devices with NFC in play store -->
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+
+    <!-- should also work without touch interface (only with d-pad) -->
+    <uses-feature
+        android:name="android.hardware.faketouch"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
