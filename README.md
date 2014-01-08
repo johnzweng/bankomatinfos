@@ -1,8 +1,25 @@
 # Bankomatkarten Infos
+
 ***
-english version below..
+***
+***
+## ***Update 8.1.2014:***<br>
+Aufgrund des aktuellen Medieninteresses an dem Thema hier eine kleine Stellungnahme:
+
+***Zur Klarstellung:*** ich wollte da nichts aufdecken oder hacken. Ich hab mich nur rein interessehalber mit dem Thema beschäftigt, weil ich prinzipiell das Thema NFC sehr spannend finde und einfach mehr darüber lernen wollte.
+
+Ich habe auch nichts "gehackt" oder "geknackt". Alles was ich in der App gemacht habe ist offen im EMV Zahlungsstandard beschrieben. Alle notwendigen Infos dazu kann jeder technisch Interessierte frei zugänglich ganz offiziell hier in den Spezifikationen nachlesen: [http://www.emvco.com/specifications.aspx?id=223](http://www.emvco.com/specifications.aspx?id=223)
+
+Außerdem ist es keineswegs neu, dass die Bankomatkarten diese Daten beinhalten. Genau dieselben Info kann man auch aus jeder alten Bankomatkarte (ohne NFC) auslesen. Man muss sich nur um ein paar Euro ein Smartcard-Lesegerät kaufen und eine entsprechende Applkation bauen. Das haben andere bereits vor mir gezeigt.
+
+Einzig neu ist die Tatsache, dass diese Infos jetzt auch drahtlos per NFC lesbar sind.
+***
+***
+***
+
 
 ### Android NFC-App zum Auslesen von österreichischen Bankomatkarten bzw. Maestro Karten
+english version below..<br>
 
 Sollte auf Android 4.0.3 oder höher funktionieren und benötigt ein Gerät mit NFC. 
 
