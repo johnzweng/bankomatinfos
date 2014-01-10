@@ -21,8 +21,12 @@
   <body>
 $ 1.2.2
   % Version 1.2.2
-  _ 2014-01-06
-    * reading current PIN retry counter value
+  _ 2014-01-10
+    * New <b>app icon</b>
+    * added '<b>Settings</b>' menu
+    * new setting '<b>Scan all files</b>': you can disable this setting, then the scan will be much faster <i>(until now all file have been scanned)</i>
+    * added reading the current PIN-retry-counter (see 'Log' tab)
+    * better handling parsing error with QUICK data
 $ 1.2.1
   % Version 1.2.1
   _ 2014-01-06

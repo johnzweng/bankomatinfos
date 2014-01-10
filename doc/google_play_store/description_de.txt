@@ -1,0 +1,42 @@
+Versucht österreichische Bankomat und Maestro-Karten per NFC auszulesen.
+
+
+Anmerkung:
+Kann natürlich nur funktionieren wenn auf der Karte das NFC- oder "pay pass" Logo abgedruckt ist (die anderen Karten haben einfach keine NFC-Funktion).
+
+
+Infos:
+----------------------------------
+Diese App liest über NFC allgemein zugängliche Informationen sowie (falls vorhanden) die letzten Transaktionen aus österreichischen (und vielleicht auch anderen) Bankomat Karten aus (Maestro Debit Karten). Bisher nur mit Bank Austria und Sparkasse Karten getestet.
+
+Funktioniert nur mit Karten mit NFC-Funktion (diese Karten haben meistens das "pay pass" Logo oder ein Funk-Symbol auf der Karte).
+
+Derzeit wird nicht der volle Umfang des EMV-Standards von dieser App genutzt. Daher ist es durchaus möglich, dass bei anderen Karten keine oder weniger Infos angezeigt werden. Diese App verwendet ausschließlich lesende Kommandos, und sollte daher gefahrlos für die Karte sein.
+
+Ich übernehme jedoch keine Haftung für Schäden oder Verluste jedweder Art. Verwendung auf eigenes Risiko!
+
+
+Kurzer Disclaimer:
+----------------------------------
+Diese App erhebt nicht den Anspruch perfekt zu sein oder mit allen Karten zu funktionieren. Ich bin kein EMV-Experte. Diese App ist nicht als professionelles Projekt gedacht, sondern nur eine kleine proof-of-concept Lösung für mich selbst, um mehr über EMV zu lernen - erstellt in meiner Freizeit. Für mehr Informationen zu den gelesenen Daten und EMV im Allgemeinen siehe die Linksammlung auf der Github-Webseite dieses Projekts.
+
+
+Sicherheitshinweis:
+----------------------------------
+Da es bei Geldkarten um sensitive Informationen geht, sollte jeder prinzipiell bei der Installation solcher Apps vorsichtig sein. Daher um die Vertrauenswürdigkeit zu erhöhen:
+
+•  Diese App verwendet *ausschließlich* die Berechtigung "Nahfeldkommunikation" (steht für NFC), ansonsten KEINE BERECHTIGUNGEN (auch kein Internetzugriff). 
+•  Der komplette Sourcecode hier öffentlich einsehbar: https://github.com/johnzweng/bankomatinfos
+•  Es werden keinerlei Daten gespeichert oder versendet (es sei denn sie versenden sie selbst mit der "Share" Funktion von Android).
+
+
+Diese App ist frei von jeglicher Werbung!
+
+
+Viel Spaß! :-)
+
+
+Technische Details:
+----------------------------------
+Diese App versucht auf der SmartCard die AID A0000000043060 (Mastercard Maestro) und D040000001000002 (Paylife Quick) anzusprechen und alle frei verfügbaren Infos auszulesen. Diese sind dem EMV Standard entsprechend codiert, und können daher eventuell eventuell nicht alle lesbar decodiert werden.
+Der gesamte Output im Rohformat (hexadezimal) wird ebenfalls angezeigt.

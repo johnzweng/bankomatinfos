@@ -634,6 +634,13 @@ public class Utils {
 		sb.append("<br/>Sourcecode of this app: https://github.com/johnzweng/bankomatinfos");
 		sb.append("<br/><br/><br/>");
 
+		// ICON
+		sb.append("<b><font color=\"#ff3232\">App icon:</font></b>");
+		sb.append("<br/>Copyright owner of the app's icon: https://www.iconfinder.com/zohanimasi");
+		sb.append("<br/>The icon <b>may not be used or re-distributed</b> in any form without the ");
+		sb.append("permission of the icon's copyright owner!");
+		sb.append("<br/><br/><br/>");
+
 		// CREDITS
 		sb.append("<b><font color=\"#ff3232\">Credits:</font></b>");
 

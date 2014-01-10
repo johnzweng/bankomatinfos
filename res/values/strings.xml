@@ -52,11 +52,18 @@
     <string name="about_dialog_btnOk">OK</string>
     <string name="about_dialog_title">About</string>
     <string name="about_dialog_image_description">App logo</string>
-    
+
     <!-- Changelog dialog -->
     <string name="changelog_full_title">Change Log</string>
     <string name="changelog_title">What\'s New</string>
     <string name="changelog_ok_button">OK</string>
     <string name="changelog_show_full">more&#8230;</string>
 
+    <!-- Settings activity -->
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_header_general">General</string>
+    <string name="pref_title_system_nfc_settings">Android NFC system settings</string>
+    <string name="pref_title_perform_full_file_scan">Scan all files</string>
+    <string name="pref_description_perform_full_file_scan">Scanning all files takes longer but *may* find more data. Otherwise only well-known files will be read.</string>
+    
 </resources>

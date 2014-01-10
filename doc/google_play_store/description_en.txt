@@ -1,0 +1,37 @@
+Tries to read infos from NFC-enabled Maestro debit cards. (Tested only with Austrian cards until now.)
+
+
+Infos:
+----------------------------------
+This app tries to read free accessible informations (and if found) the last debit transactions from Austrian (and maybe other) Maestro debit cards (in Austria called "Bankomatkarte"). Until now tested with "Bank Austria" and "Sparkasse" Maestro cards.
+
+Of course works only with NFC-enabled cards (these cards often have the "pay pass" logo or the NFC logo printed on them).
+
+At the moment this app does not use the full EMV standard, so maybe it won't give much or any infos on cards from other banks. This app only uses reading commands, so no harm should be done to your card.
+
+But I do not assume any liability for errors or losses of any kind! Use at your own risk!
+
+
+Short disclaimer:
+----------------------------------
+This may not be perfect, or the best way this could be done. I'm not an EMV expert. This was not to be intended a professional project, but just a small proof-of-concept solution for myself  to learn more about EMV - made in my free time. Check the link section on the project's Github website for more information on the result data and on EMV.
+
+
+Note on security:
+----------------------------------
+As banking cards may contain sensitive information, everyone should be careful when installing apps like this one. So to increase trustworthiness:
+
+• This app only uses the "NFC" permission and nothing else (also no internet access!).
+• The full source code of this app is freely available at: https://github.com/johnzweng/bankomatinfos
+• No data is being stored or sent (unless you send it yourself via Android's "Share" function). 
+
+
+This app does not contain any ads!
+
+
+Have fun! :-)
+
+
+Some technical details:
+----------------------------------
+This app tries to read the AID A0000000043060 (Mastercard Maestro) and D040000001000002 (Paylife Quick) on the smartcard and tries to read all free readable infos on the card. The data on these cards is usually encoded following the EMV standard for payment systems. The app tries to decode the data to make it human-understanable but this may not work on all cards. All output from the card is also presented in its raw form (hexadecimal byte arrays).

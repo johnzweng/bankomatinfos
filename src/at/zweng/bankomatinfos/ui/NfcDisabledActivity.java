@@ -3,6 +3,8 @@ package at.zweng.bankomatinfos.ui;
 import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
 import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +39,12 @@ public class NfcDisabledActivity extends Activity {
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);
+			return true;
+		case R.id.action_settings:
+			Intent i = new Intent();
+			i.setComponent(new ComponentName(getApplicationContext(),
+					SettingsActivity.class));
+			startActivity(i);
 			return true;
 		}
 		return false;

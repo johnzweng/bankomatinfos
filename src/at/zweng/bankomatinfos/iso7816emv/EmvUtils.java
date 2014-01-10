@@ -25,11 +25,24 @@ import at.zweng.bankomatinfos.exceptions.TlvParsingException;
  */
 public class EmvUtils {
 	/**
-	 * ISO command SELECT
+	 * ISO command for SELECT a file directly (Direct selection by DF name (data
+	 * field=DF name)
 	 */
+	public static final byte[] ISO_COMMAND_SELECT_DIRECT = { (byte) 0x00,
+			(byte) 0xA4, (byte) 0x04, (byte) 0x00 };
 
-	public static final byte[] ISO_COMMAND_SELECT = { (byte) 0x00, (byte) 0xA4,
-			(byte) 0x04, (byte) 0x00 };
+	/**
+	 * ISO command for SELECT PARENT DF file (empty data field)
+	 */
+	public static final byte[] ISO_COMMAND_SELECT_PARENT_DF = { (byte) 0x00,
+			(byte) 0xA4, (byte) 0x03, (byte) 0x00 };
+
+	/**
+	 * ISO command for SELECT FILE by file identifier (data field=file
+	 * idenntifier)
+	 */
+	public static final byte[] ISO_COMMAND_SELECT_FILE = { (byte) 0x00,
+			(byte) 0xA4, (byte) 0x00, (byte) 0x00 };
 
 	/**
 	 * command read QUICK balance: 00B0820000 (in fact this is a READ BINARY
@@ -69,6 +82,36 @@ public class EmvUtils {
 	 */
 	public static final byte[] EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER = {
 			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x17, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading "accumulator values and limits" (BF 30)
+	 * 
+	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
+	 *      p.155f
+	 */
+	// TODO: test/use this command
+	public static final byte[] EMV_COMMAND_GET_DATA_ACCUMULATOR_VALUES = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x30, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading "counter values and limits" (BF 35)
+	 * 
+	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
+	 *      p.155f
+	 */
+	// TODO: test/use this command
+	public static final byte[] EMV_COMMAND_GET_DATA_COUNTER_VALUES = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x35, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading "offline balance" (9F 50)
+	 * 
+	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
+	 *      p.155f
+	 */
+	// TODO: test/use this command
+	public static final byte[] EMV_COMMAND_GET_DATA_OFFLINE_BALANCE = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x50, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag "Log format" (Tag 9F 4F)
@@ -188,21 +231,30 @@ public class EmvUtils {
 	 */
 	public static byte[] createAPDU(byte[] command, byte[] cmdData,
 			byte lengthExpected) {
-		// According to ISO7816 the command section in the PDU
-		// is fixed to 4 bytes
-		int lengthOfCommand = 4;
+		// Log.d(TAG, "createAPDU command length: " + command.length);
+		// Log.d(TAG, "createAPDU cmdData length: " + cmdData.length);
 
+		byte[] pdu;
 		// length of new PDU is command + data + 2
-		byte[] pdu = new byte[lengthOfCommand + cmdData.length + 2];
+		// length of new PDU is command + 1 if data is 0-length
+		if (cmdData.length > 0) {
+			pdu = new byte[command.length + cmdData.length + 2];
+		} else {
+			pdu = new byte[command.length + 1];
+		}
+
+		// Log.d(TAG, "createAPDU pdu toal length: " + pdu.length);
 
 		// the first 5 bytes (or shorter) seem to contain the command
 		System.arraycopy(command, 0, pdu, 0, command.length);
 
-		// the 5th byte contains the length of the data section (1-byte)
-		pdu[lengthOfCommand] = ((byte) cmdData.length);
+		if (cmdData.length > 0) {
+			// the 5th byte contains the length of the data section (1-byte)
+			pdu[command.length] = ((byte) cmdData.length);
 
-		// then starting at offset 5 the data is copied in
-		System.arraycopy(cmdData, 0, pdu, 5, cmdData.length);
+			// then starting at offset 5 the data is copied in
+			System.arraycopy(cmdData, 0, pdu, 5, cmdData.length);
+		}
 
 		// because the total length is length of command + length of data + 2,
 		// we will still have 1 place left at the end of the array. --> LE field
@@ -225,9 +277,83 @@ public class EmvUtils {
 	 * @param appId
 	 * @return
 	 */
-	public static byte[] createSelect(byte[] appId) {
-		byte[] result = createAPDU(ISO_COMMAND_SELECT, appId, (byte) 0);
+	public static byte[] createSelectAid(byte[] appId) {
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_DIRECT, appId, (byte) 0);
 		return result;
+	}
+
+	/**
+	 * Creates a SELECT MF (master file) command PDU (aka: switch to "root dir")
+	 * 
+	 * @return
+	 */
+	public static byte[] createSelectMasterFile() {
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, new byte[0],
+				(byte) 0);
+		return result;
+	}
+
+	/**
+	 * Creates a SELECT FILE command PDU (selects file by file identifier bytes)
+	 * 
+	 * @param fileIdentifier
+	 *            identifier bytes
+	 * @return
+	 */
+	public static byte[] createSelectFile(byte[] fileIdentifier) {
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, fileIdentifier,
+				(byte) 0);
+		return result;
+	}
+
+	/**
+	 * Creates a SELECT PARENT DF FILE command PDU (aka: cd ..)
+	 * 
+	 * @return
+	 */
+	public static byte[] createSelectParentDfFile() {
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_PARENT_DF, new byte[0],
+				(byte) 0);
+		return result;
+	}
+
+	/**
+	 * Creates a READ BINARY command by short EF identifier PDU<br>
+	 * See http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
+	 * 4_6_basic_interindustry_commands.aspx#chap6_1 for details
+	 * 
+	 * @param shortEfFileIdentifier
+	 *            short id of the EF to read
+	 * @param offset
+	 *            offset within the file
+	 * @return command APDU
+	 */
+	public static byte[] createReadBinaryApdu(int shortEfFileIdentifier,
+			int offset) {
+		// TODO: test this method!
+		int sfi = shortEfFileIdentifier;
+		StringBuilder cmd = new StringBuilder();
+		cmd.append("00B0");
+
+		if (shortEfFileIdentifier > 7 || shortEfFileIdentifier < 0) {
+			throw new IllegalArgumentException(
+					"createReadBinaryApdu: shortEfFileIdentifier canonly contain values from 0 to 7. We got: "
+							+ shortEfFileIdentifier);
+		}
+
+		// "If bit8=1 in P1, then bit7-6 are set to 0. bit3-1 of P1 are a short
+		// EF (Elementary File) identifier and P2 is the offset of the first
+		// byte to be read in date units from the beginning of the file."
+
+		// P1:
+		sfi = sfi | 0x80;
+		cmd.append(int2Hex(sfi));
+
+		// P2: offset
+		cmd.append(int2Hex(offset));
+		// and we set the LE field to 00:
+		cmd.append("00");
+		return fromHexString(cmd.toString());
 	}
 
 	/**
@@ -328,10 +454,12 @@ public class EmvUtils {
 	 * @param pin
 	 *            the PIN to verify
 	 * @param transmitInPlaintext
+	 * @throws NumberFormatException
+	 *             if PIN cannot be parsed as integer
 	 * @return
 	 */
 	public static byte[] createApduVerifyPIN(String pin,
-			boolean transmitInPlaintext) {
+			boolean transmitInPlaintext) throws NumberFormatException {
 		int pinLength = pin.length();
 		if (pinLength < 4 || pinLength > 12) { // 0x0C
 			throw new IllegalArgumentException(
@@ -356,20 +484,7 @@ public class EmvUtils {
 			for (int i = 0; i < pinLength; i++) { // Put each PIN digit into its
 													// own nibble
 				int pos = i / 2;
-				int digit = Integer.parseInt(pin.substring(i, i + 1)); // Safe
-																		// to
-																		// use
-																		// parseInt
-																		// here,
-																		// since
-																		// the
-																		// original
-																		// String
-																		// data
-																		// came
-																		// from
-																		// a
-																		// 'long'
+				int digit = Integer.parseInt(pin.substring(i, i + 1));
 				if (highNibble) {
 					tmp[1 + pos] &= (byte) 0x0F; // Clear bits
 					tmp[1 + pos] |= (byte) (digit << 4);
@@ -571,7 +686,7 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static boolean responsePduLooksLikeTxLogEntry(byte[] responsePdu) {
-		// TODO: this is wrong! The log format may be custom format.
+		// TODO: this is wrong! log format may be custom (but works for Austria)
 		// TODO: read cards FCI for getting locataion and format of log entries
 
 		if (responsePdu == null) {

@@ -1,8 +1,25 @@
 # Bankomatkarten Infos
+
 ***
-english version below..
+***
+***
+## ***Update 8.1.2014:***<br>
+Aufgrund des aktuellen Medieninteresses an dem Thema hier eine kleine Stellungnahme:
+
+***Zur Klarstellung:*** ich wollte da nichts aufdecken oder hacken. Ich hab mich nur rein interessehalber mit dem Thema beschäftigt, weil ich prinzipiell das Thema NFC sehr spannend finde und einfach mehr darüber lernen wollte.
+
+Ich habe auch nichts "gehackt" oder "geknackt". Alles was ich in der App gemacht habe ist offen im EMV Zahlungsstandard beschrieben. Alle notwendigen Infos dazu kann jeder technisch Interessierte frei zugänglich ganz offiziell hier in den Spezifikationen nachlesen: [http://www.emvco.com/specifications.aspx?id=223](http://www.emvco.com/specifications.aspx?id=223)
+
+Außerdem ist es keineswegs neu, dass die Bankomatkarten diese Daten beinhalten. Genau dieselben Info kann man auch aus jeder alten Bankomatkarte (ohne NFC) auslesen. Man muss sich nur um ein paar Euro ein Smartcard-Lesegerät kaufen und eine entsprechende Applkation bauen. Das haben andere bereits vor mir gezeigt.
+
+Einzig neu ist die Tatsache, dass diese Infos jetzt auch drahtlos per NFC lesbar sind.
+***
+***
+***
+
 
 ### Android NFC-App zum Auslesen von österreichischen Bankomatkarten bzw. Maestro Karten
+english version below..<br>
 
 Sollte auf Android 4.0.3 oder höher funktionieren und benötigt ein Gerät mit NFC. 
 
@@ -30,7 +47,8 @@ Die App versucht eine SmartCard via NFC zu lesen. Dazu prüft sie ob entweder di
 
 ### Wo findet man weitere Infos:
 
-- [Offizielle EMV Spezifikationen](http://www.emvco.com/specifications.aspx?id=155)
+- [Offizielle EMV Spezifikationen](http://www.emvco.com/specifications.aspx?id=223)
+- [Guter Einführungstalk wie EMV Transaktionen ablaufen am 29C3](https://www.youtube.com/watch?v=qqobg1-HrfY)
 - [EMVCo FAQ](http://www.emvco.com/faq.aspx?id=37)
 - [EMV Ressourcen auf smartcardalliance.org](http://www.smartcardalliance.org/pages/publications-emv-faq)
 - Wikipedia über [EMV](https://en.wikipedia.org/wiki/EMV)
@@ -74,7 +92,8 @@ This android app tries to read a SmartCard via NFC. It checks if the card contai
 
 ### Where to look for further info:
 
-- [Official EMV Specifications](http://www.emvco.com/specifications.aspx?id=155)
+- [Official EMV Specifications](http://www.emvco.com/specifications.aspx?id=223)
+- [Good overview talk how EMV Transaktionen work at 29C3](https://www.youtube.com/watch?v=qqobg1-HrfY)
 - [EMVCo FAQ](http://www.emvco.com/faq.aspx?id=37)
 - [EMV resources at smartcardalliance.org](http://www.smartcardalliance.org/pages/publications-emv-faq)
 - Wikipedia on [EMV](https://en.wikipedia.org/wiki/EMV)
@@ -86,5 +105,4 @@ This android app tries to read a SmartCard via NFC. It checks if the card contai
 - Wikipedia on [ISO 7816-4 Smart Card APDU](https://en.wikipedia.org/wiki/Smart_card_application_protocol_data_unit)
 - [Master thesis of Michael Schouwenaar with lots of interesting EMV infos](http://www.ru.nl/publish/pages/578936/emv-cards_and_internet_banking_-_michael_schouwenaar.pdf) 
 - Another interesting [bachelor thesis by Christian Mäder and Sandro	Vogler with lots of background infos on EMV (in german)](http://eprints.hsr.ch/309/1/Bachelor_Thesis_Maeder_Vogler.pdf)
-
 

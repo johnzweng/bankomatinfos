@@ -6,13 +6,16 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -124,6 +127,12 @@ public class MainActivity extends Activity {
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);
 			return true;
+		case R.id.action_settings:
+			Intent i = new Intent();
+			i.setComponent(new ComponentName(getApplicationContext(),
+					SettingsActivity.class));
+			startActivity(i);
+			return true;
 		}
 		return false;
 	}
@@ -211,7 +220,12 @@ public class MainActivity extends Activity {
 						+ " version " + getAppVersion(MainActivity.this));
 				NfcBankomatCardReader reader = new NfcBankomatCardReader(nfcTag);
 				reader.connectIsoDep();
-				_cardReadingResults = reader.readAllCardData();
+				// read setting value
+				SharedPreferences prefs = PreferenceManager
+						.getDefaultSharedPreferences(MainActivity.this);
+				prefs.getBoolean("perform_full_file_scan", true);
+				_cardReadingResults = reader.readAllCardData(prefs.getBoolean(
+						"perform_full_file_scan", true));
 				ctl.setCardInfo(_cardReadingResults);
 				reader.disconnectIsoDep();
 			} catch (NoSmartCardException nsce) {

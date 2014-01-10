@@ -1,4 +1,4 @@
-﻿<html>
+﻿﻿<html>
   <head>
     <style type='text/css'>
       a            { color:#a0a0e0 }
@@ -21,8 +21,12 @@
   <body>
 $ 1.2.2
   % Version 1.2.2
-  _ 2014-01-06
-    * versuche PIN Wiederholungszähler auszulesen
+  _ 2014-01-10
+    * Neues <b>App Logo</b>
+    * neuer Menüpunkt '<b>Einstellungen</b>'
+    * neue Einstellung '<b>Scanne alle Dateien</b>': einfach deaktivieren, dann geht der Scan viel schneller <i>(bisher wurde immer alles gescannt)</i>
+    * auslesen der noch verfügbaren PIN-Eingabeversuche (siehe 'Log' Tab)
+    * bessere Fehlerbehandlung beim Lesen der QUICK Daten
 $ 1.2.1
   % Version 1.2.1
   _ 2014-01-06
@@ -32,7 +36,7 @@ $ 1.2.1
 $ 1.2.0
   % Version 1.2.0
   _ 2014-01-05
-  ! Esrte Version im <a href="https://play.google.com/store/apps/details?id=at.zweng.bankomatinfos">Google Play Store</a>
+  ! Erste Version im <a href="https://play.google.com/store/apps/details?id=at.zweng.bankomatinfos">Google Play Store</a>
     * versucht ab jetzt auch EMV Daten von der Karte zu lesen und zu parsen (allerdings erst sehr rudimentär)
     * neuer "Log" Tab zum Anzeigen aller empfangenen Daten im Detail
     * ab sofort iterieren wir über alle EFs und lesen die ersten paar Records (nicht nur die welche die Karte anpreist)

@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -137,6 +138,12 @@ public class ResultActivity extends FragmentActivity implements
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);
+			return true;
+		case R.id.action_settings:
+			Intent i = new Intent();
+			i.setComponent(new ComponentName(getApplicationContext(),
+					SettingsActivity.class));
+			startActivity(i);
 			return true;
 		}
 		return false;

@@ -59,4 +59,11 @@
     <string name="changelog_ok_button">OK</string>
     <string name="changelog_show_full">mehr&#8230;</string>
 
+    <!-- Settings activity -->
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="pref_header_general">Allgemein</string>
+    <string name="pref_title_system_nfc_settings">Android NFC Systemeinstellungen</string>
+    <string name="pref_title_perform_full_file_scan">Scanne alle Dateien</string>
+    <string name="pref_description_perform_full_file_scan">Das Scannen aller Dateien dauert länger, aber findet *eventuell* auf manchen Karten mehr Daten. Ansonsten werden nur Standarddateien ausgelesen.</string>
+    
 </resources>

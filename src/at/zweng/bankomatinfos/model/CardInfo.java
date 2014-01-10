@@ -27,6 +27,7 @@ public class CardInfo {
 		// create empty list
 		this._transactionLog = new ArrayList<TransactionLogEntry>();
 		this._pinRetryCounter = -1;
+		this._quickCurrency = "<unknown, or parsing error>";
 	}
 
 	/**
