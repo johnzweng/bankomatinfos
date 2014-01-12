@@ -1,13 +1,12 @@
+Version 1.2.3 (12.01.2014):
+• bessere Aufschlüsselung der Transaktionen
+• bugfix: Lesefehler bei bestimmten Transaktionstypen behoben
+• bugfix: falsche Uhrzeit bei manchen Transaktionen behoben
+
+
 Version 1.2.2 (10.01.2014):
 • Neues App Logo
 • neuer Menüpunkt 'Einstellungen'
 • neue Einstellung 'Scanne alle Dateien'
 • Auslesen der noch verfügbaren PIN-Eingabeversuche
 • bessere Fehlerbehandlung beim Lesen der QUICK Daten
-
-Version 1.2.1 (06.01.2014):
-• sendet jetzt auch kommando GET DATA "Log format"
-• changelog eingebaut
-
-Version 1.2.0 (05.01.2014):
-• Erste Version in den Play Store gestellt

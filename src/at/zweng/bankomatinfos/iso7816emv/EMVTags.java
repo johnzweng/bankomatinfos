@@ -540,8 +540,8 @@ public class EMVTags {
 	public static final EmvTag MASTERCARD_UPPER_OFFLINE_AMOUNT = new TagImpl(
 			"9f52",
 			TagValueType.BINARY,
-			"Upper Cumulative Domestic Offline Transaction Amount",
-			"Issuer specified data element indicating the required maximum cumulative offline amount allowed for the application before the transaction goes online.");
+			"Application Default Action (ADA)",
+			"Proprietary data element indicating the action a card should take when exception conditions occur???");
 
 	// Global Platform
 	// "73" Security Domain Management Data

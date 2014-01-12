@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background_list_views" >
+
+    <TextView
+        android:id="@+id/txListItemTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/txListItemAmount"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="8dp"
+        android:maxLines="1"
+        android:text="23.12.2013  07:12:23"
+        android:textAppearance="@style/TransactionListTimestamp" />
+
+    <TextView
+        android:id="@+id/txListItemAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="8dp"
+        android:layout_toLeftOf="@+id/imageViewCollapseIcon"
+        android:maxLines="1"
+        android:text="-xxxxx,xx €"
+        android:textAppearance="@style/TransactionListAmount" />
+
+    <ImageView
+        android:id="@+id/imageViewCollapseIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/txListItemAmount"
+        android:layout_marginRight="8dp"
+        android:contentDescription="@string/tx_list_image_description_collapse_icon"
+        android:src="@drawable/ic_action_collapse" />
+
+    <RelativeLayout
+        android:id="@+id/layoutFrameDetails"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txListItemAmount"
+        android:paddingTop="12dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+         >
+	<!--android:background="#E9FFE9"  #E0ECFF -->
+        
+        
+        <TextView
+            android:id="@+id/txListItemCryptogramInformationDataLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="8dp"
+            android:maxLines="1"
+            android:text="@string/tx_list_cryptogram_info_label"
+            android:textAppearance="@style/TransactionListDetailDataLabel" />
+
+        <TextView
+            android:id="@+id/txListItemCryptogramInformationData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemCryptogramInformationDataLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:maxLines="1"
+            android:text="0x40"
+            android:textAppearance="@style/TransactionListDetailData" />
+
+        
+        
+        
+        <TextView
+            android:id="@+id/txListItemATCLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/txListItemCryptogramInformationData"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
+            android:text="@string/tx_list_atc_label"
+            android:textAppearance="@style/TransactionListDetailDataLabel" />
+
+        <TextView
+            android:id="@+id/txListItemATC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemATCLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:maxLines="1"
+            android:text="65536"
+            android:textAppearance="@style/TransactionListDetailData" />
+
+        
+        
+        <TextView
+            android:id="@+id/txListItemUpperCumulativeDomesticOfflineTxAmountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/txListItemATC"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/tx_list_application_default_action_label"
+            android:textAppearance="@style/TransactionListDetailDataLabel" />
+
+        <TextView
+            android:id="@+id/txListItemApplicationDefaultAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemUpperCumulativeDomesticOfflineTxAmountLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:maxLines="1"
+            android:text="00 11 22 33 44 55"
+            android:textAppearance="@style/TransactionListDetailData" />
+        
+        
+        
+
+        <TextView
+            android:id="@+id/txListItemUnknownByteLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/txListItemApplicationDefaultAction"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
+            android:text="@string/tx_list_unknown_byte_label"
+            android:textAppearance="@style/TransactionListDetailDataLabel" />
+
+        <TextView
+            android:id="@+id/txListItemUnknownByte"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemUnknownByteLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:maxLines="1"
+            android:text="01"
+            android:textAppearance="@style/TransactionListDetailData" />
+
+        
+        
+        <TextView
+            android:id="@+id/txListItemCustomerExclusiveDataLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/txListItemUnknownByte"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
+            android:text="@string/tx_list_customer_exclusive_data_label"
+            android:textAppearance="@style/TransactionListDetailDataLabel" />
+
+        <TextView
+            android:id="@+id/txListItemCustomerExclusiveData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemCustomerExclusiveDataLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:text="00 11 22 33 44 55 66 77 88 99 00 11 22 33 44"
+            android:textAppearance="@style/TransactionListDetailData" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txListRawData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutFrameDetails"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:background="#666666"
+        android:padding="10dp"
+        android:text="00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00"
+        android:textAppearance="@style/TransactionListHexData" />
+
+</RelativeLayout>

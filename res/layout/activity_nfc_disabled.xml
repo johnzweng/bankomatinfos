@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/imageViewNfcNotAvailableLogo"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="41dp"
+        android:layout_marginBottom="4dp"
         android:gravity="center_horizontal"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"

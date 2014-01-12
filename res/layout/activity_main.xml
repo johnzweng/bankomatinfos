@@ -5,7 +5,7 @@
     tools:context=".MainActivity" >
 
     <!-- Show progress -->
-
+<!-- TODO FIXME TEXT Abgeschnitten unten BUG -->
     <LinearLayout
         android:id="@+id/read_card_status"
         android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/imageViewNfcLogo"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="41dp"
+        android:layout_marginBottom="4dp"
         android:gravity="center_horizontal"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"

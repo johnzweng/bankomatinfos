@@ -45,6 +45,15 @@
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">No transactions found</string>
 
+    <!-- Transaction List Item: -->
+    <string name="tx_list_image_description_collapse_icon">Icon Collapse</string>
+    <string name="tx_list_image_description_expand_icon">Icon Expand</string>
+    <string name="tx_list_cryptogram_info_label">Cryptogram Information Data:</string>
+    <string name="tx_list_atc_label">ATC (application tx counter):</string>
+    <string name="tx_list_customer_exclusive_data_label">Customer Exclusive Data:</string>
+    <string name="tx_list_application_default_action_label">Application Default Action (ADA)??:</string>
+    <string name="tx_list_unknown_byte_label">Unknown??:</string>
+
     <!-- Share Subject -->
     <string name="action_share_subject">Bankomat Card Info - Results</string>
 
@@ -64,6 +73,7 @@
     <string name="pref_header_general">General</string>
     <string name="pref_title_system_nfc_settings">Android NFC system settings</string>
     <string name="pref_title_perform_full_file_scan">Scan all files</string>
-    <string name="pref_description_perform_full_file_scan">Scanning all files takes longer but *may* find more data. Otherwise only well-known files will be read.</string>
-    
+    <string name="pref_description_perform_full_file_scan_true">Scan all files. This will take longer but *may* find more data.</string>
+    <string name="pref_description_perform_full_file_scan_false">Just scan well-known files. Scanning will be much faster.</string>
+    	
 </resources>

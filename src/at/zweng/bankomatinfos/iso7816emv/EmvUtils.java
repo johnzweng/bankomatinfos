@@ -74,7 +74,7 @@ public class EmvUtils {
 	 * EMV GET DATA command for reading Tag "Last Online ATC Register" (Tag 9F
 	 * 13)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA__LAST_ONLINE_APP_TX_COUNTER = {
+	public static final byte[] EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER = {
 			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x13, (byte) 0x00 };
 
 	/**
@@ -612,7 +612,7 @@ public class EmvUtils {
 	 */
 	public static String getCurrencyAsString(byte[] currencyBytes) {
 		if (compare2byteArrays(ISO4217_CURRENCY_EURO, currencyBytes)) {
-			return "Euro";
+			return "€";
 		}
 		if (compare2byteArrays(ISO4217_CURRENCY_ATS, currencyBytes)) {
 			return "ATS";
@@ -643,7 +643,7 @@ public class EmvUtils {
 			throw new IllegalArgumentException(
 					"getTimeStampFromBytes: time must be exactly 3 bytes long");
 		}
-		DateFormat df = new SimpleDateFormat("yy MM dd  hh mm ss", Locale.US);
+		DateFormat df = new SimpleDateFormat("yy MM dd  HH mm ss", Locale.US);
 		return df.parse(prettyPrintHexString(bytesToHex(date)) + "  "
 				+ prettyPrintHexString(bytesToHex(time)));
 	}
@@ -672,9 +672,9 @@ public class EmvUtils {
 	 * @return long value (example: 2345)
 	 */
 	public static long getAmountFromBcdBytes(byte[] amount) {
-		if (amount == null || amount.length != 4) {
+		if (amount == null || amount.length != 6) {
 			throw new IllegalArgumentException(
-					"getAmountFromBcdBytes: needs 4 bytes");
+					"getAmountFromBcdBytes: needs 6 bytes");
 		}
 		return Long.parseLong(bytesToHex(amount));
 	}
@@ -686,18 +686,60 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static boolean responsePduLooksLikeTxLogEntry(byte[] responsePdu) {
-		// TODO: this is wrong! log format may be custom (but works for Austria)
+		// TODO: this is not according EMV standard!
 		// TODO: read cards FCI for getting locataion and format of log entries
 
+		// TODO: currently hardcoded to log format of Austrian cards
+		
+		// 9F 4F - 1A bytes: Log Format
+		// --------------------------------------
+		// 9F 27 (01 bytes) -> Cryptogram Information Data
+		// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+		// 5F 2A (02 bytes) -> Transaction Currency Code
+		// 9A (03 bytes) -> Transaction Date
+		// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+		// 9F 52 (06 bytes) -> Upper Cumulative Domestic Offline Transaction
+		// Amount
+		// DF 3E (01 bytes) -> [UNHANDLED TAG]
+		// 9F 21 (03 bytes) -> Transaction Time (HHMMSS)
+		// 9F 7C (14 bytes) -> Customer Exclusive Data
+		
 		if (responsePdu == null) {
 			return false;
 		}
 		// 24 bytes minimum for parsing tx log + 2 bytes status word
+		// because we read until 24th byte
 		if (responsePdu.length < 26) {
 			return false;
 		}
-		// starts with bytes 40 00?
-		if (!"4000".equals(bytesToHex(getByteArrayPart(responsePdu, 0, 1)))) {
+
+		byte[] amount = getByteArrayPart(responsePdu, 3, 6);
+		byte[] currency = getByteArrayPart(responsePdu, 7, 8);
+		byte[] date = getByteArrayPart(responsePdu, 9, 11);
+		byte[] time = getByteArrayPart(responsePdu, 21, 23);
+
+		// check if currency bytes are "09 78" (=EURO)
+		if (!"0978".equals(bytesToHex(currency))) {
+			return false;
+		}
+
+		// AMOUNT:
+		// check if we could parse amount as decimal number (BCD encoding!)
+		try {
+			Long.parseLong(bytesToHex(amount), 10);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+
+		// TIME:
+		// check if time bytes look like a valid time
+		if (!bytesLookLikeValidTime(time)) {
+			return false;
+		}
+		
+		// DATE:
+		// check if time bytes look like a valid date
+		if (!bytesLookLikeValidDate(date)) {
 			return false;
 		}
 		return true;
@@ -882,6 +924,59 @@ public class EmvUtils {
 			}
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * checks if the given 3 byte long array looks like a valid BCD encoded date
+	 * value
+	 * 
+	 * @param time
+	 * @return
+	 */
+	private static boolean bytesLookLikeValidDate(byte[] date) {
+		int digit;
+		try {
+			// year byte
+			Integer.parseInt(byte2Hex(date[0]));
+			// month byte
+			digit = Integer.parseInt(byte2Hex(date[1]));
+			if (digit < 1 || digit > 12)
+				return false;
+			// day byte
+			digit = Integer.parseInt(byte2Hex(date[2]));
+			if (digit < 1 || digit > 31)
+				return false;
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * checks if the given 3 byte long array looks like a valid BCD encoded time
+	 * 
+	 * @param time
+	 * @return
+	 */
+	private static boolean bytesLookLikeValidTime(byte[] time) {
+		int digit;
+		try {
+			// hour byte
+			digit = Integer.parseInt(byte2Hex(time[0]));
+			if (digit > 23)
+				return false;
+			// minutes byte
+			digit = Integer.parseInt(byte2Hex(time[1]));
+			if (digit > 59)
+				return false;
+			// seconds byte
+			digit = Integer.parseInt(byte2Hex(time[2]));
+			if (digit > 59)
+				return false;
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

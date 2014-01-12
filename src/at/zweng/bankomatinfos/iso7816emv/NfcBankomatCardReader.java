@@ -212,6 +212,7 @@ public class NfcBankomatCardReader {
 	 */
 	private void tryToReadLogFormat() throws IOException {
 		_ctl.log("trying to send GET DATA to get 'Log Format' tag from  card...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
 		logResultPdu(resultPdu);
@@ -227,6 +228,7 @@ public class NfcBankomatCardReader {
 	private CardInfo tryToReadPinRetryCounter(CardInfo result)
 			throws IOException, TlvParsingException {
 		_ctl.log("trying to read PIN retry counter from card...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER);
 		logResultPdu(resultPdu);
@@ -250,6 +252,7 @@ public class NfcBankomatCardReader {
 	 */
 	private void tryToReadCurrentAtcValue() throws IOException {
 		_ctl.log("trying to send GET DATA for getting 'ATC' (current application transaction counter)...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_APP_TX_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
 		logResultPdu(resultPdu);
@@ -263,16 +266,47 @@ public class NfcBankomatCardReader {
 	 */
 	private void tryToReadLastOnlineAtcRegisterValue() throws IOException {
 		_ctl.log("trying to send GET DATA for getting 'Last online ATC Register' (application transaction counter of last online transaction)...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER));
 		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
+				.transceive(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	/**
+	 * Tries to read all common simple TLV tags
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadAllCommonSimpleTlvTags() throws IOException {
+		_ctl.log("trying to send command for getting all common simple TLV tags...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV));
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+	}
+
+	/**
+	 * Tries to read all common BER TLV tags
+	 * 
+	 * @throws IOException
+	 */
+	private void tryToReadAllCommonBerTlvTags() throws IOException {
+		_ctl.log("trying to send command for getting all common BER TLV tags...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV));
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
 
 	/**
 	 * CAUTION!!! If run out of PIN retries the app will be BLOCKED and your
-	 * card UNUSABLE!!! Try to send VERIFY PIN <br>
-	 * Only works if playntext pin is allowed in the cards CVM (cardholder
+	 * card UNUSABLE!!! Try to send VERIFY PIN in PLAINTEXT!<br>
+	 * Only works if plaintext pin is allowed in the cards CVM (cardholder
 	 * verification methods) methods. See tag 8E "CVM List" if it is allowed on
 	 * your card. <br>
 	 * <br>
@@ -300,7 +334,7 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
-	private CardInfo tryreadingTests(CardInfo result) throws IOException {
+	private CardInfo tryReadingTests(CardInfo result) throws IOException {
 		// byte[] cmd;
 		byte[] resultPdu;
 		//
@@ -368,32 +402,6 @@ public class NfcBankomatCardReader {
 		//
 
 		return result;
-	}
-
-	/**
-	 * Tries to read all common simple TLV tags
-	 * 
-	 * @throws IOException
-	 */
-	private void tryToReadAllCommonSimpleTlvTags() throws IOException {
-		_ctl.log("trying to send command for getting all common simple TLV tags...");
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
-		logResultPdu(resultPdu);
-		logBerTlvResponse(resultPdu);
-	}
-
-	/**
-	 * Tries to read all common BER TLV tags
-	 * 
-	 * @throws IOException
-	 */
-	private void tryToReadAllCommonBerTlvTags() throws IOException {
-		_ctl.log("trying to send command for getting all common BER TLV tags...");
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
-		logResultPdu(resultPdu);
-		logBerTlvResponse(resultPdu);
 	}
 
 	/**
@@ -465,9 +473,10 @@ public class NfcBankomatCardReader {
 					consecutiveErrorRecords = 0;
 					if (tryToParse) {
 						if (responsePduLooksLikeTxLogEntry(responsePdu)) {
-							TransactionLogEntry entry = tryParseTxLogEntryFromByteArray(responsePdu);
-							if (entry != null) {
-								txList.add(entry);
+							TransactionLogEntry txLogEntry = tryParseTxLogEntryFromByteArray(cutoffLast2Bytes(responsePdu));
+							if (txLogEntry != null) {
+								txList.add(txLogEntry);
+								_ctl.log(txLogEntry.toString());
 							}
 						} else {
 							logBerTlvResponse(responsePdu);
@@ -492,6 +501,7 @@ public class NfcBankomatCardReader {
 	 * Try to parse the raw byte array into an object
 	 * 
 	 * @param rawRecord
+	 *            (without status word
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
@@ -506,35 +516,59 @@ public class NfcBankomatCardReader {
 		// Cards use the same logging structure (of course, all the cards come
 		// from the same issuer). So I keep this for now..
 
-		if (rawRecord.length < 26) {
+		// TODO: currently hardcoded to log format of Austrian cards
+
+		// 9F 4F - 1A bytes: Log Format
+		// --------------------------------------
+		// 9F 27 (01 bytes) -> Cryptogram Information Data
+		// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+		// 5F 2A (02 bytes) -> Transaction Currency Code
+		// 9A (03 bytes) -> Transaction Date
+		// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+		// 9F 52 (06 bytes) -> Application Default Action (ADA)
+		// DF 3E (01 bytes) -> [UNHANDLED TAG]
+		// 9F 21 (03 bytes) -> Transaction Time (HHMMSS)
+		// 9F 7C (14 bytes) -> Customer Exclusive Data
+
+		if (rawRecord.length < 24) {
 			// only continue if record is at least 24(+2 status) bytes long
 			Log.w(TAG,
 					"parseTxLogEntryFromByteArray: byte array is not long enough:\n"
 							+ prettyPrintHexString(bytesToHex(rawRecord)));
 			return null;
 		}
-		if (!"400000".equals(bytesToHex(getByteArrayPart(rawRecord, 0, 2)))) {
-			// only continue if record starts with 40 00 00
-			Log.w(TAG,
-					"parseTxLogEntryFromByteArray: byte array doesn't start with 40 00 00:\n"
-							+ prettyPrintHexString(bytesToHex(rawRecord)));
-			return null;
-		}
-		byte[] amount = getByteArrayPart(rawRecord, 3, 6);
-		byte[] currency = getByteArrayPart(rawRecord, 7, 8);
-		byte[] date = getByteArrayPart(rawRecord, 9, 11);
-		byte[] time = getByteArrayPart(rawRecord, 21, 23);
 
 		TransactionLogEntry tx = new TransactionLogEntry();
 		try {
-			tx.setCurrency(getCurrencyAsString(currency));
-			tx.setTransactionTimestamp(getTimeStampFromBcdBytes(date, time));
-			tx.setAmount(getAmountFromBcdBytes(amount));
+			tx.setCryptogramInformationData(rawRecord[0]);
+			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
+			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setTransactionTimestamp(getTimeStampFromBcdBytes(
+					getByteArrayPart(rawRecord, 9, 11),
+					getByteArrayPart(rawRecord, 21, 23)));
+			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
+
+			tx.setUnknownByte(rawRecord[20]);
+			tx.setApplicationDefaultAction(getByteArrayPart(
+					rawRecord, 14, 19));
+
+			// if record has only 24 bytes then there is no cust excl data
+			// as it starts at byte 25
+			if (rawRecord.length == 24) {
+				tx.setCustomerExclusiveData(new byte[0]);
+			} else {
+				// for being tolerant we parse from byte 25 untiil end
+				tx.setCustomerExclusiveData(getByteArrayPart(rawRecord, 24,
+						rawRecord.length - 1));
+			}
+
 			tx.setRawEntry(rawRecord);
 		} catch (Exception e) {
-			Log.w(TAG,
-					"Exception while trying to parse transaction entry. byte array:\n"
-							+ prettyPrintHexString(bytesToHex(rawRecord)), e);
+			String msg = "Exception while trying to parse transaction entry: "
+					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
+					+ prettyPrintHexString(bytesToHex(rawRecord));
+			Log.w(TAG, msg, e);
+			_ctl.log(msg);
 			return null;
 		}
 		return tx;
@@ -691,8 +725,8 @@ public class NfcBankomatCardReader {
 		Log.d(TAG, "status: " + statusToString(getLast2Bytes(resultPdu)));
 		_ctl.log("received: " + bytesToHex(resultPdu));
 		_ctl.log("status: "
-				+ prettyPrintHexString(bytesToHex(getLast2Bytes(resultPdu))));
-		_ctl.log("status: " + statusToString(getLast2Bytes(resultPdu)));
+				+ prettyPrintHexString(bytesToHex(getLast2Bytes(resultPdu)))
+				+ " - " + statusToString(getLast2Bytes(resultPdu)));
 	}
 
 	/**

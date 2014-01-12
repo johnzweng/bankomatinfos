@@ -45,6 +45,15 @@
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
 
+    <!-- Transaction List Item: -->
+    <string name="tx_list_image_description_collapse_icon">Einklapp Symbol</string>
+    <string name="tx_list_image_description_expand_icon">Ausklapp Symbol</string>
+    <string name="tx_list_cryptogram_info_label">Cryptogram Information Data:</string>
+    <string name="tx_list_atc_label">ATC (application tx counter):</string>
+    <string name="tx_list_customer_exclusive_data_label">Customer Exclusive Data:</string>
+    <string name="tx_list_application_default_action_label">Application Default Action (ADA)??:</string>
+    <string name="tx_list_unknown_byte_label">Unknown??:</string>
+
     <!-- Share Subject -->
     <string name="action_share_subject">Bankomatkarten Infos - Ergebnisse</string>
 
@@ -64,6 +73,7 @@
     <string name="pref_header_general">Allgemein</string>
     <string name="pref_title_system_nfc_settings">Android NFC Systemeinstellungen</string>
     <string name="pref_title_perform_full_file_scan">Scanne alle Dateien</string>
-    <string name="pref_description_perform_full_file_scan">Das Scannen aller Dateien dauert länger, aber findet *eventuell* auf manchen Karten mehr Daten. Ansonsten werden nur Standarddateien ausgelesen.</string>
+    <string name="pref_description_perform_full_file_scan_true">Scanne alle Dateien. Das Scannen dauert länger, findet aber *eventuell* auf manchen Karten mehr Daten.</string>
+    <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
     
 </resources>

@@ -36,10 +36,10 @@ public class Utils {
 	 */
 	public final static String TAG = "BankomatInfos";
 
-	private static SimpleDateFormat fullTimeFormat = new SimpleDateFormat(
+	private static SimpleDateFormat fullTimeWithDateFormat = new SimpleDateFormat(
 			"dd.MM.yyyy HH:mm:ss", Locale.US);
 
-	private final static SimpleDateFormat fullTime = new SimpleDateFormat(
+	private final static SimpleDateFormat fullTimeMilliseconds = new SimpleDateFormat(
 			"HH:mm:ss.SSS", Locale.US);
 
 	/**
@@ -48,7 +48,7 @@ public class Utils {
 	 * @return
 	 */
 	public static String getFullTimestampString() {
-		return fullTime.format(new Date());
+		return fullTimeMilliseconds.format(new Date());
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class Utils {
 	 * @return
 	 */
 	public static String formatDateWithTime(Date d) {
-		return fullTimeFormat.format(d);
+		return fullTimeWithDateFormat.format(d);
 	}
 
 	/**
@@ -626,20 +626,26 @@ public class Utils {
 		sb.append("<b><font color=\"#ff3232\">Author:</font></b>");
 		sb.append("<br/>Johannes Zweng<br/><a");
 		sb.append("href=\"mailto:android-dev@zweng.at?subject=Feedback%20Bankomat%20Info%20App\">");
-		sb.append("android-dev@zweng.at</a>");
+		sb.append("android-dev@zweng.at</a><br/>");
+		sb.append("<i>Be curious! Have fun! :-)</i>"); 
 		sb.append("<br/><br/>");
 
 		// SOURCECODE
 		sb.append("<b><font color=\"#ff3232\">Sourcecode:</font></b>");
 		sb.append("<br/>Sourcecode of this app: https://github.com/johnzweng/bankomatinfos");
-		sb.append("<br/><br/><br/>");
+		sb.append("<br/><br/>");
+
+		// DOWNLOADS
+		sb.append("<b><font color=\"#ff3232\">Downloads:</font></b>");
+		sb.append("<br/>You can find this (and all previous versions) of this app here: http://johannes.zweng.at/android/Market/BankomatInfos");
+		sb.append("<br/><br/>");
 
 		// ICON
 		sb.append("<b><font color=\"#ff3232\">App icon:</font></b>");
 		sb.append("<br/>Copyright owner of the app's icon: https://www.iconfinder.com/zohanimasi");
 		sb.append("<br/>The icon <b>may not be used or re-distributed</b> in any form without the ");
 		sb.append("permission of the icon's copyright owner!");
-		sb.append("<br/><br/><br/>");
+		sb.append("<br/><br/>");
 
 		// CREDITS
 		sb.append("<b><font color=\"#ff3232\">Credits:</font></b>");

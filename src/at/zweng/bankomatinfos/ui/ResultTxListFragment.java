@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.R;
@@ -27,6 +28,13 @@ public class ResultTxListFragment extends Fragment {
 		_noEntriesText = (TextView) v.findViewById(R.id.lblNoEntriesAvailable);
 		_listAdapter = new ListAdapterTransactions(getActivity());
 		_listView.setAdapter(_listAdapter);
+		_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				_listAdapter.toggleItemExpandedState(position);
+			}
+		});
 		showNoResultText(_listAdapter.getCount() == 0);
 		return v;
 	}

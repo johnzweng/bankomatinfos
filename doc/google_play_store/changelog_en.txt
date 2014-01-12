@@ -1,13 +1,12 @@
+Version 1.2.3 (2014-01-12):
+• better decoding of transactions!
+• bugfix: corrected parsing error with some specific transactions
+• bugfix: wrong time displayed in some transaction
+
+
 Version 1.2.2 (2014-01-10):
 • New app icon
 • added 'Settings' menu
 • new setting 'Scan all files'
 • added reading the current PIN-retry-counter
 • better handling parsing error with QUICK data
-
-Version 1.2.1 (2014-01-06):
-• added command GET DATA "Log format"
-• added changelog
-
-Version 1.2.0 (2014-01-05):
-• First version in Play Store

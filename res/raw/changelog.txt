@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 1.2.3
+  % Version 1.2.3
+  _ 2014-01-12
+    * better decoding of transactions!
+    * bugfix: corrected parsing error with some specific transactions
+    * bugfix: wrong time displayed in some transaction
 $ 1.2.2
   % Version 1.2.2
   _ 2014-01-10

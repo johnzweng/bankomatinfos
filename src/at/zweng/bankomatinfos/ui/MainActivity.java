@@ -223,7 +223,6 @@ public class MainActivity extends Activity {
 				// read setting value
 				SharedPreferences prefs = PreferenceManager
 						.getDefaultSharedPreferences(MainActivity.this);
-				prefs.getBoolean("perform_full_file_scan", true);
 				_cardReadingResults = reader.readAllCardData(prefs.getBoolean(
 						"perform_full_file_scan", true));
 				ctl.setCardInfo(_cardReadingResults);

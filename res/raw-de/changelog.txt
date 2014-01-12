@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 1.2.3
+  % Version 1.2.3
+  _ 2014-01-12
+    * bessere Aufschlüsselung der Transaktionen
+    * bugfix: Lesefehler bei bestimmten Transaktionstypen behoben
+    * bugfix: falsche Uhrzeit bei manchen Transaktionen behoben
 $ 1.2.2
   % Version 1.2.2
   _ 2014-01-10
