@@ -36,9 +36,9 @@ Diese App versucht die letzten x Transaktionen sowie einige andere Infos aus ein
 
 ### Screenshots
 
-![Allgemeine Infos zur Karte](https://github.com/johnzweng/bankomatinfos/blob/master/sreenshots/result_tab_infos_256px.png?raw=true)
-![Liste der letzten Transaktionen](https://github.com/johnzweng/bankomatinfos/blob/master/sreenshots/result_tab_transactions_256px.png?raw=true)
-![Detailliertes Log](https://github.com/johnzweng/bankomatinfos/blob/master/sreenshots/result_tab_log_256px.png?raw=true)
+![Allgemeine Infos zur Karte](https://raw2.github.com/johnzweng/bankomatinfos/master/doc/sreenshots/result_tab_infos_256px.png)
+![Liste der letzten Transaktionen](https://raw2.github.com/johnzweng/bankomatinfos/master/doc/sreenshots/result_tab_transactions_256px.png)
+![Detailliertes Log](https://raw2.github.com/johnzweng/bankomatinfos/master/doc/sreenshots/result_tab_log_256px.png)
 
 
 ### Details
