@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.content.Context;
+import at.zweng.bankomatinfos.R;
+import static at.zweng.bankomatinfos.util.Utils.*;
+
 /**
  * Represents the data read from a bankomat card.
  * 
@@ -17,17 +21,21 @@ public class CardInfo {
 	private long _quickBalance;
 	private int _pinRetryCounter;
 	private String _quickCurrency;
+	private Context _ctx;
 
 	private List<TransactionLogEntry> _transactionLog;
+	private List<InfoKeyValuePair> _infoKeyValuePairs;
 
 	/**
 	 * Constructor
 	 */
-	public CardInfo() {
+	public CardInfo(Context ctx) {
 		// create empty list
 		this._transactionLog = new ArrayList<TransactionLogEntry>();
+		this._infoKeyValuePairs = new ArrayList<InfoKeyValuePair>();
 		this._pinRetryCounter = -1;
 		this._quickCurrency = "<unknown, or parsing error>";
+		this._ctx = ctx;
 	}
 
 	/**
@@ -43,6 +51,9 @@ public class CardInfo {
 	 */
 	public void setNfcTagId(byte[] nfcTagId) {
 		this._nfcTagId = nfcTagId;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_nfc_tag_id), "0x"
+				+ bytesToHex(nfcTagId)));
 	}
 
 	/**
@@ -61,6 +72,31 @@ public class CardInfo {
 	}
 
 	/**
+	 * @return the _infoKeyValuePairs
+	 */
+	public List<InfoKeyValuePair> getInfoKeyValuePairs() {
+		return _infoKeyValuePairs;
+	}
+
+	/**
+	 * Add a info key-value pair
+	 * 
+	 * @param pair
+	 */
+	public void addKeyValuePair(InfoKeyValuePair pair) {
+		_infoKeyValuePairs.add(pair);
+	}
+
+	/**
+	 * Add a list of key-value pairs
+	 * 
+	 * @param pair
+	 */
+	public void addKeyValuePairs(List<InfoKeyValuePair> pairs) {
+		_infoKeyValuePairs.addAll(pairs);
+	}
+
+	/**
 	 * @return the _quickCard
 	 */
 	public boolean isQuickCard() {
@@ -73,6 +109,10 @@ public class CardInfo {
 	 */
 	public void setQuickCard(boolean quickCard) {
 		this._quickCard = quickCard;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_is_quick_card), quickCard ? _ctx
+				.getResources().getString(R.string.yes) : _ctx.getResources()
+				.getString(R.string.no)));
 	}
 
 	/**
@@ -88,6 +128,10 @@ public class CardInfo {
 	 */
 	public void setMaestroCard(boolean maestroCard) {
 		this._maestroCard = maestroCard;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_is_maestro_card), maestroCard ? _ctx
+				.getResources().getString(R.string.yes) : _ctx.getResources()
+				.getString(R.string.no)));
 	}
 
 	/**
@@ -103,6 +147,9 @@ public class CardInfo {
 	 */
 	public void setQuickBalance(long quickBalance) {
 		this._quickBalance = quickBalance;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_quick_balance),
+				formatBalance(quickBalance)));
 	}
 
 	/**
@@ -118,6 +165,8 @@ public class CardInfo {
 	 */
 	public void setQuickCurrency(String quickCurrency) {
 		this._quickCurrency = quickCurrency;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_quick_currency), quickCurrency));
 	}
 
 	/**
@@ -133,6 +182,9 @@ public class CardInfo {
 	 */
 	public void setPinRetryCounter(int pinRetryCounter) {
 		this._pinRetryCounter = pinRetryCounter;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_remaining_pin_retries), Integer
+				.toString(pinRetryCounter)));
 	}
 
 	/*

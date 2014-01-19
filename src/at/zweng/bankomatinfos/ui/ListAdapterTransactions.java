@@ -103,13 +103,13 @@ public class ListAdapterTransactions extends BaseAdapter {
 			cryptogramInformation.setText("0x"
 					+ byte2Hex(tx.getCryptogramInformationData()));
 			atc.setText(Integer.toString(tx.getAtc()));
-			appDefaultAction.setText(prettyPrintHexString(bytesToHex(tx
-					.getApplicationDefaultAction())));
+			appDefaultAction.setText(prettyPrintString(bytesToHex(tx
+					.getApplicationDefaultAction()),2));
 			unknownByte.setText(byte2Hex(tx.getUnknownByte()));
-			customerEsclusive.setText(prettyPrintHexString(bytesToHex(tx
-					.getCustomerExclusiveData())));
+			customerEsclusive.setText(prettyPrintString(bytesToHex(tx
+					.getCustomerExclusiveData()),2));
 
-			rawData.setText(prettyPrintHexString(bytesToHex(tx.getRawEntry())));
+			rawData.setText(prettyPrintString(bytesToHex(tx.getRawEntry()),2));
 		}
 		return v;
 	}

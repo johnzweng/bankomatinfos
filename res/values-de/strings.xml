@@ -5,6 +5,7 @@
     <string name="action_settings">Einstellungen</string>
     <string name="action_about">Über</string>
     <string name="action_share">Teilen</string>
+    <string name="action_donate">Spenden</string>
     <string name="action_changelog">Letzte Änderungen</string>
     <string name="your_card_please">Bitte halten Sie Ihre Bankomatkarte an die Rückseite des Geräts&#8230;</string>
     <string name="nfc_logo_description">NFC Logo</string>
@@ -41,7 +42,11 @@
     <string name="no">NEIN</string>
     <string name="lbl_quick_balance">QUICK Guthaben auf der Karte:</string>
     <string name="lbl_quick_currency">QUICK Währung:</string>
-
+    <string name="lbl_remaining_pin_retries">Verbleibende Versuche zur PIN Eingabe:</string>
+    <string name="lbl_expiration_date">Ablaufdatum der Karte:</string>
+    <string name="lbl_effective_date">Ausstellungsdatum der Karte:</string>
+    <string name="lbl_primary_account_number">Kartennummer:</string>
+    
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
 
@@ -62,6 +67,13 @@
     <string name="about_dialog_title">Infos</string>
     <string name="about_dialog_image_description">App logo</string>
 
+    <!-- Donate Dialog -->
+    <string name="donate_dialog_title">Spenden</string>
+    <string name="donate_dialog_btn_bitcoin">Bitcoin</string>
+    <string name="donate_dialog_btn_paypal">Paypal</string>
+    <string name="donate_dialog_btn_euro">Euro (Überweisung)</string>
+    <string name="donate_text"><Data><![CDATA[ <b>Eins vorweg:</b><br/><br/>Es ist absolut in Ordnung diese App frei und kostenlos zu verwenden. Ich habe diese App nur aus technischem Interesse und nicht mit Gewinnabsichten gebaut.<br/><br/>Diejenigen die dennoch gerne etwas spenden möchte, können dies wie folgt tun: ]]> </Data></string>
+    
     <!-- Changelog dialog -->
     <string name="changelog_full_title">Letzte Änderungen</string>
     <string name="changelog_title">Was ist neu?</string>

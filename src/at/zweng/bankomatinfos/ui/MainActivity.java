@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
 	private IntentFilter[] _filters;
 	private String[][] _techLists;
 	private NfcAdapter _nfcAdapter;
+
 	// View elements
 	private View _viewNfcLogo;
 	private View _viewTextViewShowCard;
@@ -86,14 +87,6 @@ public class MainActivity extends Activity {
 			_nfcAdapter.enableForegroundDispatch(this, _pendingIntent,
 					_filters, _techLists);
 		}
-		Intent intent = getIntent();
-		if (intent != null
-				&& NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-			Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-			if (tag != null) {
-				handleTag(tag);
-			}
-		}
 	}
 
 	@Override
@@ -123,6 +116,9 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
+			return true;
+		case R.id.action_donate:
+			showDonationDialog(getFragmentManager());
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);
@@ -218,13 +214,14 @@ public class MainActivity extends Activity {
 				ctl.clearLog();
 				ctl.log(getResources().getString(R.string.app_name)
 						+ " version " + getAppVersion(MainActivity.this));
-				NfcBankomatCardReader reader = new NfcBankomatCardReader(nfcTag);
+				NfcBankomatCardReader reader = new NfcBankomatCardReader(
+						nfcTag, MainActivity.this);
 				reader.connectIsoDep();
 				// read setting value
 				SharedPreferences prefs = PreferenceManager
 						.getDefaultSharedPreferences(MainActivity.this);
 				_cardReadingResults = reader.readAllCardData(prefs.getBoolean(
-						"perform_full_file_scan", true));
+						"perform_full_file_scan", false));
 				ctl.setCardInfo(_cardReadingResults);
 				reader.disconnectIsoDep();
 			} catch (NoSmartCardException nsce) {

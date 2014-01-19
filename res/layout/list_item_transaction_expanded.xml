@@ -188,7 +188,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layoutFrameDetails"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginTop="10dp"
@@ -196,5 +196,16 @@
         android:padding="10dp"
         android:text="00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00 00 22 33 44 55 66 77 88 99 AA BB CC DD EE FF EE 00"
         android:textAppearance="@style/TransactionListHexData" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="15dp"
+        android:layout_below="@+id/txListRawData"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:visibility="invisible" />
+    
+    
 
 </RelativeLayout>

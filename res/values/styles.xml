@@ -17,35 +17,50 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
-    
     <style name="TransactionListTimestamp">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">#111111</item>
     </style>
+
     <style name="TransactionListDetailDataLabel">
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#444444</item>
     </style>
+
     <style name="TransactionListDetailData">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">#444444</item>
     </style>
+
     <style name="TransactionListHexData">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">#eeeeee</item>
-        <item name="android:typeface">monospace</item> 
+        <item name="android:typeface">monospace</item>
     </style>
+
     <style name="ResultLog">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">#efefef</item>
-        <item name="android:typeface">monospace</item> 
+        <item name="android:typeface">monospace</item>
     </style>
+
     <style name="TransactionListAmount">
         <item name="android:textSize">25sp</item>
         <item name="android:textColor">#B40404</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
-    
+
+    <!-- general infos list view -->
+    <style name="InfoListLabel">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#444444</item>
+    </style>
+
+    <style name="InfoListValue">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#222222</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

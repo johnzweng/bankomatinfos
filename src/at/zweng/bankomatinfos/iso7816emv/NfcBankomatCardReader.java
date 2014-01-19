@@ -1,10 +1,47 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAESTRO_BANKOMAT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_APP_TX_COUNTER;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOG_FORMAT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_BALANCE;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_CURRENCY;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createApduVerifyPIN;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createGetProcessingOptionsApdu;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createReadRecordApdu;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectAid;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectMasterFile;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectParentDfFile;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.filterTagsForResult;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBcdBytes;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBytes;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getCurrencyAsString;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getNextTLV;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTagsFromBerTlvAPDUResponse;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTimeStampFromBcdBytes;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.isStatusSuccess;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.prettyPrintBerTlvAPDUResponse;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.responsePduLooksLikeTxLogEntry;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.statusToString;
+import static at.zweng.bankomatinfos.util.Utils.TAG;
+import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
+import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
+import static at.zweng.bankomatinfos.util.Utils.cutoffLast2Bytes;
+import static at.zweng.bankomatinfos.util.Utils.fromHexString;
+import static at.zweng.bankomatinfos.util.Utils.getByteArrayPart;
+import static at.zweng.bankomatinfos.util.Utils.getLast2Bytes;
+import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.util.Log;
@@ -13,8 +50,6 @@ import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
-import static at.zweng.bankomatinfos.util.Utils.*;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.*;
 
 /**
  * Performs all the reading operations on a card.
@@ -25,16 +60,20 @@ public class NfcBankomatCardReader {
 	private Tag _nfcTag;
 	private IsoDep _localIsoDep;
 	private AppController _ctl;
+	private List<TagAndValue> _tagList;
+	private Context _ctx;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param _nfcTag
 	 */
-	public NfcBankomatCardReader(Tag nfcTag) {
+	public NfcBankomatCardReader(Tag nfcTag, Context ctx) {
 		super();
 		this._nfcTag = nfcTag;
 		this._ctl = AppController.getInstance();
+		this._tagList = new ArrayList<TagAndValue>();
+		this._ctx = ctx;
 	}
 
 	/**
@@ -71,14 +110,14 @@ public class NfcBankomatCardReader {
 	 */
 	public CardInfo readAllCardData(boolean performFullFileScan)
 			throws IOException {
-		CardInfo result = new CardInfo();
+		CardInfo result = new CardInfo(_ctx);
 		_ctl.log("Starting to read data from card..");
 		result.setNfcTagId(_nfcTag.getId());
 		_ctl.log("NFC Tag ID: "
-				+ prettyPrintHexString(bytesToHex(_nfcTag.getId())));
+				+ prettyPrintString(bytesToHex(_nfcTag.getId()), 2));
 		_ctl.log("Historical bytes: "
-				+ prettyPrintHexString(bytesToHex(_localIsoDep
-						.getHistoricalBytes())));
+				+ prettyPrintString(
+						bytesToHex(_localIsoDep.getHistoricalBytes()), 2));
 		result = readQuickInfos(result);
 		result = readMaestroCardInfos(result, performFullFileScan);
 		_ctl.log("FINISHED! :-)");
@@ -202,6 +241,8 @@ public class NfcBankomatCardReader {
 		tryToReadAllCommonBerTlvTags();
 		// result = tryreadingTests(result);
 		result = searchForFiles(result, fullFileScan, true);
+
+		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList));
 		return result;
 	}
 
@@ -338,26 +379,17 @@ public class NfcBankomatCardReader {
 		// byte[] cmd;
 		byte[] resultPdu;
 		//
-		// _ctl.log("trying to send command GET CHALLENGE: ");
-		// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
-		// logResultPdu(resultPdu);
+		// DANGEROUS!!!!!!
+		// DANGEROUS!!!!!!
+		// DANGEROUS!!!!!!
+		//
+		// GET CHALLENGE is an active command which may change the state in your
+		// card!!! Only perform if you know what you do!!!
+		//
 		//
 		// _ctl.log("trying to send command GET CHALLENGE: ");
 		// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
 		// logResultPdu(resultPdu);
-		//
-		// _ctl.log("trying to send command GET CHALLENGE: ");
-		// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
-		// logResultPdu(resultPdu);
-		//
-		// _ctl.log("trying to send command GET CHALLENGE: ");
-		// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
-		// logResultPdu(resultPdu);
-		//
-		// _ctl.log("trying to send command GET CHALLENGE: ");
-		// resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_CHALLENGE);
-		// logResultPdu(resultPdu);
-		//
 		//
 		//
 		// Log.d(TAG, "trying to send SELECT COMMAND 3F 00: ");
@@ -534,7 +566,7 @@ public class NfcBankomatCardReader {
 			// only continue if record is at least 24(+2 status) bytes long
 			Log.w(TAG,
 					"parseTxLogEntryFromByteArray: byte array is not long enough:\n"
-							+ prettyPrintHexString(bytesToHex(rawRecord)));
+							+ prettyPrintString(bytesToHex(rawRecord), 2));
 			return null;
 		}
 
@@ -549,8 +581,7 @@ public class NfcBankomatCardReader {
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
 
 			tx.setUnknownByte(rawRecord[20]);
-			tx.setApplicationDefaultAction(getByteArrayPart(
-					rawRecord, 14, 19));
+			tx.setApplicationDefaultAction(getByteArrayPart(rawRecord, 14, 19));
 
 			// if record has only 24 bytes then there is no cust excl data
 			// as it starts at byte 25
@@ -566,7 +597,7 @@ public class NfcBankomatCardReader {
 		} catch (Exception e) {
 			String msg = "Exception while trying to parse transaction entry: "
 					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
-					+ prettyPrintHexString(bytesToHex(rawRecord));
+					+ prettyPrintString(bytesToHex(rawRecord), 2);
 			Log.w(TAG, msg, e);
 			_ctl.log(msg);
 			return null;
@@ -682,14 +713,14 @@ public class NfcBankomatCardReader {
 					+ ". In hex: "
 					+ bytesToHex(resultPdu)
 					+ "\nThe complete response was:\n"
-					+ prettyPrintHexString(bytesToHex(resultPdu));
+					+ prettyPrintString(bytesToHex(resultPdu), 2);
 			Log.w(TAG, msg);
 			throw new TlvParsingException(msg);
 		}
 		byte[] rawCurrency = new byte[2];
 		System.arraycopy(resultPdu, 0, rawCurrency, 0, 2);
 		_ctl.log("QUICK currency = "
-				+ prettyPrintHexString(bytesToHex(rawCurrency)));
+				+ prettyPrintString(bytesToHex(rawCurrency), 2));
 		_ctl.log("QUICK currency = " + getCurrencyAsString(rawCurrency));
 		return rawCurrency;
 	}
@@ -720,12 +751,14 @@ public class NfcBankomatCardReader {
 	 */
 	private void logResultPdu(byte[] resultPdu) {
 		Log.d(TAG, "received: " + bytesToHex(resultPdu));
-		Log.d(TAG, "status: "
-				+ prettyPrintHexString(bytesToHex(getLast2Bytes(resultPdu))));
+		Log.d(TAG,
+				"status: "
+						+ prettyPrintString(
+								bytesToHex(getLast2Bytes(resultPdu)), 2));
 		Log.d(TAG, "status: " + statusToString(getLast2Bytes(resultPdu)));
 		_ctl.log("received: " + bytesToHex(resultPdu));
 		_ctl.log("status: "
-				+ prettyPrintHexString(bytesToHex(getLast2Bytes(resultPdu)))
+				+ prettyPrintString(bytesToHex(getLast2Bytes(resultPdu)), 2)
 				+ " - " + statusToString(getLast2Bytes(resultPdu)));
 	}
 
@@ -737,15 +770,16 @@ public class NfcBankomatCardReader {
 	private void logBerTlvResponse(byte[] resultPdu) {
 		if (resultPdu.length > 2) {
 			try {
+				byte[] data = cutoffLast2Bytes(resultPdu);
 				_ctl.log("Trying to decode response as BER-TLV..");
-				_ctl.log(prettyPrintBerTlvAPDUResponse(
-						cutoffLast2Bytes(resultPdu), 0));
+				_ctl.log(prettyPrintBerTlvAPDUResponse(data, 0));
+				// and add all found tags to list
+				_tagList.addAll(getTagsFromBerTlvAPDUResponse(data));
 			} catch (TlvParsingException e) {
 				_ctl.log("decoding error... maybe this data is not BER-TLV encoded?");
 				Log.w(TAG, "exception while parsing BER-TLV PDU response\n"
-						+ prettyPrintHexString(bytesToHex(resultPdu)), e);
+						+ prettyPrintString(bytesToHex(resultPdu), 2), e);
 			}
 		}
 	}
-
 }

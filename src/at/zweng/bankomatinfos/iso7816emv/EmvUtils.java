@@ -7,11 +7,17 @@ import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
+import android.content.Context;
+import android.util.Log;
+import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
+import at.zweng.bankomatinfos.model.InfoKeyValuePair;
 
 /**
  * Util functions around EMV (https://en.wikipedia.org/wiki/EMV) standard and
@@ -59,8 +65,16 @@ public class EmvUtils {
 			(byte) 0xB0, (byte) 0x81, (byte) 0x15, (byte) 0x02 };
 
 	/**
-	 * EMV command GET CHALLENGE (returns 8 byte random number)
+	 * EMV command GET CHALLENGE (returns 8 byte random number), used in
+	 * transactions.
 	 */
+	// DANGEROUS!!!!!!
+	// DANGEROUS!!!!!!
+	// DANGEROUS!!!!!!
+	//
+	// GET CHALLENGE is an active command which changes the state in your
+	// card! Only use if you know what you do!
+	//
 	public static final byte[] EMV_COMMAND_GET_CHALLENGE = { (byte) 0x00,
 			(byte) 0x84, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
@@ -644,8 +658,28 @@ public class EmvUtils {
 					"getTimeStampFromBytes: time must be exactly 3 bytes long");
 		}
 		DateFormat df = new SimpleDateFormat("yy MM dd  HH mm ss", Locale.US);
-		return df.parse(prettyPrintHexString(bytesToHex(date)) + "  "
-				+ prettyPrintHexString(bytesToHex(time)));
+		return df.parse(prettyPrintString(bytesToHex(date), 2) + "  "
+				+ prettyPrintString(bytesToHex(time), 2));
+	}
+
+	/**
+	 * Parses a Date object out of the given byte array. The date is encoded in
+	 * BCD format, which means you have to read it as hexadeceimal string: for
+	 * example:<br>
+	 * date: 0x131231<br>
+	 * --> which represents 31. December 2013
+	 * 
+	 * @param date
+	 * @return
+	 * @throws ParseException
+	 */
+	public static Date getDateFromBcdBytes(byte[] date) throws ParseException {
+		if (date == null || date.length != 3) {
+			throw new IllegalArgumentException(
+					"getDateFromBcdBytes: date must be exactly 3 bytes long");
+		}
+		DateFormat df = new SimpleDateFormat("yy MM dd", Locale.US);
+		return df.parse(prettyPrintString(bytesToHex(date), 2));
 	}
 
 	/**
@@ -690,7 +724,7 @@ public class EmvUtils {
 		// TODO: read cards FCI for getting locataion and format of log entries
 
 		// TODO: currently hardcoded to log format of Austrian cards
-		
+
 		// 9F 4F - 1A bytes: Log Format
 		// --------------------------------------
 		// 9F 27 (01 bytes) -> Cryptogram Information Data
@@ -703,7 +737,7 @@ public class EmvUtils {
 		// DF 3E (01 bytes) -> [UNHANDLED TAG]
 		// 9F 21 (03 bytes) -> Transaction Time (HHMMSS)
 		// 9F 7C (14 bytes) -> Customer Exclusive Data
-		
+
 		if (responsePdu == null) {
 			return false;
 		}
@@ -736,7 +770,7 @@ public class EmvUtils {
 		if (!bytesLookLikeValidTime(time)) {
 			return false;
 		}
-		
+
 		// DATE:
 		// check if time bytes look like a valid date
 		if (!bytesLookLikeValidDate(date)) {
@@ -890,9 +924,9 @@ public class EmvUtils {
 			EmvTag tag = tlv.getTag();
 
 			// buf.append(" TAG: ");
-			buf.append(prettyPrintHexString(bytesToHex(tagBytes)));
+			buf.append(prettyPrintString(bytesToHex(tagBytes), 2));
 			buf.append("  -  ");
-			buf.append(prettyPrintHexString(bytesToHex(lengthBytes)));
+			buf.append(prettyPrintString(bytesToHex(lengthBytes), 2));
 			buf.append(" bytes: ");
 			buf.append(tag.getName());
 
@@ -918,12 +952,115 @@ public class EmvUtils {
 							indentLength + extraIndent));
 
 					buf.append(" (");
-					buf.append(getTagValueAsString(tag, valueBytes));
+					buf.append(getTagValueInfo(tag, valueBytes));
 					buf.append(")");
 				}
 			}
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * Tries to parse a byte array as EMV BER-TLV encoded data and returns a
+	 * list of tags
+	 * 
+	 * source: https://code.google.com/p/javaemvreader/
+	 * 
+	 * @param data
+	 * @param indentLength
+	 * @return
+	 * @throws NfcException
+	 */
+	public static List<TagAndValue> getTagsFromBerTlvAPDUResponse(byte[] data)
+			throws TlvParsingException {
+		List<TagAndValue> tagList = new ArrayList<TagAndValue>();
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
+		while (stream.available() > 0) {
+			BERTLV tlv = getNextTLV(stream);
+			EmvTag tag = tlv.getTag();
+			byte[] valueBytes = tlv.getValueBytes();
+
+			if (tag.isConstructed()) {
+				// Recursion:
+				tagList.addAll(getTagsFromBerTlvAPDUResponse(tlv
+						.getValueBytes()));
+			} else {
+				tagList.add(new TagAndValue(tag, valueBytes));
+			}
+		}
+		return tagList;
+	}
+
+	/**
+	 * Filters interesting tags to be displayed in the result view
+	 * 
+	 * @param tagList
+	 * @return
+	 */
+	public static List<InfoKeyValuePair> filterTagsForResult(Context ctx,
+			List<TagAndValue> tagList) {
+		List<InfoKeyValuePair> resultList = new ArrayList<InfoKeyValuePair>();
+		String tagBytesHexString;
+
+		for (TagAndValue tagAndValue : tagList) {
+			tagBytesHexString = bytesToHex(tagAndValue.getTag().getTagBytes());
+
+			// Expiration date
+			if ("5F24".equalsIgnoreCase(tagBytesHexString)) {
+				try {
+					InfoKeyValuePair expirationDate = new InfoKeyValuePair(ctx
+							.getResources().getString(
+									R.string.lbl_expiration_date),
+							formatDateOnly(getDateFromBcdBytes(tagAndValue
+									.getValue())));
+					resultList.add(expirationDate);
+				} catch (ParseException e) {
+					// dont add in case we cannot parse
+					Log.w(TAG, "cannot parse expiration date!", e);
+				}
+			}
+			// Effective date
+			else if ("5F25".equalsIgnoreCase(tagBytesHexString)) {
+				try {
+					InfoKeyValuePair expirationDate = new InfoKeyValuePair(ctx
+							.getResources().getString(
+									R.string.lbl_effective_date),
+							formatDateOnly(getDateFromBcdBytes(tagAndValue
+									.getValue())));
+					resultList.add(expirationDate);
+				} catch (ParseException e) {
+					// dont add in case we cannot parse
+					Log.w(TAG, "cannot parse effective date!", e);
+				}
+			}
+			// Account Number
+			else if ("5A".equalsIgnoreCase(tagBytesHexString)) {
+				if (tagAndValue.getValue() != null
+						&& tagAndValue.getValue().length > 1) {
+					String primaryAccountNumber = bytesToHex(tagAndValue
+							.getValue());
+					// last character is always F: cut it off:
+					primaryAccountNumber = primaryAccountNumber.substring(0,
+							primaryAccountNumber.length() - 1);
+					resultList.add(new InfoKeyValuePair(ctx.getResources()
+							.getString(R.string.lbl_primary_account_number),
+							prettyPrintString(primaryAccountNumber, 4)));
+				}
+			}
+
+			// TODO: look for other interesting EMV tags (even if they are not
+			// present on my card)
+
+			// Log.d(TAG, "  name: " + tagAndValue.getTag().getName());
+			// Log.d(TAG, "   tag: "
+			// + bytesToHex(tagAndValue.getTag().getTagBytes()));
+			// Log.d(TAG,
+			// "   val: "
+			// + getTagValueAsString(tagAndValue.getTag(),
+			// tagAndValue.getValue()));
+
+		}
+		return resultList;
 	}
 
 	/**
@@ -1073,7 +1210,7 @@ public class EmvUtils {
 			EmvTag tag = EMVTags.getNotNull(readTagIdBytes(stream));
 			int length = readTagLength(stream);
 
-			buf.append(prettyPrintHexString(bytesToHex(tag.getTagBytes())));
+			buf.append(prettyPrintString(bytesToHex(tag.getTagBytes()), 2));
 			buf.append(" (");
 			buf.append(bytesToHex(intToByteArray(length)));
 			buf.append(" bytes) -> ");
@@ -1091,7 +1228,7 @@ public class EmvUtils {
 	 * @param value
 	 * @return
 	 */
-	private static String getTagValueAsString(EmvTag tag, byte[] value) {
+	private static String getTagValueInfo(EmvTag tag, byte[] value) {
 		StringBuilder buf = new StringBuilder();
 		switch (tag.getTagValueType()) {
 		case TEXT:

@@ -19,6 +19,13 @@
     </style>
   </head>
   <body>
+$ 1.2.4
+  % Version 1.2.4
+  _ 2014-01-19
+    * show new fields: <b>expiration date</b>, <b>activation date</b>, <b>card number</b>
+    * bugfix: fixed IOException on app restart
+    * bugfix: crash on 'Settings' page
+    * new menu entry: donation 
 $ 1.2.3
   % Version 1.2.3
   _ 2014-01-12

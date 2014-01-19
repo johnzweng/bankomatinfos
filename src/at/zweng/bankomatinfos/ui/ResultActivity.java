@@ -2,6 +2,7 @@ package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
 import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
+import static at.zweng.bankomatinfos.util.Utils.showDonationDialog;
 
 import java.util.Locale;
 
@@ -53,7 +54,7 @@ public class ResultActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_result);
 
-		_fragmentResultInfos = new ResultInfosFragment();
+		_fragmentResultInfos = new ResultInfosListFragment();
 		_fragmentResultTxList = new ResultTxListFragment();
 		_fragmentResultLog = new ResultLogFragment();
 
@@ -135,6 +136,9 @@ public class ResultActivity extends FragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
+			return true;
+		case R.id.action_donate:
+			showDonationDialog(getFragmentManager());
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);

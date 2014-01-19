@@ -23,7 +23,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:maxLines="1"
-        android:text="23.12.2013  07:12:23"
+        android:text=""
         android:textAppearance="@style/TransactionListTimestamp" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:maxLines="1"
-        android:text="-xxxxx,xx €"
+        android:text=""
         android:textAppearance="@style/TransactionListAmount" />
 
     <ImageView

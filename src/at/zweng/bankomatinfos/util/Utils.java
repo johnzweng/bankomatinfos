@@ -23,6 +23,7 @@ import android.util.Log;
 import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.ui.AboutDialogFragment;
 import at.zweng.bankomatinfos.ui.ChangelogDialogFragment;
+import at.zweng.bankomatinfos.ui.DonateDialogFragment;
 
 /**
  * Some static helper methods
@@ -38,6 +39,9 @@ public class Utils {
 
 	private static SimpleDateFormat fullTimeWithDateFormat = new SimpleDateFormat(
 			"dd.MM.yyyy HH:mm:ss", Locale.US);
+
+	private static SimpleDateFormat dateOnlyDateFormat = new SimpleDateFormat(
+			"dd.MM.yyyy", Locale.US);
 
 	private final static SimpleDateFormat fullTimeMilliseconds = new SimpleDateFormat(
 			"HH:mm:ss.SSS", Locale.US);
@@ -91,13 +95,13 @@ public class Utils {
 	 *            hex string (or any other string) (ex: "0011AAEEFF")
 	 * @return string with inserted whitespaces (ex: "00 11 AA EE FF")
 	 */
-	public static String prettyPrintHexString(String in) {
+	public static String prettyPrintString(String in, int groupCount) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < in.length(); i++) {
 			char c = in.charAt(i);
 			buf.append(c);
 			int nextPos = i + 1;
-			if (nextPos % 2 == 0 && nextPos != in.length()) {
+			if (nextPos % groupCount == 0 && nextPos != in.length()) {
 				buf.append(" ");
 			}
 		}
@@ -217,6 +221,16 @@ public class Utils {
 	 */
 	public static String formatDateWithTime(Date d) {
 		return fullTimeWithDateFormat.format(d);
+	}
+
+	/**
+	 * format date
+	 * 
+	 * @param d
+	 * @return
+	 */
+	public static String formatDateOnly(Date d) {
+		return dateOnlyDateFormat.format(d);
 	}
 
 	/**
@@ -589,6 +603,14 @@ public class Utils {
 	}
 
 	/**
+	 * show donation dialog
+	 */
+	public static void showDonationDialog(FragmentManager fm) {
+		DialogFragment donateFragment = new DonateDialogFragment();
+		donateFragment.show(fm, "dialog_donate");
+	}
+
+	/**
 	 * show changelog dialog
 	 * 
 	 * @param <code>true</code> if full changelog should be shown,
@@ -627,7 +649,7 @@ public class Utils {
 		sb.append("<br/>Johannes Zweng<br/><a");
 		sb.append("href=\"mailto:android-dev@zweng.at?subject=Feedback%20Bankomat%20Info%20App\">");
 		sb.append("android-dev@zweng.at</a><br/>");
-		sb.append("<i>Be curious! Have fun! :-)</i>"); 
+		sb.append("<i>Be curious! Have fun! :-)</i>");
 		sb.append("<br/><br/>");
 
 		// SOURCECODE

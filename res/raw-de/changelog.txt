@@ -19,6 +19,13 @@
     </style>
   </head>
   <body>
+$ 1.2.4
+  % Version 1.2.4
+  _ 2014-01-19
+    * zeigt nun auch: <b>Ablaufdatum</b>, <b>Austellungsdatum</b>, <b>Kartennummer</b>
+    * bugfix: IOException bei App-Neustart behoben
+    * bugfix: Absturz auf 'Einstellungen' Seite
+    * neuer Menüeintrag: Spenden
 $ 1.2.3
   % Version 1.2.3
   _ 2014-01-12

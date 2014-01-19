@@ -1,12 +1,11 @@
+Version 1.2.4 (2014-01-19):
+• shows new fields: expiration date, activation date, card number
+• bugfix: fixed IOException on app restart
+• bugfix: fixed crash on "Settings" page
+• new menu entry: "Donation"
+
+
 Version 1.2.3 (2014-01-12):
 • better decoding of transactions!
 • bugfix: corrected parsing error with some specific transactions
 • bugfix: wrong time displayed in some transaction
-
-
-Version 1.2.2 (2014-01-10):
-• New app icon
-• added 'Settings' menu
-• new setting 'Scan all files'
-• added reading the current PIN-retry-counter
-• better handling parsing error with QUICK data

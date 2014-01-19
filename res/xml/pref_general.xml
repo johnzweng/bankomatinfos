@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="perform_full_file_scan"
         android:summaryOn="@string/pref_description_perform_full_file_scan_true"
         android:summaryOff="@string/pref_description_perform_full_file_scan_false"
