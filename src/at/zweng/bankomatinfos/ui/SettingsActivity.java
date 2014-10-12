@@ -137,4 +137,23 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 	}
 
+	/**
+	 * Important fix for this vulnerability:<br>
+	 * <br>
+	 * http://securityintelligence.com/wp-content
+	 * /uploads/2013/12/android-collapses-into-fragments.pdf <br>
+	 * <br>
+	 * http://securityintelligence
+	 * .com/new-vulnerability-android-framework-fragment-injection/#
+	 * 
+	 * @see android.preference.PreferenceActivity#isValidFragment(java.lang.String)
+	 */
+	@Override
+	protected boolean isValidFragment(String fragmentName) {
+		if (GeneralPreferenceFragment.class.getName().equals(fragmentName)) {
+			return true;
+		}
+		return false;
+	}
+
 }

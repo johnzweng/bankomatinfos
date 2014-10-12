@@ -1,6 +1,8 @@
 package at.zweng.bankomatinfos.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
@@ -156,8 +158,18 @@ public class Utils {
 	 * @return
 	 */
 	public static String formatBalance(long balance) {
-		float floatBalance = ((float) balance) / 100f;
-		return String.format(Locale.US, "%.2f", floatBalance);
+		if (balance < 100) {
+			return "0,"
+					+ String.format(Locale.GERMANY, "%02d",
+							Long.valueOf(balance % 100L));
+		}
+		String format;
+		format = "%,d";
+		// format = "%d";
+		return String.format(Locale.GERMANY, format, (balance / 100L))
+				+ ","
+				+ String.format(Locale.GERMANY, "%02d",
+						Long.valueOf(balance % 100L));
 	}
 
 	/**
@@ -682,6 +694,19 @@ public class Utils {
 
 		sb.append("<br/>");
 		return Html.fromHtml(sb.toString());
+	}
+
+	/**
+	 * Returns the stackstrace as String
+	 * 
+	 * @param t
+	 * @return
+	 */
+	public static String getStacktrace(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		return sw.toString();
 	}
 
 }

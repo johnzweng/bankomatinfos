@@ -48,7 +48,16 @@
             android:layout_marginRight="20dp"
             android:text="@string/donate_dialog_btn_bitcoin" >
         </Button>
-         <Button
+        <Button
+            android:id="@+id/btnDonateDialogFlattr"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/donate_dialog_btn_flattr" >
+        </Button>
+        <Button
             android:id="@+id/btnDonateDialogPaypal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

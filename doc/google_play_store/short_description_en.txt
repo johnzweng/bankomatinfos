@@ -1,0 +1,1 @@
+Reads infos about your "paypass" Maestro card via NFC.

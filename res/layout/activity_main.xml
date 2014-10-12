@@ -5,7 +5,6 @@
     tools:context=".MainActivity" >
 
     <!-- Show progress -->
-<!-- TODO FIXME TEXT Abgeschnitten unten BUG -->
     <LinearLayout
         android:id="@+id/read_card_status"
         android:layout_width="wrap_content"

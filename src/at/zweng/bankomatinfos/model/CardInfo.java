@@ -1,12 +1,14 @@
 package at.zweng.bankomatinfos.model;
 
+import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
+import static at.zweng.bankomatinfos.util.Utils.formatBalance;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
 import at.zweng.bankomatinfos.R;
-import static at.zweng.bankomatinfos.util.Utils.*;
 
 /**
  * Represents the data read from a bankomat card.
@@ -18,6 +20,8 @@ public class CardInfo {
 	private byte[] _nfcTagId;
 	private boolean _quickCard;
 	private boolean _maestroCard;
+	private boolean _containsTxLogs;
+	private boolean _visaCard;
 	private long _quickBalance;
 	private int _pinRetryCounter;
 	private String _quickCurrency;
@@ -86,6 +90,13 @@ public class CardInfo {
 	public void addKeyValuePair(InfoKeyValuePair pair) {
 		_infoKeyValuePairs.add(pair);
 	}
+	
+	/**
+	 * @param headerName
+	 */
+	public void addSectionHeader(String headerName) {
+		_infoKeyValuePairs.add(new InfoKeyValuePair(headerName));
+	}
 
 	/**
 	 * Add a list of key-value pairs
@@ -116,15 +127,41 @@ public class CardInfo {
 	}
 
 	/**
-	 * @return the _maestroCard
+	 * @return <code>true</code> if is a maestro card
 	 */
 	public boolean isMaestroCard() {
 		return _maestroCard;
 	}
 
 	/**
-	 * @param _maestroCard
-	 *            the _maestroCard to set
+	 * @return true if is a VISA card
+	 */
+	public boolean isVisaCard() {
+		return _visaCard;
+	}
+
+	/**
+	 * @return true card contains TX logs
+	 */
+	public boolean containsTxLogs() {
+		return _containsTxLogs;
+	}
+
+	/**
+	 * @param containsTxLogs
+	 *            true if card seems to contain TX logs
+	 */
+	public void setContainsTxLogs(boolean containsTxLogs) {
+		this._containsTxLogs = containsTxLogs;
+		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+				.getString(R.string.lbl_contains_emv_log_entry_tag), containsTxLogs ? _ctx
+				.getResources().getString(R.string.yes) : _ctx.getResources()
+				.getString(R.string.no)));
+	}
+
+	/**
+	 * @param maestroCard
+	 *            true if is a maestro card
 	 */
 	public void setMaestroCard(boolean maestroCard) {
 		this._maestroCard = maestroCard;
@@ -135,6 +172,21 @@ public class CardInfo {
 	}
 
 	/**
+	 * @param visaCard
+	 *            true if is a VISA creditcard
+	 */
+	public void setVisaCard(boolean visaCard) {
+		this._visaCard = visaCard;
+		// do not show this label, if it is no VISA card
+		if (visaCard) {
+			this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+					.getString(R.string.lbl_is_visa_card), visaCard ? _ctx
+					.getResources().getString(R.string.yes) : _ctx
+					.getResources().getString(R.string.no)));
+		}
+	}
+
+	/**
 	 * @return the _quickBalance
 	 */
 	public long getQuickBalance() {
@@ -142,7 +194,7 @@ public class CardInfo {
 	}
 
 	/**
-	 * @param _quickBalance
+	 * @param quickBalance
 	 *            the _quickBalance to set
 	 */
 	public void setQuickBalance(long quickBalance) {
@@ -153,14 +205,14 @@ public class CardInfo {
 	}
 
 	/**
-	 * @return the _quickCurrency
+	 * @return the quick currency
 	 */
 	public String getQuickCurrency() {
 		return _quickCurrency;
 	}
 
 	/**
-	 * @param _quickCurrency
+	 * @param quickCurrency
 	 *            the _quickCurrency to set
 	 */
 	public void setQuickCurrency(String quickCurrency) {
@@ -170,14 +222,14 @@ public class CardInfo {
 	}
 
 	/**
-	 * @return the _pinRetryCounter
+	 * @return the pin retry counter
 	 */
 	public int getPinRetryCounter() {
 		return _pinRetryCounter;
 	}
 
 	/**
-	 * @param _pinRetryCounter
+	 * @param pinRetryCounter
 	 *            the _pinRetryCounter to set
 	 */
 	public void setPinRetryCounter(int pinRetryCounter) {
@@ -196,10 +248,11 @@ public class CardInfo {
 	public String toString() {
 		return "CardInfo [_nfcTagId=" + Arrays.toString(_nfcTagId)
 				+ ", _quickCard=" + _quickCard + ", _maestroCard="
-				+ _maestroCard + ", _quickBalance=" + _quickBalance
-				+ ", _pinRetryCounter=" + _pinRetryCounter
-				+ ", _quickCurrency=" + _quickCurrency + ", _transactionLog="
-				+ _transactionLog + "]";
+				+ _maestroCard + ", _visaCard=" + _visaCard
+				+ ", _quickBalance=" + _quickBalance + ", _pinRetryCounter="
+				+ _pinRetryCounter + ", _quickCurrency=" + _quickCurrency
+				+ ", _ctx=" + _ctx + ", _transactionLog=" + _transactionLog
+				+ ", _infoKeyValuePairs=" + _infoKeyValuePairs + "]";
 	}
 
 }

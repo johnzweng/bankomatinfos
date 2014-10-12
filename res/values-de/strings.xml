@@ -19,7 +19,7 @@
     <string name="dialog_title_error_no_smartcard">Keine SmartCard</string>
     <string name="dialog_text_error_no_smartcard">Dieser NFC Tag ist keine gültige ISO 7816 SmartCard).</string>
     <string name="dialog_title_error_ioexception">Eingabe-Ausgabe-Fehler</string>
-    <string name="dialog_text_error_ioexception">Während des Lesevorgangs ist eine \'IOException\' aufgetreten. Bitte sehen Sie in \'logcat\' für mehr Details.</string>
+    <string name="dialog_text_error_ioexception">Während des Lesevorgangs ist eine \'IOException\' aufgetreten. Es werden daher vermutlich keine sinnvollen Ergebnisse angezeigt werden.\n\nBitte sehen Sie am Reiter \'Log\' nach, was schiefgegangen sein könnte.</string>
     <string name="dialog_title_error_unknown">Unbekannter Fehler</string>
     <string name="dialog_text_error_unknown">Während des Lesevorgangs ist ein unbekannter Fehler bzw. eine unbekannte Exception aufgetreten. error during reading the card. Bitte sehen Sie in \'logcat\' für mehr Details.</string>
 
@@ -35,9 +35,15 @@
 
     <!-- General results -->
 
+	<!-- section headers -->
+	<string name="section_nfc">NFC:</string>
+	<string name="section_GPCS_CPLC">Karteninfos (CPLC Daten):</string>
+	<string name="section_emv">EMV / Bankomat / Quick:</string>
+	
     <string name="lbl_nfc_tag_id">NFC Tag ID dieser Karte\n(Dies ist nicht die Kartennummer!):</string>
     <string name="lbl_is_quick_card">Hat diese Karte eine QUICK Funktion:</string>
     <string name="lbl_is_maestro_card">Ist das eine Maestro (Bankomat) Karte:</string>
+    <string name="lbl_is_visa_card">Ist das eine VISA Kreditkarte:</string>
     <string name="yes">JA</string>
     <string name="no">NEIN</string>
     <string name="lbl_quick_balance">QUICK Guthaben auf der Karte:</string>
@@ -46,9 +52,16 @@
     <string name="lbl_expiration_date">Ablaufdatum der Karte:</string>
     <string name="lbl_effective_date">Ausstellungsdatum der Karte:</string>
     <string name="lbl_primary_account_number">Kartennummer:</string>
-    
+    <string name="lbl_application_transaction_counter">Transaktionszähler:</string>
+    <!-- did we find the EMV TAG "9F 4D" ("Log Entry")? -->
+    <string name="lbl_contains_emv_log_entry_tag">Enthält Infos zu Transaktionslogs:</string>
+
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
+    <string name="tx_list_no_tx_log_tag_found">Diese Karte scheint keine Transaktionslogs zu beinhalten.</string>
+    <!-- alert dialog -->
+    <string name="tx_log_alertdialog_title">Hinweis</string>
+    <string name="tx_log_alertdialog_text">Sorry.. Diese Karte beinhaltet offensichtlich keine Transaktions-Logs.\n\nDetails: Der EMV TAG \""9F 4D\" (\"Log Entry\") ist auf dieser Karte gar nicht vorhanden.</string>
 
     <!-- Transaction List Item: -->
     <string name="tx_list_image_description_collapse_icon">Einklapp Symbol</string>
@@ -70,10 +83,11 @@
     <!-- Donate Dialog -->
     <string name="donate_dialog_title">Spenden</string>
     <string name="donate_dialog_btn_bitcoin">Bitcoin</string>
+    <string name="donate_dialog_btn_flattr">Flattr</string>
     <string name="donate_dialog_btn_paypal">Paypal</string>
     <string name="donate_dialog_btn_euro">Euro (Überweisung)</string>
-    <string name="donate_text"><Data><![CDATA[ <b>Eins vorweg:</b><br/><br/>Es ist absolut in Ordnung diese App frei und kostenlos zu verwenden. Ich habe diese App nur aus technischem Interesse und nicht mit Gewinnabsichten gebaut.<br/><br/>Diejenigen die dennoch gerne etwas spenden möchte, können dies wie folgt tun: ]]> </Data></string>
-    
+    <string name="donate_text"><Data><![CDATA[ <b>Eins vorweg:</b><br/><br/>Es ist absolut in Ordnung diese App frei und kostenlos zu verwenden. Ich habe diese App nur aus technischem Interesse und nicht mit Gewinnabsichten gebaut.<br/><br/>Diejenigen die dennoch gerne etwas spenden möchte, können dies wie folgt tun: ]]></Data></string>
+
     <!-- Changelog dialog -->
     <string name="changelog_full_title">Letzte Änderungen</string>
     <string name="changelog_title">Was ist neu?</string>
@@ -87,5 +101,5 @@
     <string name="pref_title_perform_full_file_scan">Scanne alle Dateien</string>
     <string name="pref_description_perform_full_file_scan_true">Scanne alle Dateien. Das Scannen dauert länger, findet aber *eventuell* auf manchen Karten mehr Daten.</string>
     <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
-    
+
 </resources>

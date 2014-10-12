@@ -48,7 +48,7 @@ public class ResultLogFragment extends Fragment {
 	 */
 	private void loadDataIntoUi() {
 		AppController controller = AppController.getInstance();
-		CardInfo cardInfo = controller.getCardInfo();
+		CardInfo cardInfo = controller.getCardInfoNullSafe(getActivity());
 		if (cardInfo == null) {
 			Log.e(TAG, "card info object is null");
 			return;

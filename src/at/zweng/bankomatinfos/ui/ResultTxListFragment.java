@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.R;
 
 /**
@@ -45,8 +46,20 @@ public class ResultTxListFragment extends Fragment {
 	 * @param show
 	 */
 	private void showNoResultText(boolean show) {
-		_listView.setVisibility(show ? View.GONE : View.VISIBLE);
-		_noEntriesText.setVisibility(show ? View.VISIBLE : View.GONE);
+		AppController.getInstance().getCardInfoNullSafe(getActivity())
+				.containsTxLogs();
+		if (show) {
+			if (!AppController.getInstance().getCardInfoNullSafe(getActivity())
+					.containsTxLogs()) {
+				_noEntriesText.setText(R.string.tx_list_no_tx_log_tag_found);
+			} else {
+				_noEntriesText.setText(R.string.tx_list_no_tx_found);
+			}
+			_listView.setVisibility(View.GONE);
+			_noEntriesText.setVisibility(View.VISIBLE);
+		} else {
+			_listView.setVisibility(View.VISIBLE);
+			_noEntriesText.setVisibility(View.GONE);
+		}
 	}
-
 }

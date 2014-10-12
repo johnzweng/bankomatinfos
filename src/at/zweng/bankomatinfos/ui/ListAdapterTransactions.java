@@ -3,21 +3,27 @@
  */
 package at.zweng.bankomatinfos.ui;
 
+import static at.zweng.bankomatinfos.util.Utils.byte2Hex;
+import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
+import static at.zweng.bankomatinfos.util.Utils.formatBalance;
+import static at.zweng.bankomatinfos.util.Utils.formatDateWithTime;
+import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
+
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
-import static at.zweng.bankomatinfos.util.Utils.*;
 
 /**
  * Custom list adapter for the transaction list
@@ -29,13 +35,14 @@ public class ListAdapterTransactions extends BaseAdapter {
 	private Context _context;
 	private List<TransactionLogEntry> _txList;
 	private SparseBooleanArray itemExpandedStateMap;
+	private int expandedElementId = -1;
 
 	/**
 	 * Constructor
 	 */
 	public ListAdapterTransactions(Context ctx) {
 		this._context = ctx;
-		this._txList = AppController.getInstance().getCardInfo()
+		this._txList = AppController.getInstance().getCardInfoNullSafe(ctx)
 				.getTransactionLog();
 		itemExpandedStateMap = new SparseBooleanArray();
 	}
@@ -62,9 +69,6 @@ public class ListAdapterTransactions extends BaseAdapter {
 		tx = _txList.get(position);
 		// read setting value
 		boolean showFullTxData = (itemExpandedStateMap.get(position, false));
-
-		// TODO: maybe don't recreate view every time. But we need to check if
-		// the layout is still the one we need
 
 		// if (v == null) {
 		LayoutInflater mInflater = (LayoutInflater) _context
@@ -103,13 +107,22 @@ public class ListAdapterTransactions extends BaseAdapter {
 			cryptogramInformation.setText("0x"
 					+ byte2Hex(tx.getCryptogramInformationData()));
 			atc.setText(Integer.toString(tx.getAtc()));
-			appDefaultAction.setText(prettyPrintString(bytesToHex(tx
-					.getApplicationDefaultAction()),2));
+			appDefaultAction.setText(prettyPrintString(
+					bytesToHex(tx.getApplicationDefaultAction()), 2));
 			unknownByte.setText(byte2Hex(tx.getUnknownByte()));
-			customerEsclusive.setText(prettyPrintString(bytesToHex(tx
-					.getCustomerExclusiveData()),2));
+			customerEsclusive.setText(prettyPrintString(
+					bytesToHex(tx.getCustomerExclusiveData()), 2));
 
-			rawData.setText(prettyPrintString(bytesToHex(tx.getRawEntry()),2));
+			rawData.setText(prettyPrintString(bytesToHex(tx.getRawEntry()), 2));
+		}
+
+		Animation animation;
+		if (position == expandedElementId) {
+			expandedElementId = -1;
+			animation = new AlphaAnimation(0, 1);
+			animation.setDuration(90);
+			v.startAnimation(animation);
+			animation = null;
 		}
 		return v;
 	}
@@ -118,14 +131,26 @@ public class ListAdapterTransactions extends BaseAdapter {
 	 * @param position
 	 */
 	public void toggleItemExpandedState(int position) {
-		Log.w(TAG, "toggleItemExpandedState position: " + position);
+
+		// EXPAND:
 		if (itemExpandedStateMap.get(position, false) == false) {
+			expandedElementId = position;
+			// and if we expanded an element collapse all other elements (so
+			// that only 1 elements is expanded)
+			for (int i = 0; i < itemExpandedStateMap.size(); i++) {
+				if (i != position) {
+					itemExpandedStateMap.put(i, false);
+				}
+			}
 			itemExpandedStateMap.put(position, true);
-		} else {
+		}
+
+		// COLLAPSE:
+		else {
+			expandedElementId = -1;
 			itemExpandedStateMap.put(position, false);
 		}
-		Log.w(TAG, "toggleItemExpandedState new expanded state: "
-				+ itemExpandedStateMap.get(position));
+
 		super.notifyDataSetChanged();
 	}
 }

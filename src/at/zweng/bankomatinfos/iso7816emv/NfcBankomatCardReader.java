@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAESTRO_BANKOMAT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_VISA_CREDITCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV;
@@ -11,7 +12,6 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_PI
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_BALANCE;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_CURRENCY;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createApduVerifyPIN;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createGetProcessingOptionsApdu;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createReadRecordApdu;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectAid;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectMasterFile;
@@ -31,7 +31,6 @@ import static at.zweng.bankomatinfos.util.Utils.TAG;
 import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
 import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
 import static at.zweng.bankomatinfos.util.Utils.cutoffLast2Bytes;
-import static at.zweng.bankomatinfos.util.Utils.fromHexString;
 import static at.zweng.bankomatinfos.util.Utils.getByteArrayPart;
 import static at.zweng.bankomatinfos.util.Utils.getLast2Bytes;
 import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
@@ -40,15 +39,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.util.Log;
 import at.zweng.bankomatinfos.AppController;
+import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
+import at.zweng.bankomatinfos.model.InfoKeyValuePair;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
 
 /**
@@ -112,15 +115,76 @@ public class NfcBankomatCardReader {
 			throws IOException {
 		CardInfo result = new CardInfo(_ctx);
 		_ctl.log("Starting to read data from card..");
+		result.addSectionHeader(_ctx.getResources().getString(
+				R.string.section_nfc));
 		result.setNfcTagId(_nfcTag.getId());
 		_ctl.log("NFC Tag ID: "
 				+ prettyPrintString(bytesToHex(_nfcTag.getId()), 2));
 		_ctl.log("Historical bytes: "
 				+ prettyPrintString(
 						bytesToHex(_localIsoDep.getHistoricalBytes()), 2));
+		result.addSectionHeader(_ctx.getResources().getString(
+				R.string.section_GPCS_CPLC));
+		result = readCPLCInfos(result);
+		result.addSectionHeader(_ctx.getResources().getString(
+				R.string.section_emv));
 		result = readQuickInfos(result);
 		result = readMaestroCardInfos(result, performFullFileScan);
+		// result = readVisaCardInfos(result, performFullFileScan);
 		_ctl.log("FINISHED! :-)");
+		return result;
+	}
+
+	/**
+	 * Try to read generic infos about the SmartCard as defined in the
+	 * "GlobalPlatform Card Specification" (GPCS).
+	 * 
+	 * @param result
+	 * @return
+	 * @throws IOException
+	 * @throws TlvParsingException
+	 */
+	private CardInfo readCPLCInfos(CardInfo result) throws IOException {
+		_ctl.log("Trying to read Card Production Life Cycle (CPLC) data as "
+				+ "defined by GlobalPlatform Card Specification (GPCS)..");
+		byte[] resultPdu = sendGetCPLC();
+		// if not success, abort here
+		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
+			return result;
+		}
+		if (resultPdu.length <= 2) {
+			return result;
+		}
+
+		try {
+			CPLC cplcData = CPLC.parse(cutoffLast2Bytes(resultPdu));
+			String cplcString = cplcData.toString();
+			_ctl.log(cplcString);
+			Log.d(TAG, "CPLC data: " + cplcString);
+
+			Pattern p = Pattern.compile("^0+$");
+			Map<String, String> fields = cplcData.getFields();
+			_ctl.log("Same date human readable parsed:");
+			for (String key : fields.keySet()) {
+				String val = fields.get(key);
+				if (p.matcher(val).matches()) {
+					// ignore fields which are just 000s
+					continue;
+				}
+				String humanReadableVal = CPLC.getHumanReadableValue(key, val);
+				_ctl.log("  * " + key + ":\n    " + humanReadableVal);
+				result.addKeyValuePair(new InfoKeyValuePair(key,
+						humanReadableVal));
+			}
+		} catch (TlvParsingException pe) {
+			_ctl.log("ERROR: Catched Exception while reading CPLC data:\n" + pe
+					+ "\n" + pe.getMessage());
+			Log.w(TAG, "Catched Exception while reading CPLC infos: ", pe);
+		} catch (RuntimeException re) {
+			_ctl.log("ERROR: Catched Exception while reading CPLC infos:\n"
+					+ re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading CPLC infos: ", re);
+		}
 		return result;
 	}
 
@@ -197,6 +261,82 @@ public class NfcBankomatCardReader {
 	}
 
 	/**
+	 * Read VISA card infos from card
+	 * 
+	 * @param result
+	 * @param fullFileScan
+	 *            <code>true</code> if we should try to iterate over all EFs,
+	 *            false if only some
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unused")
+	private CardInfo readVisaCardInfos(CardInfo result, boolean fullFileScan)
+			throws IOException {
+		Log.d(TAG, "check if card contains VISA Creditcard AID..");
+		_ctl.log("Trying to select VISA Creditcard AID..");
+		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_VISA_CREDITCARD);
+		logBerTlvResponse(selectAidResponse);
+		boolean isVisaCard = isStatusSuccess(getLast2Bytes(selectAidResponse));
+		_ctl.log("is a VISA Creditcard: " + isVisaCard);
+		result.setVisaCard(isVisaCard);
+		if (!isVisaCard) {
+			return result;
+		}
+		// ok, so let's catch exceptions here, instead of just letting the whole
+		// scan abort, so that the user gets at least some infos where the
+		// parsing failed:
+		try {
+			result = readVisaCreditcardEmvData(selectAidResponse, result,
+					fullFileScan);
+		} catch (RuntimeException re) {
+			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
+					+ re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading VISA card infos: ", re);
+		} catch (TlvParsingException tle) {
+			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
+					+ tle + "\n" + tle.getMessage());
+			Log.w(TAG, "Catched Exception while reading VISA card infos: ", tle);
+		}
+		return result;
+	}
+
+	/**
+	 * Try to read some EMV data
+	 * 
+	 * @param selectAidResponse
+	 * @param result
+	 * @param fullFileScan
+	 *            <code>true</code> if we should try to iterate over all EFs,
+	 *            false if only some well known on Austrian Bankomat Cards
+	 * @return
+	 * @throws IOException
+	 * @throws TlvParsingException
+	 */
+	private CardInfo readVisaCreditcardEmvData(byte[] selectAidResponse,
+			CardInfo result, boolean fullFileScan) throws IOException,
+			TlvParsingException {
+
+		// Note 15.02.2014:
+		// -------------------
+		// It seems that sending GET PROCESSING OPTIONS increases the
+		// application transaction counter (ATC) on the card and all the infos
+		// also can be read without sending the ATC. Therefore I will omit
+		// sending the GPO command.
+
+		tryToReadLogFormat();
+		result = tryToReadPinRetryCounter(result);
+		tryToReadCurrentAtcValue();
+		tryToReadLastOnlineAtcRegisterValue();
+		tryToReadAllCommonSimpleTlvTags();
+		tryToReadAllCommonBerTlvTags();
+		// result = tryreadingTests(result);
+		result = searchForFiles(result, fullFileScan, true);
+
+		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList, false));
+		return result;
+	}
+
+	/**
 	 * Try to read some EMV data
 	 * 
 	 * @param selectAidResponse
@@ -214,24 +354,30 @@ public class NfcBankomatCardReader {
 
 		// reading transaction logs is WRONG implemented (currently hardcoded
 		// for Bank Austria style)
-		// TODO: read cards FCI for getting locataion and format of log entries
-		// and parse transaction log dynamically based on Log format
+
+		// Note 15.02.2014:
+		// -------------------
+		// It seems that sending GET PROCESSING OPTIONS increases the
+		// application transaction counter (ATC) on the card and all the infos
+		// also can be read without sending the ATC. Therefore I will omit
+		// sending the GPO command.
 
 		// send GET PROCESSING OPTIONS
-		_ctl.log("trying to send GET PROCESSING OPTIONS command..");
-		byte[] processingOptionsApdu = createGetProcessingOptionsApdu(selectAidResponse);
-		_ctl.log("sent: " + bytesToHex(processingOptionsApdu));
-		byte[] resultPdu = _localIsoDep.transceive(processingOptionsApdu);
-		logResultPdu(resultPdu);
-		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
-			Log.w(TAG,
-					"GET PROCESSING OPTIONS: Response status word was not ok! Error: "
-							+ statusToString(getLast2Bytes(resultPdu))
-							+ ". In hex: " + bytesToHex(resultPdu));
-			_ctl.log("GET PROCESSING OPTIONS did not return successfully..");
-			return result;
-		}
-		logBerTlvResponse(resultPdu);
+		// _ctl.log("trying to send GET PROCESSING OPTIONS command..");
+		// byte[] processingOptionsApdu =
+		// createGetProcessingOptionsApdu(selectAidResponse);
+		// _ctl.log("sent: " + bytesToHex(processingOptionsApdu));
+		// byte[] resultPdu = _localIsoDep.transceive(processingOptionsApdu);
+		// logResultPdu(resultPdu);
+		// if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
+		// Log.w(TAG,
+		// "GET PROCESSING OPTIONS: Response status word was not ok! Error: "
+		// + statusToString(getLast2Bytes(resultPdu))
+		// + ". In hex: " + bytesToHex(resultPdu));
+		// _ctl.log("GET PROCESSING OPTIONS did not return successfully..");
+		// return result;
+		// }
+		// logBerTlvResponse(resultPdu);
 
 		tryToReadLogFormat();
 		result = tryToReadPinRetryCounter(result);
@@ -241,8 +387,8 @@ public class NfcBankomatCardReader {
 		tryToReadAllCommonBerTlvTags();
 		// result = tryreadingTests(result);
 		result = searchForFiles(result, fullFileScan, true);
-
-		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList));
+		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList, true));
+		result = lookForLogEntryEmvTag(result);
 		return result;
 	}
 
@@ -358,6 +504,7 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private void tryToVerifyPlaintextPin(String pin) throws IOException {
 		// this just performs PLAINTEXT pin verification (not supported on
 		// modern cards)
@@ -375,6 +522,7 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private CardInfo tryReadingTests(CardInfo result) throws IOException {
 		// byte[] cmd;
 		byte[] resultPdu;
@@ -411,28 +559,57 @@ public class NfcBankomatCardReader {
 		// resultPdu = _localIsoDep.transceive(fromHexString(cmd));
 		// logResultPdu(resultPdu);
 		// logBerTlvResponse(resultPdu);
-		String cmd;
-		cmd = "80 CA BF 30 00";
-		_ctl.log("trying to send command (): " + cmd);
-		resultPdu = _localIsoDep.transceive(fromHexString(cmd));
-		logResultPdu(resultPdu);
-		logBerTlvResponse(resultPdu);
-		cmd = "80 CA 9F 35 00";
-		_ctl.log("trying to send command (): " + cmd);
-		resultPdu = _localIsoDep.transceive(fromHexString(cmd));
-		logResultPdu(resultPdu);
-		logBerTlvResponse(resultPdu);
-		cmd = "80 CA 9F 50 00";
-		_ctl.log("trying to send command (): " + cmd);
-		resultPdu = _localIsoDep.transceive(fromHexString(cmd));
-		logResultPdu(resultPdu);
-		logBerTlvResponse(resultPdu);
+		// String cmd;
+		// cmd = "80 CA BF 30 00";
+		// _ctl.log("trying to send command (): " + cmd);
+		// resultPdu = _localIsoDep.transceive(fromHexString(cmd));
+		// logResultPdu(resultPdu);
+		// logBerTlvResponse(resultPdu);
+		// cmd = "80 CA 9F 35 00";
+		// _ctl.log("trying to send command (): " + cmd);
+		// resultPdu = _localIsoDep.transceive(fromHexString(cmd));
+		// logResultPdu(resultPdu);
+		// logBerTlvResponse(resultPdu);
+		// cmd = "80 CA 9F 50 00";
+		// _ctl.log("trying to send command (): " + cmd);
+		// resultPdu = _localIsoDep.transceive(fromHexString(cmd));
+		// logResultPdu(resultPdu);
+		// logBerTlvResponse(resultPdu);
 
 		// QUICK:
 		// -- 3F 00
 		// \ -- 00 02: EF 5 REC 1: 005C 9000
 		//
 
+		return result;
+	}
+
+	/**
+	 * Checks if the EMV TAG "9F 4D Log Entry" is found within the list. This
+	 * EMV tag normally specifies where to find the log records on the card (and
+	 * also how many of them should be stored).<br/>
+	 * If this tag is not present, it's a strong indication that there are no
+	 * logs on the card.
+	 * 
+	 * @param result
+	 * @return
+	 */
+	private CardInfo lookForLogEntryEmvTag(CardInfo result) {
+		boolean foundLogTag = false;
+		for (TagAndValue tv : _tagList) {
+			if ("9F4D".equals(bytesToHex(tv.getTag().getTagBytes()))) {
+				foundLogTag = true;
+			}
+		}
+		if (foundLogTag) {
+			Log.d(TAG, "YES! EMV Tag 'Log Entry' found! This card *may* "
+					+ "store transactions logs.");
+		} else {
+			Log.d(TAG,
+					"NO! Dit not find the EMV Tag 'Log Entry'! This means "
+							+ "that this card propably won't store transactions logs at all.");
+		}
+		result.setContainsTxLogs(foundLogTag);
 		return result;
 	}
 
@@ -468,10 +645,6 @@ public class NfcBankomatCardReader {
 
 		// iterate over EFs
 		for (int shortEfFileIdentifier = 0; shortEfFileIdentifier < 32; shortEfFileIdentifier++) {
-
-			// TODO: better implementation of whitelisted EFs
-			// TODO: and in future honor the AFL response of the card to do
-			// this!!
 
 			// ugly and hardcoded, but keep it for now
 			// jump to next if EF not in whitelst
@@ -538,9 +711,6 @@ public class NfcBankomatCardReader {
 	 *         parsed
 	 */
 	private TransactionLogEntry tryParseTxLogEntryFromByteArray(byte[] rawRecord) {
-		// TODO: transaction log parsing is INCORRECT!!
-		// according to EMV the format may be dynamic and is specified by the
-		// card in the "Log format" tag.
 		// TODO: change this method to parse tx log entries dynamically based on
 		// format as specified by card
 
@@ -640,6 +810,7 @@ public class NfcBankomatCardReader {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private byte[] selectMasterfile() throws IOException {
 		byte[] readRecordApdu = createSelectMasterFile();
 		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
@@ -659,6 +830,7 @@ public class NfcBankomatCardReader {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private byte[] selectParentDf() throws IOException {
 		byte[] readRecordApdu = createSelectParentDfFile();
 		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
@@ -723,6 +895,25 @@ public class NfcBankomatCardReader {
 				+ prettyPrintString(bytesToHex(rawCurrency), 2));
 		_ctl.log("QUICK currency = " + getCurrencyAsString(rawCurrency));
 		return rawCurrency;
+	}
+
+	/**
+	 * Send GET_CPLC_COMMAND command to the card to receive
+	 * "card production life cycle" (CPLC) data according the GlobalPlatform
+	 * Card Specification.
+	 * 
+	 * @return the bytes as returned by the SmartCard
+	 * @throws IOException
+	 */
+	private byte[] sendGetCPLC() throws IOException {
+		Log.d(TAG, "sending GET CPLC command..");
+		byte[] command = EmvUtils.GPCS_GET_CPLC_COMMAND;
+		Log.d(TAG, "will send byte array: " + bytesToHex(command));
+		_ctl.log("sent: " + bytesToHex(command));
+		byte[] resultPdu = _localIsoDep.transceive(command);
+		logResultPdu(resultPdu);
+		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
+		return resultPdu;
 	}
 
 	/**

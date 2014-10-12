@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 1.2.5
+  % Version 1.2.5
+  _ 2014-10-11
+    * zeigt nun weitere allgemeine Infos zur Karte (<b>Betriebssystem</b>, <b>Hersteller</b>, <b>Produktionsdatum</b>,..)
+    * Hinweistext für Karten die prinzipiell keine Logs speichern
+    * bugfix: Exception beim Lesen bestimmter Karten behoben
 $ 1.2.4
   % Version 1.2.4
   _ 2014-01-19

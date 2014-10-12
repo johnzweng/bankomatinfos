@@ -9,7 +9,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,6 +32,7 @@ import at.zweng.bankomatinfos.model.InfoKeyValuePair;
  * @author Johannes Zweng <johannes@zweng.at>
  */
 public class EmvUtils {
+
 	/**
 	 * ISO command for SELECT a file directly (Direct selection by DF name (data
 	 * field=DF name)
@@ -63,6 +66,14 @@ public class EmvUtils {
 	 */
 	public static final byte[] ISO_COMMAND_QUICK_READ_CURRENCY = { (byte) 0x00,
 			(byte) 0xB0, (byte) 0x81, (byte) 0x15, (byte) 0x02 };
+
+	/**
+	 * GET_CPLC_COMMAND command for receiving "Card Production Life Cycle"
+	 * (CPLC) data, according the GlobalPlatform Card Specification.
+	 * 
+	 */
+	public static final byte[] GPCS_GET_CPLC_COMMAND = { (byte) 0x80,
+			(byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x00 };
 
 	/**
 	 * EMV command GET CHALLENGE (returns 8 byte random number), used in
@@ -103,7 +114,7 @@ public class EmvUtils {
 	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
 	 *      p.155f
 	 */
-	// TODO: test/use this command
+	// TODO: test this command
 	public static final byte[] EMV_COMMAND_GET_DATA_ACCUMULATOR_VALUES = {
 			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x30, (byte) 0x00 };
 
@@ -113,7 +124,7 @@ public class EmvUtils {
 	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
 	 *      p.155f
 	 */
-	// TODO: test/use this command
+	// TODO: test this command
 	public static final byte[] EMV_COMMAND_GET_DATA_COUNTER_VALUES = {
 			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x35, (byte) 0x00 };
 
@@ -123,7 +134,7 @@ public class EmvUtils {
 	 * @see "EMV Common Payment Application Specification v1 Dec 2005.pdf",
 	 *      p.155f
 	 */
-	// TODO: test/use this command
+	// TODO: test this command
 	public static final byte[] EMV_COMMAND_GET_DATA_OFFLINE_BALANCE = {
 			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x50, (byte) 0x00 };
 
@@ -162,6 +173,13 @@ public class EmvUtils {
 	public static final byte[] APPLICATION_ID_EMV_MAESTRO_BANKOMAT = {
 			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04,
 			(byte) 0x30, (byte) 0x60 };
+
+	/**
+	 * Application ID for Visa credit or debit card: A0000000031010
+	 */
+	public static final byte[] APPLICATION_ID_EMV_VISA_CREDITCARD = {
+			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x03,
+			(byte) 0x10, (byte) 0x10 };
 
 	/**
 	 * Currency values<br>
@@ -344,7 +362,6 @@ public class EmvUtils {
 	 */
 	public static byte[] createReadBinaryApdu(int shortEfFileIdentifier,
 			int offset) {
-		// TODO: test this method!
 		int sfi = shortEfFileIdentifier;
 		StringBuilder cmd = new StringBuilder();
 		cmd.append("00B0");
@@ -998,7 +1015,7 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static List<InfoKeyValuePair> filterTagsForResult(Context ctx,
-			List<TagAndValue> tagList) {
+			List<TagAndValue> tagList, boolean cutOffLastAccountnumberDigit) {
 		List<InfoKeyValuePair> resultList = new ArrayList<InfoKeyValuePair>();
 		String tagBytesHexString;
 
@@ -1039,17 +1056,31 @@ public class EmvUtils {
 						&& tagAndValue.getValue().length > 1) {
 					String primaryAccountNumber = bytesToHex(tagAndValue
 							.getValue());
-					// last character is always F: cut it off:
-					primaryAccountNumber = primaryAccountNumber.substring(0,
-							primaryAccountNumber.length() - 1);
+					if (cutOffLastAccountnumberDigit) {
+						// last character is always F: cut it off:
+						primaryAccountNumber = primaryAccountNumber.substring(
+								0, primaryAccountNumber.length() - 1);
+					}
 					resultList.add(new InfoKeyValuePair(ctx.getResources()
 							.getString(R.string.lbl_primary_account_number),
 							prettyPrintString(primaryAccountNumber, 4)));
 				}
 			}
 
-			// TODO: look for other interesting EMV tags (even if they are not
-			// present on my card)
+			// Current ATC (application transaction counter) value
+			else if ("9F36".equalsIgnoreCase(tagBytesHexString)) {
+				if (tagAndValue.getValue() != null
+						&& tagAndValue.getValue().length > 1) {
+					int currentTransactionCounter = byteArrayToInt(tagAndValue
+							.getValue());
+					resultList
+							.add(new InfoKeyValuePair(
+									ctx.getResources()
+											.getString(
+													R.string.lbl_application_transaction_counter),
+									Integer.toString(currentTransactionCounter)));
+				}
+			}
 
 			// Log.d(TAG, "  name: " + tagAndValue.getTag().getName());
 			// Log.d(TAG, "   tag: "
@@ -1061,6 +1092,57 @@ public class EmvUtils {
 
 		}
 		return resultList;
+	}
+
+	/**
+	 * Takes a date value as used in CPLC Date fields (represented by 2 bytes)
+	 * 
+	 * @param paramByte1
+	 * @param paramByte2
+	 * @throws IllegalArgumentException
+	 * @return
+	 */
+	public static Date calculateCplcDate(byte[] dateBytes)
+			throws IllegalArgumentException {
+		if (dateBytes == null || dateBytes.length != 2) {
+			throw new IllegalArgumentException(
+					"Error! CLCP Date values consist always of exactly 2 bytes");
+		}
+		// current time
+		Calendar now = Calendar.getInstance();
+
+		int year = now.get(Calendar.YEAR);
+		int startYearOfCurrentDecade = year - (year % 10);
+
+		int days = 100 * (dateBytes[0] & 0xF) + 10 * (0xF & dateBytes[1] >>> 4)
+				+ (dateBytes[1] & 0xF);
+
+		if (days > 366) {
+			throw new IllegalArgumentException(
+					"Invalid date (or are we parsing it wrong??)");
+		}
+
+		Calendar calculatedDate = Calendar.getInstance();
+		calculatedDate.clear();
+		calculatedDate.set(Calendar.YEAR, startYearOfCurrentDecade
+				+ (0xF & dateBytes[0] >>> 4));
+		calculatedDate.set(Calendar.DAY_OF_YEAR, days);
+		while (calculatedDate.after(now)) {
+			calculatedDate.add(Calendar.YEAR, -10);
+		}
+		return calculatedDate.getTime();
+	}
+
+	/**
+	 * CPLC dates are counted in days starting from "1986-02-04"
+	 * 
+	 * @param cplcDateValue
+	 * @return
+	 */
+	public static Calendar getDateFromCPLCDateValue(int cplcDateValue) {
+		GregorianCalendar startDay = new GregorianCalendar(1977, 11, 29);
+		startDay.add(Calendar.DAY_OF_YEAR, cplcDateValue);
+		return startDay;
 	}
 
 	/**

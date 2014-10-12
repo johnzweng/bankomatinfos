@@ -1,0 +1,57 @@
+
+<!-- represents one row in NavDrawer -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="20dp"
+    android:background="@android:color/holo_orange_light"
+     >
+
+    <!--
+    #dddddd
+    android:background="#eeeeee"
+    android:background="@drawable/list_selector"
+    -->
+
+<!-- 
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" 
+        android:background="#ff3333" 
+        >
+        </FrameLayout>
+ -->
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:visibility="invisible" />
+
+
+
+    <TextView
+        android:id="@+id/infoListItemName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:layout_centerVertical="true"        
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@+id/textView1"
+        android:text="Medium Text"
+        android:textAppearance="@style/ResultListHeaderItem" />
+<!-- 
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" 
+        android:background="#ff3333" 
+        >
+    </FrameLayout>
+     -->
+    
+
+</RelativeLayout>

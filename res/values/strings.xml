@@ -19,7 +19,7 @@
     <string name="dialog_title_error_no_smartcard">No SmartCard</string>
     <string name="dialog_text_error_no_smartcard">This NFC tag is no valid ISO 7816 compliant SmartCard.</string>
     <string name="dialog_title_error_ioexception">IO Exception</string>
-    <string name="dialog_text_error_ioexception">IOException during reading the card. Look into logcat for details.</string>
+    <string name="dialog_text_error_ioexception">IOException during reading the card. You probably won\'t see any results.\n\nLook in the \'Log\' tab for details what may have gone wrong.</string>
     <string name="dialog_title_error_unknown">Unknown Exception</string>
     <string name="dialog_text_error_unknown">Unknown error during reading the card. Look into logcat for details.</string>
 
@@ -35,9 +35,15 @@
 
     <!-- General results -->
 
-    <string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
+	<!-- section headers -->
+	<string name="section_nfc">NFC:</string>
+	<string name="section_GPCS_CPLC">Card infos (CPLC data):</string>
+	<string name="section_emv">EMV / Maestro / Quick:</string>
+
+	<string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
     <string name="lbl_is_quick_card">Is a QUICK card:</string>
     <string name="lbl_is_maestro_card">Is a Maestro (Bankomat) card:</string>
+    <string name="lbl_is_visa_card">Is a VISA Creditcard:</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="lbl_quick_balance">QUICK balance:</string>
@@ -46,10 +52,18 @@
     <string name="lbl_expiration_date">Expiration date:</string>
     <string name="lbl_effective_date">Activation date:</string>
     <string name="lbl_primary_account_number">Card number:</string>
+    <string name="lbl_application_transaction_counter">Transaction counter:</string>
+    <!-- did we find the EMV TAG "9F 4D" ("Log Entry")?  -->
+    <string name="lbl_contains_emv_log_entry_tag">Contains info about transaction logs:</string>
+    
 
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">No transactions found</string>
-
+    <string name="tx_list_no_tx_log_tag_found">This card seems not to contain any transactions logs.</string>
+    <!-- alert dialog -->
+    <string name="tx_log_alertdialog_title">Note</string>
+    <string name="tx_log_alertdialog_text">Sorry.. This card seems not contain transaction logs at all. \n\nDetails: the EMV TAG \"9F 4D\" (\"Log Entry\") is not present on this card.</string>
+    
     <!-- Transaction List Item: -->
     <string name="tx_list_image_description_collapse_icon">Icon Collapse</string>
     <string name="tx_list_image_description_expand_icon">Icon Expand</string>
@@ -70,6 +84,7 @@
     <!-- Donate Dialog -->
     <string name="donate_dialog_title">Donations</string>
     <string name="donate_dialog_btn_bitcoin">Bitcoin</string>
+    <string name="donate_dialog_btn_flattr">Flattr</string>
     <string name="donate_dialog_btn_paypal">Paypal</string>
     <string name="donate_dialog_btn_euro">Euro (bank account)</string>
     <string name="donate_text"><Data><![CDATA[ <b>First of all:</b><br/><br/>It\'s completely okay to use this app for free. I\'ve built this app just out of technical interest and not with the intent to make profit.<br/><br/>For those who want to donate, you can do it the following ways: ]]> </Data></string>

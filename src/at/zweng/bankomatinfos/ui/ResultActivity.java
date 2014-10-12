@@ -21,6 +21,9 @@ import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos.util.Utils;
+
+// TODO: maybe also add share action for general and transations fragment
 
 /**
  * Activity for displaying the results (hosts fragements in tabs).
@@ -30,9 +33,12 @@ import at.zweng.bankomatinfos.R;
 public class ResultActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 
+	private static AppController _controller = AppController.getInstance();
 	private Fragment _fragmentResultInfos;
 	private Fragment _fragmentResultTxList;
 	private Fragment _fragmentResultLog;
+
+	private boolean _alertShown = false;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -159,6 +165,21 @@ public class ResultActivity extends FragmentActivity implements
 		// When the given tab is selected, switch to the corresponding page in
 		// the ViewPager.
 		_viewPager.setCurrentItem(tab.getPosition());
+
+		// show alert dialog for one time if card does not support tx logs
+		if (!_alertShown
+				&& tab.getPosition() == 1
+				&& !_controller.getCardInfoNullSafe(this).containsTxLogs()
+				&& _controller.getCardInfoNullSafe(this).getTransactionLog()
+						.size() == 0) {
+			_alertShown = true;
+			Utils.displaySimpleAlertDialog(
+					this,
+					getResources().getString(R.string.tx_log_alertdialog_title),
+					this.getResources().getString(
+							R.string.tx_log_alertdialog_text));
+		}
+
 		invalidateOptionsMenu(); // creates call to
 		// onPrepareOptionsMenu()
 	}

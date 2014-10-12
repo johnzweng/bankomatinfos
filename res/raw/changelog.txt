@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 1.2.5
+  % Version 1.2.5
+  _ 2014-10-11
+    * show new generic infos about the card (<b>operating system</b>, <b>manufacturer</b>, <b>production date</b>,..)
+    * Show note for cards which do not store transaction logs at all
+    * bugfix: exception when reading certain cards
 $ 1.2.4
   % Version 1.2.4
   _ 2014-01-19

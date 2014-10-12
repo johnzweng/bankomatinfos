@@ -17,7 +17,7 @@ import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
 
 /**
- * Custom list adapter for the card infos list
+ * Custom list adapter for the card infos list (first tab page
  * 
  * @author Johannes Zweng <johannes@zweng.at>
  */
@@ -31,7 +31,7 @@ public class ListAdapterInfos extends BaseAdapter {
 	 */
 	public ListAdapterInfos(Context ctx) {
 		this._context = ctx;
-		this._infoList = AppController.getInstance().getCardInfo()
+		this._infoList = AppController.getInstance().getCardInfoNullSafe(ctx)
 				.getInfoKeyValuePairs();
 	}
 
@@ -53,18 +53,25 @@ public class ListAdapterInfos extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View v, ViewGroup parent) {
-		InfoKeyValuePair infoItem;
-		infoItem = _infoList.get(position);
-		if (v == null) {
+		InfoKeyValuePair infoItem = _infoList.get(position);
+		if (infoItem.isSectionHeader()) {
+			LayoutInflater mInflater = (LayoutInflater) _context
+					.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+			v = mInflater.inflate(R.layout.list_item_general_info_header, null);
+		} else {
 			LayoutInflater mInflater = (LayoutInflater) _context
 					.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 			v = mInflater.inflate(R.layout.list_item_general_info, null);
 		}
 
 		TextView infoLabel = (TextView) v.findViewById(R.id.infoListItemName);
-		TextView infoValue = (TextView) v.findViewById(R.id.infoListItemValue);
 		infoLabel.setText(infoItem.getName());
-		infoValue.setText(infoItem.getValue());
+
+		if (!infoItem.isSectionHeader()) {
+			TextView infoValue = (TextView) v
+					.findViewById(R.id.infoListItemValue);
+			infoValue.setText(infoItem.getValue());
+		}
 		return v;
 	}
 

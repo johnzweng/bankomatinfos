@@ -26,6 +26,7 @@ import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.iso7816emv.NfcBankomatCardReader;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.util.ChangeLog;
+import at.zweng.bankomatinfos.util.CustomAlertDialog;
 
 /**
  * Startup activity
@@ -84,6 +85,15 @@ public class MainActivity extends Activity {
 
 		if (_nfcAdapter != null) {
 			Log.d(TAG, "enabling foreground NFC dispatch");
+			// TESTING new ReaderMode:
+			// Log.i(TAG, "enableReaderMode without P2P only NFC A");
+			// _nfcAdapter
+			// .enableReaderMode(
+			// this,
+			// this,
+			// (NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
+			// NfcAdapter.FLAG_READER_NFC_A),
+			// null);
 			_nfcAdapter.enableForegroundDispatch(this, _pendingIntent,
 					_filters, _techLists);
 		}
@@ -209,9 +219,9 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
+			AppController ctl = AppController.getInstance();
+			ctl.clearLog();
 			try {
-				AppController ctl = AppController.getInstance();
-				ctl.clearLog();
 				ctl.log(getResources().getString(R.string.app_name)
 						+ " version " + getAppVersion(MainActivity.this));
 				NfcBankomatCardReader reader = new NfcBankomatCardReader(
@@ -238,6 +248,11 @@ public class MainActivity extends Activity {
 			} catch (IOException e) {
 				Log.e(TAG, "Catched IOException during reading the card", e);
 				error = ERROR_IO_EX;
+				ctl.log("-----------------------------------------------");
+				ctl.log("ERROR ERROR ERROR:");
+				ctl.log("Catched IOException during reading the card:");
+				ctl.log(getStacktrace(e));
+				ctl.log("-----------------------------------------------");
 				return false;
 			}
 			return true;
@@ -252,7 +267,8 @@ public class MainActivity extends Activity {
 						+ _cardReadingResults.isMaestroCard() + ", isQuick: "
 						+ _cardReadingResults.isQuickCard());
 				if (!_cardReadingResults.isMaestroCard()
-						&& !_cardReadingResults.isQuickCard()) {
+						&& !_cardReadingResults.isQuickCard()
+						&& !_cardReadingResults.isVisaCard()) {
 					showProgressAnimation(false);
 					displaySimpleAlertDialog(
 							MainActivity.this,
@@ -277,13 +293,6 @@ public class MainActivity extends Activity {
 									R.string.dialog_title_error_card_lost),
 							getResources().getString(
 									R.string.dialog_text_error_card_lost));
-				} else if (error == ERROR_IO_EX) {
-					displaySimpleAlertDialog(
-							MainActivity.this,
-							getResources().getString(
-									R.string.dialog_title_error_ioexception),
-							getResources().getString(
-									R.string.dialog_text_error_ioexception));
 				} else if (error == ERROR_NO_SMARTCARD) {
 					displaySimpleAlertDialog(
 							MainActivity.this,
@@ -291,7 +300,31 @@ public class MainActivity extends Activity {
 									R.string.dialog_title_error_no_smartcard),
 							getResources().getString(
 									R.string.dialog_text_error_no_smartcard));
-				} else {
+				}
+				// In this case we still open the result Activity for allowing
+				// the user to inspect the stacktrace in the Log tab
+				else if (error == ERROR_IO_EX) {
+					new CustomAlertDialog(MainActivity.this,
+							getResources().getString(
+									R.string.dialog_title_error_ioexception),
+							getResources().getString(
+									R.string.dialog_text_error_ioexception)) {
+
+						/**
+						 * First show the alert dialog, and when user clicks ok,
+						 * show the result
+						 */
+						@Override
+						public void onOkClick() {
+							// show results page
+							Intent intent = new Intent(MainActivity.this,
+									ResultActivity.class);
+							startActivity(intent);
+						}
+					}.show();
+				}
+
+				else {
 					displaySimpleAlertDialog(
 							MainActivity.this,
 							getResources().getString(

@@ -1,11 +1,17 @@
+Version 1.2.5 (11.10.2014):
+â€¢ now also shows some generic infos about card (OS, IC type, etc..)
+â€¢ display note for newer cards which don't contain tx logs
+â€¢ bugfix: fixed exception occuring with some cards
+
+
 Version 1.2.4 (2014-01-19):
-• shows new fields: expiration date, activation date, card number
-• bugfix: fixed IOException on app restart
-• bugfix: fixed crash on "Settings" page
-• new menu entry: "Donation"
+â€¢ shows new fields: expiration date, activation date, card number
+â€¢ bugfix: fixed IOException on app restart
+â€¢ bugfix: fixed crash on "Settings" page
+â€¢ new menu entry: "Donation"
 
 
 Version 1.2.3 (2014-01-12):
-• better decoding of transactions!
-• bugfix: corrected parsing error with some specific transactions
-• bugfix: wrong time displayed in some transaction
+â€¢ better decoding of transactions!
+â€¢ bugfix: corrected parsing error with some specific transactions
+â€¢ bugfix: wrong time displayed in some transaction

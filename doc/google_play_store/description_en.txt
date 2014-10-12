@@ -1,4 +1,4 @@
-Tries to read infos from NFC-enabled Maestro debit cards. (Tested only with Austrian cards until now.)
+Tries to read infos from NFC-enabled Maestro debit cards. (Only for cards FROM AUSTRIA!)
 
 
 Infos:
@@ -21,9 +21,9 @@ Note on security:
 ----------------------------------
 As banking cards may contain sensitive information, everyone should be careful when installing apps like this one. So to increase trustworthiness:
 
-• This app only uses the "NFC" permission and nothing else (also no internet access!).
-• The full source code of this app is freely available at: https://github.com/johnzweng/bankomatinfos
-• No data is being stored or sent (unless you send it yourself via Android's "Share" function). 
+â€¢ This app only uses the "NFC" permission and nothing else (also no internet access!).
+â€¢ The full source code of this app is freely available at: https://github.com/johnzweng/bankomatinfos
+â€¢ No data is being stored or sent (unless you send it yourself via Android's "Share" function). 
 
 
 This app does not contain any ads!

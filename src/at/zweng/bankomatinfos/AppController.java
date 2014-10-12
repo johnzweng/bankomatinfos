@@ -1,7 +1,7 @@
 package at.zweng.bankomatinfos;
 
-
 import static at.zweng.bankomatinfos.util.Utils.*;
+import android.content.Context;
 import at.zweng.bankomatinfos.model.CardInfo;
 
 /**
@@ -47,6 +47,16 @@ public class AppController {
 	 * @return the _cardInfo
 	 */
 	public CardInfo getCardInfo() {
+		return _cardInfo;
+	}
+
+	/**
+	 * @return the _cardInfo
+	 */
+	public CardInfo getCardInfoNullSafe(Context ctx) {
+		if (_cardInfo == null) {
+			return new CardInfo(ctx);
+		}
 		return _cardInfo;
 	}
 

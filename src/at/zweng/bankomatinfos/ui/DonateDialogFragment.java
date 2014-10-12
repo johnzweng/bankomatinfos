@@ -23,6 +23,7 @@ public class DonateDialogFragment extends DialogFragment {
 
 	private final static String DONATE_WEBPAGE_URL_BITCOIN_FALLBACK = "http://johannes.zweng.at/donations.html#bitcoin";
 	private final static String DONATE_WEBPAGE_URL_BANK = "http://johannes.zweng.at/donations.html#bank";
+	private final static String DONATE_WEBPAGE_URL_FLATTR = "http://johannes.zweng.at/donations.html#flattr";
 	private final static String DONATE_WEBPAGE_URL_PAYPAL = "http://johannes.zweng.at/donations.html#paypal";
 
 	@Override
@@ -66,6 +67,16 @@ public class DonateDialogFragment extends DialogFragment {
 				Intent donateIntent = new Intent();
 				donateIntent.setAction(Intent.ACTION_VIEW);
 				donateIntent.setData(Uri.parse(DONATE_WEBPAGE_URL_PAYPAL));
+				startActivity(donateIntent);
+			}
+		});
+		Button flattr = (Button) v.findViewById(R.id.btnDonateDialogFlattr);
+		flattr.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent donateIntent = new Intent();
+				donateIntent.setAction(Intent.ACTION_VIEW);
+				donateIntent.setData(Uri.parse(DONATE_WEBPAGE_URL_FLATTR));
 				startActivity(donateIntent);
 			}
 		});

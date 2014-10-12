@@ -1,0 +1,1 @@
+Zeigt Infos über deine "paypass" Bankomat- bzw. Maestro-Karte.
