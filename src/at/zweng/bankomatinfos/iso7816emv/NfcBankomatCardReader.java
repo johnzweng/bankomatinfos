@@ -684,7 +684,15 @@ public class NfcBankomatCardReader {
 								_ctl.log(txLogEntry.toString());
 							}
 						} else {
-							logBerTlvResponse(responsePdu);
+							// avoid that a single unparsable record may abort
+							// the whole scan
+							try {
+								logBerTlvResponse(responsePdu);
+							} catch (Exception e) {
+								Log.w(TAG,
+										"Ignored exception while parsing TLV data",
+										e);
+							}
 						}
 					} else {
 						logResultPdu(responsePdu);

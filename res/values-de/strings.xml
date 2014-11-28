@@ -102,4 +102,11 @@
     <string name="pref_description_perform_full_file_scan_true">Scanne alle Dateien. Das Scannen dauert länger, findet aber *eventuell* auf manchen Karten mehr Daten.</string>
     <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
 
+    <!-- Cryptogram information data -->
+    <string name="cryptogram_type_tc">Das Terminal darf diese Transaktion offline akzeptieren (kann aber aus anderen Gründen trotzdem online gehen und die Bank fragen).</string>
+    <string name="cryptogram_type_arqc">Das Terminal muss online gehen und die Bank fragen, ob diese Transaktion akzeptiert werden darf.</string>
+    <string name="cryptogram_type_aac">Die Karte hat diese Transaktion gleich offline abgelehnt.</string>
+    <string name="cryptogram_type_rfu">Dieser Typ ist reserviert für zukünftige Anwendungen.</string>
+    
+    
 </resources>

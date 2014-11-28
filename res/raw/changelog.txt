@@ -19,6 +19,10 @@
     </style>
   </head>
   <body>
+$ 1.2.6
+  % Version 1.2.6
+  _ 2014-11-28
+    * explain the field "cryptogram information data" in log entries
 $ 1.2.5
   % Version 1.2.5
   _ 2014-10-11

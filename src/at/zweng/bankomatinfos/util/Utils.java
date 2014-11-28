@@ -607,6 +607,61 @@ public class Utils {
 	}
 
 	/**
+	 * Parse the byte "cryptogram infrmation data". See EMV specifications 4.3,
+	 * EMV Book 3, page 56 (page 72 in the pdf), Table 14:
+	 * "Coding of Cryptogram Information Data"
+	 * 
+	 * @param b
+	 * @param ctx
+	 * @return
+	 */
+	public static String explainCryptogramInformationByte(byte b, Context ctx) {
+		// b8 b7
+		// 0 0 --> AAC
+		// 0 1 --> TC
+		// 1 0 --> ARQC
+		// 1 1 --> RFU
+		//
+		// b6 b5
+		// reserved for payment system specific cryptograms
+		//
+		// b4
+		// 0 --> No advice required
+		// 1 --> Advice reequired
+		//
+		// b3 b1 b1 : reason/advice code
+		// 1 x x: RFU
+		// 0 0 0: no information given
+		// 0 0 1: service not allowed
+		// 0 1 0: pin try limit exceeded
+		// 0 1 1: issuer authentication failed
+
+		StringBuilder s = new StringBuilder();
+
+		// bit 8 == 1 and bit 7 == 0
+		if (((b >>> 7 & (byte) 0x01) == 1) && ((b >>> 6 & (byte) 0x01) == 0)) {
+			s.append("ARQC: " + ctx.getString(R.string.cryptogram_type_arqc));
+		} else
+		// bit 8 == 0 and bit 7 == 1
+		if (((b >>> 7 & (byte) 0x01) == 0) && ((b >>> 6 & (byte) 0x01) == 1)) {
+			s.append("TC: " + ctx.getString(R.string.cryptogram_type_tc));
+		} else
+		// bit 8 == 0 and bit 7 == 0
+		if (((b >>> 7 & (byte) 0x01) == 0) && ((b >>> 6 & (byte) 0x01) == 0)) {
+			s.append("AAC: " + ctx.getString(R.string.cryptogram_type_aac));
+		} else
+		// bit 8 == 1 and bit 7 == 1
+		if (((b >>> 7 & (byte) 0x01) == 1) && ((b >>> 6 & (byte) 0x01) == 1)) {
+			s.append("RFU: " + ctx.getString(R.string.cryptogram_type_rfu));
+		}
+
+		// TODO: parse and explaining remaining bits
+		// (but as it seems most of the time they are zero)
+
+		return s.toString();
+	}
+
+	/**
 	 * show about dialog
 	 */
 	public static void showAboutDialog(FragmentManager fm) {

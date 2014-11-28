@@ -1,17 +1,8 @@
+Version 1.2.6 (28.11.2014):
+• Erkläre die Bedeutung des Felds "cryptogram information data" in den Log-Einträgen
+
+
 Version 1.2.5 (11.10.2014):
 • Anzeige weiterer allgemeiner Kartendaten (OS, IC, etc..)
 • zeige Hinweis bei neueren Karten die keine Logs mehr speichern
 • bugfix: Exception beim Lesen bestimmter Karten behoben
-
-
-Version 1.2.4 (19.01.2014):
-• zeigt nun auch: Ablaufdatum, Austellungsdatum und Kartennummer
-• bugfix: IOException bei App-Neustart behoben
-• bugfix: Absturz auf "Einstellungen" Seite behoben
-• neuer Menüeintrag: "Spenden"
-
-
-Version 1.2.3 (12.01.2014):
-• bessere Aufschlüsselung der Transaktionen
-• bugfix: Lesefehler bei bestimmten Transaktionstypen behoben
-• bugfix: falsche Uhrzeit bei manchen Transaktionen behoben

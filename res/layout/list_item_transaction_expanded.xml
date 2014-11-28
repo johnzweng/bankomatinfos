@@ -78,6 +78,16 @@
             android:text="0x40"
             android:textAppearance="@style/TransactionListDetailData" />
 
+        <TextView
+            android:id="@+id/txListItemCryptogramInformationDataExplained"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txListItemCryptogramInformationData"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="8dp"
+            android:text="(online / offline etc..)"
+            android:textAppearance="@style/TransactionListDetailDataSmall" />
         
         
         
@@ -86,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/txListItemCryptogramInformationData"
+            android:layout_below="@+id/txListItemCryptogramInformationDataExplained"
             android:layout_marginRight="8dp"
             android:layout_marginTop="4dp"
             android:maxLines="1"

@@ -1,17 +1,8 @@
-Version 1.2.5 (11.10.2014):
+Version 1.2.6 (2014-11-28):
+• explain the field "cryptogram information data" in log entries
+
+
+Version 1.2.5 (2014-10-11):
 • now also shows some generic infos about card (OS, IC type, etc..)
 • display note for newer cards which don't contain tx logs
 • bugfix: fixed exception occuring with some cards
-
-
-Version 1.2.4 (2014-01-19):
-• shows new fields: expiration date, activation date, card number
-• bugfix: fixed IOException on app restart
-• bugfix: fixed crash on "Settings" page
-• new menu entry: "Donation"
-
-
-Version 1.2.3 (2014-01-12):
-• better decoding of transactions!
-• bugfix: corrected parsing error with some specific transactions
-• bugfix: wrong time displayed in some transaction

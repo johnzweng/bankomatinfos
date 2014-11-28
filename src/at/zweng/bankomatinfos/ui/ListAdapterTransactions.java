@@ -5,6 +5,7 @@ package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.byte2Hex;
 import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
+import static at.zweng.bankomatinfos.util.Utils.explainCryptogramInformationByte;
 import static at.zweng.bankomatinfos.util.Utils.formatBalance;
 import static at.zweng.bankomatinfos.util.Utils.formatDateWithTime;
 import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
@@ -94,6 +95,8 @@ public class ListAdapterTransactions extends BaseAdapter {
 		if (showFullTxData) {
 			TextView cryptogramInformation = (TextView) v
 					.findViewById(R.id.txListItemCryptogramInformationData);
+			TextView cryptogramInformationExplained = (TextView) v
+					.findViewById(R.id.txListItemCryptogramInformationDataExplained);
 			TextView atc = (TextView) v.findViewById(R.id.txListItemATC);
 
 			TextView appDefaultAction = (TextView) v
@@ -106,6 +109,9 @@ public class ListAdapterTransactions extends BaseAdapter {
 
 			cryptogramInformation.setText("0x"
 					+ byte2Hex(tx.getCryptogramInformationData()));
+			cryptogramInformationExplained
+					.setText(explainCryptogramInformationByte(tx
+							.getCryptogramInformationData(),_context));
 			atc.setText(Integer.toString(tx.getAtc()));
 			appDefaultAction.setText(prettyPrintString(
 					bytesToHex(tx.getApplicationDefaultAction()), 2));
