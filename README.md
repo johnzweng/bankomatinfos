@@ -1,5 +1,7 @@
 # Bankomatkarten Infos
 
+
+Compiled apk available from: http://johannes.zweng.at/android/Market/BankomatInfos/
 ***
 ### ***Important note, 2014-12-12:***<br>
 The application got a new package ID (so technically it is now a new application). The main reason for this step was that Google blocked the application in the Play Store because of:
