@@ -1,25 +1,22 @@
 # Bankomatkarten Infos
 
 ***
-***
-***
-## ***Update 8.1.2014:***<br>
-Aufgrund des aktuellen Medieninteresses an dem Thema hier eine kleine Stellungnahme:
+### ***Important note, 2014-12-12:***<br>
+The application got a new package ID (so technically it is now a new application). The main reason for this step was that Google blocked the application in the Play Store because of:
+> **REASON FOR REMOVAL**: Violation of the [paid and free](https://play.google.com/about/developer-content-policy.html#payments) provision of the Content Policy and [section 3.5](https://play.google.com/about/developer-distribution-agreement.html#pricing-payments) of the Developer Distribution Agreement.
 
-***Zur Klarstellung:*** ich wollte da nichts aufdecken oder hacken. Ich hab mich nur rein interessehalber mit dem Thema beschäftigt, weil ich prinzipiell das Thema NFC sehr spannend finde und einfach mehr darüber lernen wollte.
+Therefore I removed the "donation" dialog and published the app again under a new application ID (as this is allowed by Google):
+> This particular app has been disabled as a policy strike. If your developer account is still in good standing, you may revise and upload a policy compliant version of this application as a new package name.
 
-Ich habe auch nichts "gehackt" oder "geknackt". Alles was ich in der App gemacht habe ist offen im EMV Zahlungsstandard beschrieben. Alle notwendigen Infos dazu kann jeder technisch Interessierte frei zugänglich ganz offiziell hier in den Spezifikationen nachlesen: [http://www.emvco.com/specifications.aspx?id=223](http://www.emvco.com/specifications.aspx?id=223)
+Sorry for this step. If you have installed the previous version, please uninstall it and install the new one, so that you will receive further updates.
 
-Außerdem ist es keineswegs neu, dass die Bankomatkarten diese Daten beinhalten. Genau dieselben Info kann man auch aus jeder alten Bankomatkarte (ohne NFC) auslesen. Man muss sich nur um ein paar Euro ein Smartcard-Lesegerät kaufen und eine entsprechende Applkation bauen. Das haben andere bereits vor mir gezeigt.
-
-Einzig neu ist die Tatsache, dass diese Infos jetzt auch drahtlos per NFC lesbar sind.
+Thank you very much and sorry for the inconvenience,
+<br>Johannes Zweng
 ***
-***
-***
-
+<br><br>
 
 ### Android NFC-App zum Auslesen von österreichischen Bankomatkarten bzw. Maestro Karten
-english version below..<br>
+<br>(scroll down for english version)<br>
 
 Sollte auf Android 4.0.3 oder höher funktionieren und benötigt ein Gerät mit NFC. 
 
