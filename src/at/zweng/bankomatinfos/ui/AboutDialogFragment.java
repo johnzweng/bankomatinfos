@@ -9,7 +9,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Fragment for about dialog

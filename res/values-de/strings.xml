@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Bankomatkarten Infos</string>
+    <string name="app_name">Bankomatkarten Infos 2</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_about">Über</string>
     <string name="action_share">Teilen</string>
@@ -79,14 +79,6 @@
     <string name="about_dialog_btnOk">OK</string>
     <string name="about_dialog_title">Infos</string>
     <string name="about_dialog_image_description">App logo</string>
-
-    <!-- Donate Dialog -->
-    <string name="donate_dialog_title">Spenden</string>
-    <string name="donate_dialog_btn_bitcoin">Bitcoin</string>
-    <string name="donate_dialog_btn_flattr">Flattr</string>
-    <string name="donate_dialog_btn_paypal">Paypal</string>
-    <string name="donate_dialog_btn_euro">Euro (Überweisung)</string>
-    <string name="donate_text"><Data><![CDATA[ <b>Eins vorweg:</b><br/><br/>Es ist absolut in Ordnung diese App frei und kostenlos zu verwenden. Ich habe diese App nur aus technischem Interesse und nicht mit Gewinnabsichten gebaut.<br/><br/>Diejenigen die dennoch gerne etwas spenden möchte, können dies wie folgt tun: ]]></Data></string>
 
     <!-- Changelog dialog -->
     <string name="changelog_full_title">Letzte Änderungen</string>

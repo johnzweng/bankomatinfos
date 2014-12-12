@@ -19,6 +19,14 @@
     </style>
   </head>
   <body>
+$ 2.0.0
+  % Version 2.0.0
+  _ 2014-12-12
+    * Reines Policy Update wegen Play-Store Sperre (funktional keine Änderungen zu 1.2.6)
+    * "Spenden"-Dialog entfernt, da er offensichtlich gegen Google's Content Policy bzw. Developer Distribution Agreements verstoßen hat und zum <b>Ausschluss der App</b> aus dem Play Store geführt hat.
+    * Neue ID für die App (dh. technisch ist es jetzt eine neue App und kein Update der alten App), da die alte Package ID dauerhaft im Play Store gesperrt bleibt (leider)
+    * Name von "Bankomatkarten Infos" auf "Bankomatkarten Infos 2" geändert.
+    * <b>Bitte deinstalliere die alte Version der App manuell von deinem Gerät!</b> (falls du die App bereits früher einmal installiert hattest)
 $ 1.2.6
   % Version 1.2.6
   _ 2014-11-28

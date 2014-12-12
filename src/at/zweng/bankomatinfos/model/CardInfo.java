@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Represents the data read from a bankomat card.

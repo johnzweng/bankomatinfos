@@ -29,7 +29,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.webkit.WebView;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 public class ChangeLog {
 

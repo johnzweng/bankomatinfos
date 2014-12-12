@@ -13,8 +13,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Custom list adapter for the card infos list (first tab page

@@ -1,1 +1,1 @@
-Zeigt Infos über deine "paypass" Bankomat- bzw. Maestro-Karte.
+Liest Infos aus österrichischen "paypass" Bankomatkarten über NFC.

@@ -1,8 +1,9 @@
+Version 2.0.0 (12.12.2014):
+• Update aus Policy-Gründen wegen Play-Store Sperre (funktional keine Änderungen zu 1.2.6)
+• "Spenden"-Dialog entfernt, da er offensichtlich gegen Google's Content Policy bzw. Developer Distribution Agreements verstoßen hat und zum <b>Ausschluss der App</b> aus dem Play Store geführt hat.
+• Neue ID für die App (dh. technisch ist es jetzt eine neue App und kein Update der alten App), da die alte Package ID dauerhaft im Play Store gesperrt bleibt (leider)
+• Name von "Bankomatkarten Infos" auf "Bankomatkarten Infos 2" geändert.
+
 Version 1.2.6 (28.11.2014):
 • Erkläre die Bedeutung des Felds "cryptogram information data" in den Log-Einträgen
 
-
-Version 1.2.5 (11.10.2014):
-• Anzeige weiterer allgemeiner Kartendaten (OS, IC, etc..)
-• zeige Hinweis bei neueren Karten die keine Logs mehr speichern
-• bugfix: Exception beim Lesen bestimmter Karten behoben

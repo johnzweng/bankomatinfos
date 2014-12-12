@@ -47,12 +47,12 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.util.Log;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Performs all the reading operations on a card.

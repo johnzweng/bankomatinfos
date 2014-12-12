@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.model.CardInfo;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * A simple fragment subclass, showing the result log tab.

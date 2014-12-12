@@ -1,9 +1,18 @@
-Tries to read infos from NFC-enabled Maestro debit cards. (Only for cards FROM AUSTRIA!)
+Tries to read technical details from Austrian NFC-enabled Maestro debit cards. (Works only with cards FROM AUSTRIA!)
+
+
+IMPORTANT NOTE:
+----------------------------------
+This is a revised re-publishment of the app "Bankomat Card Infos" (which was removed from Play Store by Google). The "Donation" page has been removed completly, because it violated Google's Content Policy and/or Developer Distribution Agreements.
+
+This app has nothing to do with payments, nor does it include any payment functionality. This is just a technical analysis tool for scanning NFC-enabled EMV Smartcards, issued in Austria.
+
+This is not a payment app!
 
 
 Infos:
 ----------------------------------
-This app tries to read free accessible informations (and if found) the last debit transactions from Austrian (and maybe other) Maestro debit cards (in Austria called "Bankomatkarte"). Until now tested with "Bank Austria" and "Sparkasse" Maestro cards.
+This app tries to read free accessible informations (and if found) the last debit transactions from Austrian (and maybe other) Maestro debit cards (in Austria called "Bankomatkarte").
 
 Of course works only with NFC-enabled cards (these cards often have the "pay pass" logo or the NFC logo printed on them).
 

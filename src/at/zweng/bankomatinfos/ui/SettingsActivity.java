@@ -11,7 +11,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On

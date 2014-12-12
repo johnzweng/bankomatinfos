@@ -19,6 +19,14 @@
     </style>
   </head>
   <body>
+$ 2.0.0
+  % Version 2.0.0
+  _ 2014-12-12
+    * just a policy update because of the removal from Play Store by Google (no functional changes to version 1.2.6)
+    * completly removed the "Donation" dialog as it violated Google's Content Policy and/or Developer Distribution Agreements (and lead to the expulsion of the app from the Play Store)
+    * new package ID for the app (so technically this is a <b>new app</b> and not just an update of the old app) because the old package ID stays bloccked permanently in Play Store (unfortunately)
+    * changed app name from "Bankomat Card Infos" to "Bankomat Card Infos 2"
+    * <b>Please uninstall the old app version manually from your phone</b> (if you have installed it before)
 $ 1.2.6
   % Version 1.2.6
   _ 2014-11-28

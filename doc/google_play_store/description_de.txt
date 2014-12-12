@@ -1,19 +1,24 @@
 Versucht österreichische Bankomat und Maestro-Karten per NFC auszulesen.
 
 
+HINWEIS:
+----------------------------------
+Dies ist eine überarbeitete Neu-Publizierung der App "Bankomatkarten Infos" (die im Play Store von Google gesperrt wurde). Ich habe den "Spenden" Dialog komplett entfernt, da er offensichtlich gegen Google's Content Policy bzw. Developer Distribution Agreements verstoßen hat.
+
+Diese App hat nichts mit Zahlungen zu tun und ermöglicht auch keinerlei Zahlungen! Dies ist rein ein Analyse-Werkzeug um technische Details aus NFC-aktivierten Bankomatkarten aus Österreich auszulesen.
+
+Dies ist keine Bezahl-App!
+
+
 Anmerkung:
-Kann natürlich nur funktionieren wenn auf der Karte das NFC- oder "pay pass" Logo abgedruckt ist (die anderen Karten haben einfach keine NFC-Funktion).  Hinweis: bei manchen Geräten ist der NFC Empfänger im Akku eingebaut (ja wirklich!) - zB beim Galaxy S3! Daher funktioniert NFC oft nicht mit Zweitakkus.
-
-Sollte es daher nicht funktionieren, am besten einfach kurz Gegenprobe mit einer anderen App machen (zb. mit der offiziellen "Paylife Quick" App) ob NFC prinzipiell funktoniert (auch geht bei manchen Karten NFC einfach nicht - da kann die App nichts dafür).
-
-Wenn die Karte noch nie (mit PIN) benutzt wurde - also frisch aus dem Kuvert - gibt sie außer Quick Guthaben auch nichts preis.
+• Funktioniert nur wenn auf der Karte das NFC- oder "pay pass" Logo abgedruckt ist
+• bei manchen Geräten ist der NFC Empfänger im Akku eingebaut (zB beim Galaxy S3)! Daher funktioniert NFC oft nicht mit Zweitakkus.
+• Sollte es daher nicht funktionieren, am besten einfach kurz Gegenprobe mit einer anderen App machen (zb. mit der offiziellen "Paylife Quick" App) ob NFC prinzipiell funktoniert (auch geht bei manchen Karten NFC einfach nicht - da kann die App nichts dafür).
 
 
 Infos:
 ----------------------------------
 Diese App liest über NFC allgemein zugängliche Informationen sowie (falls vorhanden) die letzten Transaktionen aus österreichischen (und vielleicht auch anderen) Bankomat Karten aus (Maestro Debit Karten). Bisher nur mit Bank Austria und Sparkasse Karten getestet.
-
-Funktioniert nur mit Karten mit NFC-Funktion (diese Karten haben meistens das "pay pass" Logo oder ein Funk-Symbol auf der Karte).
 
 Derzeit wird nicht der volle Umfang des EMV-Standards von dieser App genutzt. Daher ist es durchaus möglich, dass bei anderen Karten keine oder weniger Infos angezeigt werden. Diese App verwendet ausschließlich lesende Kommandos, und sollte daher gefahrlos für die Karte sein.
 

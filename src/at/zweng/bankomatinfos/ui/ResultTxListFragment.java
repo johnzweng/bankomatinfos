@@ -9,7 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * A simple Fragment subclass, showing the transaction list.

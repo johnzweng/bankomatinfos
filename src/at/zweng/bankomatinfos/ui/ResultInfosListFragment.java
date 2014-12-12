@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import at.zweng.bankomatinfos.R;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * A simple Fragment subclass, showing the list of infos.

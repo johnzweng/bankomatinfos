@@ -21,12 +21,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.iso7816emv.NfcBankomatCardReader;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.util.ChangeLog;
 import at.zweng.bankomatinfos.util.CustomAlertDialog;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Startup activity
@@ -126,9 +126,6 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
-			return true;
-		case R.id.action_donate:
-			showDonationDialog(getFragmentManager());
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);

@@ -22,10 +22,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.ui.AboutDialogFragment;
 import at.zweng.bankomatinfos.ui.ChangelogDialogFragment;
-import at.zweng.bankomatinfos.ui.DonateDialogFragment;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Some static helper methods
@@ -667,14 +666,6 @@ public class Utils {
 	public static void showAboutDialog(FragmentManager fm) {
 		DialogFragment aboutFragment = new AboutDialogFragment();
 		aboutFragment.show(fm, "dialog_about");
-	}
-
-	/**
-	 * show donation dialog
-	 */
-	public static void showDonationDialog(FragmentManager fm) {
-		DialogFragment donateFragment = new DonateDialogFragment();
-		donateFragment.show(fm, "dialog_donate");
 	}
 
 	/**

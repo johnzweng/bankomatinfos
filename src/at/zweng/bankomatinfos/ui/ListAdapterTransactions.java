@@ -23,8 +23,8 @@ import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.model.TransactionLogEntry;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Custom list adapter for the transaction list

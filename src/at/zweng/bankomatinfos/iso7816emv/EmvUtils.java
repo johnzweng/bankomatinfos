@@ -17,9 +17,9 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.util.Log;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
+import at.zweng.bankomatinfos2.R;
 
 /**
  * Util functions around EMV (https://en.wikipedia.org/wiki/EMV) standard and

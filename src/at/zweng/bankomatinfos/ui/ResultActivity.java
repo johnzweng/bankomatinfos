@@ -2,7 +2,6 @@ package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
 import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
-import static at.zweng.bankomatinfos.util.Utils.showDonationDialog;
 
 import java.util.Locale;
 
@@ -20,8 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.R;
 import at.zweng.bankomatinfos.util.Utils;
+import at.zweng.bankomatinfos2.R;
 
 // TODO: maybe also add share action for general and transations fragment
 
@@ -142,9 +141,6 @@ public class ResultActivity extends FragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			showAboutDialog(getFragmentManager());
-			return true;
-		case R.id.action_donate:
-			showDonationDialog(getFragmentManager());
 			return true;
 		case R.id.action_changelog:
 			showChangelogDialog(getFragmentManager(), true);
