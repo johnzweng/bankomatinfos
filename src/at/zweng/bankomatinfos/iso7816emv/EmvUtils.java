@@ -76,6 +76,13 @@ public class EmvUtils {
 			(byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x00 };
 
 	/**
+	 * GET_CPLC_COMMAND , but with Le set to 2D (some cards seem to require it
+	 * this way)
+	 */
+	public static final byte[] GPCS_GET_CPLC_COMMAND_WITH_LENGTH = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x2D };
+
+	/**
 	 * EMV command GET CHALLENGE (returns 8 byte random number), used in
 	 * transactions.
 	 */

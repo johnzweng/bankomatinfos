@@ -1087,6 +1087,23 @@ public class NfcBankomatCardReader {
 		byte[] resultPdu = _localIsoDep.transceive(command);
 		logResultPdu(resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
+
+		// some card don't return CPLC if sent with Le 00
+		// retry it with (hardcoded) Le value
+		// TODO: better check if SW1 == 6D ("incorrect len, SW2 specifies
+		// correct length")
+		// and send specified len
+		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
+			Log.d(TAG,
+					"sending GET CPLC returned an error, will retry with Le set..");
+			Log.d(TAG, "sending GET CPLC command with Le set..");
+			command = EmvUtils.GPCS_GET_CPLC_COMMAND_WITH_LENGTH;
+			Log.d(TAG, "will send byte array: " + bytesToHex(command));
+			_ctl.log("sent: " + bytesToHex(command));
+			resultPdu = _localIsoDep.transceive(command);
+			logResultPdu(resultPdu);
+			Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
+		}
 		return resultPdu;
 	}
 

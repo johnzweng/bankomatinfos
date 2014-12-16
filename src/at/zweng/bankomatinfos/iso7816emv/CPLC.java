@@ -174,8 +174,13 @@ public class CPLC {
 		if ("3060".equals(id)) {
 			return "Renesas";
 		}
+		// seen on an Austrian Mastercard from Kalixa
 		if ("1180".equals(id)) {
 			return "cpi-pf (CPI Card Group)";
+		}
+		// seen on a Romanian Mastercard
+		if ("1143".equals(id)) {
+			return "Oberthur Technologies";
 		}
 		return "Unknown (0x" + id + ")";
 	}
