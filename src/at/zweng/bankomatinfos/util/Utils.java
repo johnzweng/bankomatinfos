@@ -77,6 +77,20 @@ public class Utils {
 	}
 
 	/**
+	 * Returns a hexadecimal String representation of a byte array (without
+	 * spaces), also null parameter allowed
+	 * 
+	 * @param bytes
+	 * @return
+	 */
+	public static String bytesToHexNullAllowed(byte[] bytes) {
+		if (bytes == null) {
+			return "<null>";
+		}
+		return bytesToHex(bytes);
+	}
+
+	/**
 	 * @param b
 	 * @return hex representation as string
 	 */

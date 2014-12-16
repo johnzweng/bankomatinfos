@@ -1,6 +1,7 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAESTRO_BANKOMAT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MASTERCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_VISA_CREDITCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
@@ -20,12 +21,12 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.filterTagsForResult;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getCurrencyAsString;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getDateFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getNextTLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTagsFromBerTlvAPDUResponse;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTimeStampFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.isStatusSuccess;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.prettyPrintBerTlvAPDUResponse;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.responsePduLooksLikeTxLogEntry;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.statusToString;
 import static at.zweng.bankomatinfos.util.Utils.TAG;
 import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
@@ -65,6 +66,41 @@ public class NfcBankomatCardReader {
 	private AppController _ctl;
 	private List<TagAndValue> _tagList;
 	private Context _ctx;
+
+	// 9F 4F - 11 bytes: Log Format
+	// 9F 27 (01 bytes) -> Cryptogram Information Data
+	// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+	// 5F 2A (02 bytes) -> Transaction Currency Code
+	// 9A (03 bytes) -> Transaction Date
+	// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+	// 9F 52 (06 bytes) -> Application Default Action (ADA)
+	// total length: 20 bytes
+	private static final String LOG_FORMAT_MASTERCARD = "9F4F119F27019F02065F2A029A039F36029F52069000";
+	private static final int LOG_LENGTH_MASTERCARD = 22;
+
+	// 9F 4F - 1A bytes: Log Format
+	// 9F 27 (01 bytes) -> Cryptogram Information Data
+	// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+	// 5F 2A (02 bytes) -> Transaction Currency Code
+	// 9A (03 bytes) -> Transaction Date
+	// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+	// 9F 52 (06 bytes) -> Application Default Action (ADA)
+	// DF 3E (01 bytes) -> [UNHANDLED TAG]
+	// 9F 21 (03 bytes) -> Transaction Time (HHMMSS)
+	// 9F 7C (0x14 bytes) -> Customer Exclusive Data
+	// total length: 44 bytes
+	private static final String LOG_FORMAT_BANKOMAT_AUSTRIA = "9F4F1A9F27019F02065F2A029A039F36029F5206DF3E019F21039F7C149000";
+	private static final int LOG_LENGTH_BANKOMAT_AUSTRIA = 44;
+
+	// until now on all cards I've seen which head a tx log, they were stored on
+	// EF11
+	// we also cannot rely on cards Log Entry tag, as some cards don't contain
+	// this tag
+	// but still have logs in EF11
+	private static final int LOG_RECORD_EF = 11;
+
+	// FIXME: dynamic parsing of log entries, not static pattern comparison
+	private String _logFormatResponse;
 
 	/**
 	 * Constructor
@@ -130,7 +166,8 @@ public class NfcBankomatCardReader {
 				R.string.section_emv));
 		result = readQuickInfos(result);
 		result = readMaestroCardInfos(result, performFullFileScan);
-		// result = readVisaCardInfos(result, performFullFileScan);
+		result = readVisaCardInfos(result, performFullFileScan);
+		result = readMastercardInfos(result, performFullFileScan);
 		_ctl.log("FINISHED! :-)");
 		return result;
 	}
@@ -261,6 +298,47 @@ public class NfcBankomatCardReader {
 	}
 
 	/**
+	 * Read Mastercard infos from card
+	 * 
+	 * @param result
+	 * @param fullFileScan
+	 *            <code>true</code> if we should try to iterate over all EFs,
+	 *            false if only some
+	 * @throws IOException
+	 */
+	private CardInfo readMastercardInfos(CardInfo result, boolean fullFileScan)
+			throws IOException {
+		Log.d(TAG, "check if card contains Mastercard Creditcard AID..");
+		_ctl.log("Trying to select Mastercard Creditcard AID..");
+		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_MASTERCARD);
+		logBerTlvResponse(selectAidResponse);
+		boolean isMastercard = isStatusSuccess(getLast2Bytes(selectAidResponse));
+		_ctl.log("is a Mastercard Creditcard: " + isMastercard);
+		result.setMasterCard(isMastercard);
+		if (!isMastercard) {
+			return result;
+		}
+		// ok, so let's catch exceptions here, instead of just letting the whole
+		// scan abort, so that the user gets at least some infos where the
+		// parsing failed:
+		try {
+			result = readCreditcardEmvData(selectAidResponse, result,
+					fullFileScan);
+		} catch (RuntimeException re) {
+			_ctl.log("ERROR: Catched Exception while reading mastercard infos:\n"
+					+ re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading mastercard  infos: ",
+					re);
+		} catch (TlvParsingException tle) {
+			_ctl.log("ERROR: Catched Exception while reading mastercard  infos:\n"
+					+ tle + "\n" + tle.getMessage());
+			Log.w(TAG, "Catched Exception while reading mastercard  infos: ",
+					tle);
+		}
+		return result;
+	}
+
+	/**
 	 * Read VISA card infos from card
 	 * 
 	 * @param result
@@ -269,7 +347,6 @@ public class NfcBankomatCardReader {
 	 *            false if only some
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unused")
 	private CardInfo readVisaCardInfos(CardInfo result, boolean fullFileScan)
 			throws IOException {
 		Log.d(TAG, "check if card contains VISA Creditcard AID..");
@@ -286,7 +363,7 @@ public class NfcBankomatCardReader {
 		// scan abort, so that the user gets at least some infos where the
 		// parsing failed:
 		try {
-			result = readVisaCreditcardEmvData(selectAidResponse, result,
+			result = readCreditcardEmvData(selectAidResponse, result,
 					fullFileScan);
 		} catch (RuntimeException re) {
 			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
@@ -312,17 +389,9 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private CardInfo readVisaCreditcardEmvData(byte[] selectAidResponse,
+	private CardInfo readCreditcardEmvData(byte[] selectAidResponse,
 			CardInfo result, boolean fullFileScan) throws IOException,
 			TlvParsingException {
-
-		// Note 15.02.2014:
-		// -------------------
-		// It seems that sending GET PROCESSING OPTIONS increases the
-		// application transaction counter (ATC) on the card and all the infos
-		// also can be read without sending the ATC. Therefore I will omit
-		// sending the GPO command.
-
 		tryToReadLogFormat();
 		result = tryToReadPinRetryCounter(result);
 		tryToReadCurrentAtcValue();
@@ -331,7 +400,6 @@ public class NfcBankomatCardReader {
 		tryToReadAllCommonBerTlvTags();
 		// result = tryreadingTests(result);
 		result = searchForFiles(result, fullFileScan, true);
-
 		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList, false));
 		return result;
 	}
@@ -402,6 +470,7 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
+		_logFormatResponse = bytesToHex(resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -652,7 +721,7 @@ public class NfcBankomatCardReader {
 				if (shortEfFileIdentifier != 1 && shortEfFileIdentifier != 2
 						&& shortEfFileIdentifier != 3
 						&& shortEfFileIdentifier != 4
-						&& shortEfFileIdentifier != 11)
+						&& shortEfFileIdentifier != LOG_RECORD_EF)
 					continue;
 			}
 
@@ -677,8 +746,19 @@ public class NfcBankomatCardReader {
 					// also if we find a record set counter to 0
 					consecutiveErrorRecords = 0;
 					if (tryToParse) {
-						if (responsePduLooksLikeTxLogEntry(responsePdu)) {
-							TransactionLogEntry txLogEntry = tryParseTxLogEntryFromByteArray(cutoffLast2Bytes(responsePdu));
+
+						if (shortEfFileIdentifier == LOG_RECORD_EF) {
+							Log.i(TAG, "JZJZ TEST lengthLooksLike TX Record: "
+									+ lengthLooksLikeTxLog(responsePdu));
+							Log.i(TAG, "JZJZ TEST responsePdu length: "
+									+ responsePdu.length);
+							Log.i(TAG, "JZJZ TEST log format: "
+									+ _logFormatResponse);
+						}
+
+						if (shortEfFileIdentifier == LOG_RECORD_EF
+								&& lengthLooksLikeTxLog(responsePdu)) {
+							TransactionLogEntry txLogEntry = tryToParseLogEntry(responsePdu);
 							if (txLogEntry != null) {
 								txList.add(txLogEntry);
 								_ctl.log(txLogEntry.toString());
@@ -711,6 +791,34 @@ public class NfcBankomatCardReader {
 	}
 
 	/**
+	 * Very simple test for log record..
+	 * 
+	 * @param rawRecord
+	 * @return
+	 */
+	private boolean lengthLooksLikeTxLog(byte[] rawRecord) {
+		if (LOG_FORMAT_BANKOMAT_AUSTRIA.equals(_logFormatResponse)) {
+			return (rawRecord.length == LOG_LENGTH_BANKOMAT_AUSTRIA);
+		} else if (LOG_FORMAT_MASTERCARD.equals(_logFormatResponse)) {
+			return (rawRecord.length == LOG_LENGTH_MASTERCARD);
+		}
+		return false;
+	}
+
+	/**
+	 * @param rawRecord
+	 * @return
+	 */
+	private TransactionLogEntry tryToParseLogEntry(byte[] rawRecord) {
+		if (LOG_FORMAT_BANKOMAT_AUSTRIA.equals(_logFormatResponse)) {
+			return parseBankomatTxLogEntryFromByteArray(rawRecord);
+		} else if (LOG_FORMAT_MASTERCARD.equals(_logFormatResponse)) {
+			return parseMastercardTxLogEntryFromByteArray(rawRecord);
+		}
+		return null;
+	}
+
+	/**
 	 * Try to parse the raw byte array into an object
 	 * 
 	 * @param rawRecord
@@ -718,7 +826,66 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private TransactionLogEntry tryParseTxLogEntryFromByteArray(byte[] rawRecord) {
+	private TransactionLogEntry parseMastercardTxLogEntryFromByteArray(
+			byte[] rawRecord) {
+		// TODO: change this method to parse tx log entries dynamically based on
+		// format as specified by card
+
+		// UPDATE: according users' responses it seems that all Austrian
+		// Cards use the same logging structure (of course, all the cards come
+		// from the same issuer). So I keep this for now..
+
+		// TODO: currently hardcoded to log format of Austrian cards
+
+		// 9F 4F - 1A bytes: Log Format
+		// --------------------------------------
+		// 9F 27 (01 bytes) -> Cryptogram Information Data
+		// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+		// 5F 2A (02 bytes) -> Transaction Currency Code
+		// 9A (03 bytes) -> Transaction Date
+		// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+		// 9F 52 (06 bytes) -> Application Default Action (ADA)
+
+		if (rawRecord.length < LOG_LENGTH_MASTERCARD) {
+			// only continue if record is at least 24(+2 status) bytes long
+			Log.w(TAG,
+					"parseTxLogEntryFromByteArray: byte array is not long enough for log entry:\n"
+							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			return null;
+		}
+
+		TransactionLogEntry tx = new TransactionLogEntry();
+		try {
+			tx.setCryptogramInformationData(rawRecord[0]);
+			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
+			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setTransactionTimestamp(
+					getDateFromBcdBytes(getByteArrayPart(rawRecord, 9, 11)),
+					false);
+			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
+			tx.setApplicationDefaultAction(getByteArrayPart(rawRecord, 14, 19));
+			tx.setRawEntry(rawRecord);
+		} catch (Exception e) {
+			String msg = "Exception while trying to parse transaction entry: "
+					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2);
+			Log.w(TAG, msg, e);
+			_ctl.log(msg);
+			return null;
+		}
+		return tx;
+	}
+
+	/**
+	 * Try to parse the raw byte array into an object
+	 * 
+	 * @param rawRecord
+	 *            (without status word
+	 * @return the parsed record or <code>null</code> if something could not be
+	 *         parsed
+	 */
+	private TransactionLogEntry parseBankomatTxLogEntryFromByteArray(
+			byte[] rawRecord) {
 		// TODO: change this method to parse tx log entries dynamically based on
 		// format as specified by card
 
@@ -751,24 +918,25 @@ public class NfcBankomatCardReader {
 		TransactionLogEntry tx = new TransactionLogEntry();
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
-			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
-			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
-			tx.setTransactionTimestamp(getTimeStampFromBcdBytes(
-					getByteArrayPart(rawRecord, 9, 11),
-					getByteArrayPart(rawRecord, 21, 23)));
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
-
-			tx.setUnknownByte(rawRecord[20]);
+			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setTransactionTimestamp(
+					getTimeStampFromBcdBytes(
+							getByteArrayPart(rawRecord, 9, 11),
+							getByteArrayPart(rawRecord, 21, 23)), true);
+			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
 			tx.setApplicationDefaultAction(getByteArrayPart(rawRecord, 14, 19));
+			tx.setUnknownByte(rawRecord[20]);
 
 			// if record has only 24 bytes then there is no cust excl data
 			// as it starts at byte 25
 			if (rawRecord.length == 24) {
 				tx.setCustomerExclusiveData(new byte[0]);
 			} else {
-				// for being tolerant we parse from byte 25 untiil end
+				// for being tolerant we parse from byte 25 untiil end (last 2
+				// bytes are status)
 				tx.setCustomerExclusiveData(getByteArrayPart(rawRecord, 24,
-						rawRecord.length - 1));
+						rawRecord.length - 3));
 			}
 
 			tx.setRawEntry(rawRecord);
@@ -794,6 +962,7 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @return
 	 * @throws IOException
+	 * 
 	 */
 	private byte[] readRecord(int shortEfFileIdentifier, int recordNumber,
 			boolean logAlways) throws IOException {

@@ -12,8 +12,8 @@
     <string name="read_card_progress_status">Reading card&#8230;</string>
 
     <!-- error alert dialogs -->
-    <string name="dialog_title_error_no_maestro_or_quick">Unknown Card</string>
-    <string name="dialog_text_error_no_maestro_or_quick">This card is no Maestro or Paylife QUICK card.</string>
+    <string name="dialog_title_error_unsupported_card">Unknown Card</string>
+    <string name="dialog_text_error_unsupported_card">Sorry, currently only the following card types are supported:\n\n » Maestro Bankomat (Austria)\n » Paylife QUICK (Austria)\n » VISA credit card\n » Mastercard credit card</string>
     <string name="dialog_title_error_card_lost">Card lost</string>
     <string name="dialog_text_error_card_lost">Lost the connection to the card during reading.\n\nDid you remove the card?</string>
     <string name="dialog_title_error_no_smartcard">No SmartCard</string>
@@ -38,12 +38,13 @@
 	<!-- section headers -->
 	<string name="section_nfc">NFC:</string>
 	<string name="section_GPCS_CPLC">Card infos (CPLC data):</string>
-	<string name="section_emv">EMV / Maestro / Quick:</string>
+	<string name="section_emv">EMV / Credit card / Maestro / Quick:</string>
 
 	<string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
     <string name="lbl_is_quick_card">Is a QUICK card:</string>
     <string name="lbl_is_maestro_card">Is a Maestro (Bankomat) card:</string>
     <string name="lbl_is_visa_card">Is a VISA Creditcard:</string>
+    <string name="lbl_is_mastercard">Is a Mastercard Creditcard:</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="lbl_quick_balance">QUICK balance:</string>
@@ -54,7 +55,7 @@
     <string name="lbl_primary_account_number">Card number:</string>
     <string name="lbl_application_transaction_counter">Transaction counter:</string>
     <!-- did we find the EMV TAG "9F 4D" ("Log Entry")?  -->
-    <string name="lbl_contains_emv_log_entry_tag">Contains info about transaction logs:</string>
+    <string name="lbl_contains_emv_log_entry_tag">Contains transaction logs:</string>
     
 
     <!-- Transaction List: -->

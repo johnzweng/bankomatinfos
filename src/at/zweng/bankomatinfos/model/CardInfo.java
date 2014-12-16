@@ -22,6 +22,7 @@ public class CardInfo {
 	private boolean _maestroCard;
 	private boolean _containsTxLogs;
 	private boolean _visaCard;
+	private boolean _masterCard;
 	private long _quickBalance;
 	private int _pinRetryCounter;
 	private String _quickCurrency;
@@ -90,7 +91,7 @@ public class CardInfo {
 	public void addKeyValuePair(InfoKeyValuePair pair) {
 		_infoKeyValuePairs.add(pair);
 	}
-	
+
 	/**
 	 * @param headerName
 	 */
@@ -120,10 +121,12 @@ public class CardInfo {
 	 */
 	public void setQuickCard(boolean quickCard) {
 		this._quickCard = quickCard;
-		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
-				.getString(R.string.lbl_is_quick_card), quickCard ? _ctx
-				.getResources().getString(R.string.yes) : _ctx.getResources()
-				.getString(R.string.no)));
+		if (quickCard) {
+			this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+					.getString(R.string.lbl_is_quick_card), quickCard ? _ctx
+					.getResources().getString(R.string.yes) : _ctx
+					.getResources().getString(R.string.no)));
+		}
 	}
 
 	/**
@@ -141,6 +144,20 @@ public class CardInfo {
 	}
 
 	/**
+	 * @return true if is a VISA card
+	 */
+	public boolean isMasterCard() {
+		return _masterCard;
+	}
+
+	/**
+	 * @return true if is one of the supported card types
+	 */
+	public boolean isSupportedCard() {
+		return _quickCard || _maestroCard || _masterCard || _visaCard;
+	}
+
+	/**
 	 * @return true card contains TX logs
 	 */
 	public boolean containsTxLogs() {
@@ -154,9 +171,9 @@ public class CardInfo {
 	public void setContainsTxLogs(boolean containsTxLogs) {
 		this._containsTxLogs = containsTxLogs;
 		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
-				.getString(R.string.lbl_contains_emv_log_entry_tag), containsTxLogs ? _ctx
-				.getResources().getString(R.string.yes) : _ctx.getResources()
-				.getString(R.string.no)));
+				.getString(R.string.lbl_contains_emv_log_entry_tag),
+				containsTxLogs ? _ctx.getResources().getString(R.string.yes)
+						: _ctx.getResources().getString(R.string.no)));
 	}
 
 	/**
@@ -165,10 +182,12 @@ public class CardInfo {
 	 */
 	public void setMaestroCard(boolean maestroCard) {
 		this._maestroCard = maestroCard;
-		this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
-				.getString(R.string.lbl_is_maestro_card), maestroCard ? _ctx
-				.getResources().getString(R.string.yes) : _ctx.getResources()
-				.getString(R.string.no)));
+		if (maestroCard) {
+			this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+					.getString(R.string.lbl_is_maestro_card),
+					maestroCard ? _ctx.getResources().getString(R.string.yes)
+							: _ctx.getResources().getString(R.string.no)));
+		}
 	}
 
 	/**
@@ -181,6 +200,21 @@ public class CardInfo {
 		if (visaCard) {
 			this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
 					.getString(R.string.lbl_is_visa_card), visaCard ? _ctx
+					.getResources().getString(R.string.yes) : _ctx
+					.getResources().getString(R.string.no)));
+		}
+	}
+
+	/**
+	 * @param masterCarrd
+	 *            true if is a Mastercard creditcard
+	 */
+	public void setMasterCard(boolean masterCarrd) {
+		this._masterCard = masterCarrd;
+		// do not show this label, if it is no Mastercard
+		if (masterCarrd) {
+			this.addKeyValuePair(new InfoKeyValuePair(_ctx.getResources()
+					.getString(R.string.lbl_is_mastercard), masterCarrd ? _ctx
 					.getResources().getString(R.string.yes) : _ctx
 					.getResources().getString(R.string.no)));
 		}

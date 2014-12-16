@@ -7,13 +7,13 @@
     <string name="action_share">Teilen</string>
     <string name="action_donate">Spenden</string>
     <string name="action_changelog">Letzte Änderungen</string>
-    <string name="your_card_please">Bitte halten Sie Ihre Bankomatkarte an die Rückseite des Geräts&#8230;</string>
+    <string name="your_card_please">Bitte halten Sie Ihre Bankomat- oder Kreditkarte an die Rückseite des Geräts&#8230;</string>
     <string name="nfc_logo_description">NFC Logo</string>
     <string name="read_card_progress_status">Bitte warten, lese Karte&#8230;</string>
 
     <!-- error alert dialogs -->
-    <string name="dialog_title_error_no_maestro_or_quick">Unbekannte Karte</string>
-    <string name="dialog_text_error_no_maestro_or_quick">Diese Karte ist keine Maestro (Bankomat) oder Paylife QUICK Karte.</string>
+    <string name="dialog_title_error_unsupported_card">Unbekannte Karte</string>
+    <string name="dialog_text_error_unsupported_card">Sorry, momentan werden nur folgende Kartentypen unterstützt:\n\n » Maestro Bankomat (Österreich)\n » Paylife QUICK (Österreich)\n » VISA Kreditkarte\n » Mastercard Kreditkarte</string>
     <string name="dialog_title_error_card_lost">Karte verloren</string>
     <string name="dialog_text_error_card_lost">Die Verbindung zur Karte wurde während des Lesevorgangs unterbrochen.\n\nHaben Sie die Karte vom Gerät entfernt?</string>
     <string name="dialog_title_error_no_smartcard">Keine SmartCard</string>
@@ -38,12 +38,13 @@
 	<!-- section headers -->
 	<string name="section_nfc">NFC:</string>
 	<string name="section_GPCS_CPLC">Karteninfos (CPLC Daten):</string>
-	<string name="section_emv">EMV / Bankomat / Quick:</string>
+	<string name="section_emv">EMV / Kreditkarte / Bankomat / Quick:</string>
 	
     <string name="lbl_nfc_tag_id">NFC Tag ID dieser Karte\n(Dies ist nicht die Kartennummer!):</string>
     <string name="lbl_is_quick_card">Hat diese Karte eine QUICK Funktion:</string>
     <string name="lbl_is_maestro_card">Ist das eine Maestro (Bankomat) Karte:</string>
     <string name="lbl_is_visa_card">Ist das eine VISA Kreditkarte:</string>
+    <string name="lbl_is_mastercard">Ist das eine Mastercard Kreditkarte:</string>
     <string name="yes">JA</string>
     <string name="no">NEIN</string>
     <string name="lbl_quick_balance">QUICK Guthaben auf der Karte:</string>
@@ -54,7 +55,7 @@
     <string name="lbl_primary_account_number">Kartennummer:</string>
     <string name="lbl_application_transaction_counter">Transaktionszähler:</string>
     <!-- did we find the EMV TAG "9F 4D" ("Log Entry")? -->
-    <string name="lbl_contains_emv_log_entry_tag">Enthält Infos zu Transaktionslogs:</string>
+    <string name="lbl_contains_emv_log_entry_tag">Enthält Transaktionslogs:</string>
 
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>

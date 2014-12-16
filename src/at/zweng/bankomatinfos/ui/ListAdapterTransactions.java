@@ -7,6 +7,7 @@ import static at.zweng.bankomatinfos.util.Utils.byte2Hex;
 import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
 import static at.zweng.bankomatinfos.util.Utils.explainCryptogramInformationByte;
 import static at.zweng.bankomatinfos.util.Utils.formatBalance;
+import static at.zweng.bankomatinfos.util.Utils.formatDateOnly;
 import static at.zweng.bankomatinfos.util.Utils.formatDateWithTime;
 import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
 
@@ -87,7 +88,11 @@ public class ListAdapterTransactions extends BaseAdapter {
 				.findViewById(R.id.txListItemTimestamp);
 		TextView amount = (TextView) v.findViewById(R.id.txListItemAmount);
 
-		timeStamp.setText(formatDateWithTime(tx.getTransactionTimestamp()));
+		if (tx.hasTime()) {
+			timeStamp.setText(formatDateWithTime(tx.getTransactionTimestamp()));
+		} else {
+			timeStamp.setText(formatDateOnly(tx.getTransactionTimestamp()));
+		}
 		amount.setText("-" + formatBalance(tx.getAmount()) + " "
 				+ tx.getCurrency());
 
@@ -103,21 +108,35 @@ public class ListAdapterTransactions extends BaseAdapter {
 					.findViewById(R.id.txListItemApplicationDefaultAction);
 			TextView unknownByte = (TextView) v
 					.findViewById(R.id.txListItemUnknownByte);
-			TextView customerEsclusive = (TextView) v
+			TextView unknownByteLabel = (TextView) v
+					.findViewById(R.id.txListItemUnknownByteLabel);
+			TextView customerExclusive = (TextView) v
 					.findViewById(R.id.txListItemCustomerExclusiveData);
+			TextView customerExclusiveLabel = (TextView) v
+					.findViewById(R.id.txListItemCustomerExclusiveDataLabel);
 			TextView rawData = (TextView) v.findViewById(R.id.txListRawData);
 
 			cryptogramInformation.setText("0x"
 					+ byte2Hex(tx.getCryptogramInformationData()));
 			cryptogramInformationExplained
-					.setText(explainCryptogramInformationByte(tx
-							.getCryptogramInformationData(),_context));
+					.setText(explainCryptogramInformationByte(
+							tx.getCryptogramInformationData(), _context));
 			atc.setText(Integer.toString(tx.getAtc()));
 			appDefaultAction.setText(prettyPrintString(
 					bytesToHex(tx.getApplicationDefaultAction()), 2));
+			if (tx.getUnknownByte()!=null) {
 			unknownByte.setText(byte2Hex(tx.getUnknownByte()));
-			customerEsclusive.setText(prettyPrintString(
-					bytesToHex(tx.getCustomerExclusiveData()), 2));
+			} else {
+				unknownByte.setVisibility(View.GONE);
+				unknownByteLabel.setVisibility(View.GONE);
+			}
+			if (tx.getCustomerExclusiveData() != null) {
+				customerExclusive.setText(prettyPrintString(
+						bytesToHex(tx.getCustomerExclusiveData()), 2));
+			} else {
+				customerExclusiveLabel.setVisibility(View.GONE);
+				customerExclusive.setVisibility(View.GONE);
+			}
 
 			rawData.setText(prettyPrintString(bytesToHex(tx.getRawEntry()), 2));
 		}

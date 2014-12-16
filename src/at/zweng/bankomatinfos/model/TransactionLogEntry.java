@@ -18,8 +18,10 @@ public class TransactionLogEntry {
 	private byte[] _applicationDefaultAction;
 	private byte[] _customerExclusiveData;
 	// TAG "DF 3E"
-	private byte _unknownByte;
+	private Byte _unknownByte;
 	private byte[] _rawEntry;
+
+	private boolean _hasTime;
 
 	/**
 	 * @return the _transactionTimestamp
@@ -29,11 +31,14 @@ public class TransactionLogEntry {
 	}
 
 	/**
-	 * @param _transactionTimestamp
+	 * @param transactionTimestamp
 	 *            the _transactionTimestamp to set
+	 * @param true if timestamp also contains time (not just date)
 	 */
-	public void setTransactionTimestamp(Date transactionTimestamp) {
+	public void setTransactionTimestamp(Date transactionTimestamp,
+			boolean includesTime) {
 		this._transactionTimestamp = transactionTimestamp;
+		this._hasTime = includesTime;
 	}
 
 	/**
@@ -122,15 +127,14 @@ public class TransactionLogEntry {
 	 * @param applicationDefaultAction
 	 *            the _applicationDefaultAction to set
 	 */
-	public void setApplicationDefaultAction(
-			byte[] applicationDefaultAction) {
+	public void setApplicationDefaultAction(byte[] applicationDefaultAction) {
 		this._applicationDefaultAction = applicationDefaultAction;
 	}
 
 	/**
 	 * @return the _unknownByte
 	 */
-	public byte getUnknownByte() {
+	public Byte getUnknownByte() {
 		return _unknownByte;
 	}
 
@@ -157,6 +161,14 @@ public class TransactionLogEntry {
 		this._rawEntry = rawEntry;
 	}
 
+	/**
+	 * @return <code>true</code> if timestamp contains date + time,
+	 *         <code>false</code> otherwise
+	 */
+	public boolean hasTime() {
+		return _hasTime;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -164,17 +176,26 @@ public class TransactionLogEntry {
 	 */
 	@Override
 	public String toString() {
-		return "TransactionLogEntry [\n  - transactionTimestamp: "
-				+ formatDateWithTime(_transactionTimestamp) + "\n  - amount: "
-				+ formatBalance(_amount) + "\n  - atc: " + _atc
-				+ "\n  - currency: " + _currency
-				+ "\n  - cryptogramInformationData: "
-				+ byte2Hex(_cryptogramInformation)
-				+ "\n  - applicationDefaultAction: "
-				+ bytesToHex(_applicationDefaultAction)
-				+ "\n  - customerExclusiveData: "
-				+ bytesToHex(_customerExclusiveData) + "\n  - unknownByte: "
-				+ byte2Hex(_unknownByte) + "\n]";
-	}
+		StringBuilder sb = new StringBuilder(
+				"TransactionLogEntry [\n  - transactionTimestamp: ");
 
+		sb.append(formatDateWithTime(_transactionTimestamp));
+		sb.append("\n  - includes time: " + _hasTime);
+		sb.append("\n  - amount: ");
+		sb.append(formatBalance(_amount) + "\n  - atc: " + _atc);
+		sb.append("\n  - currency: " + _currency);
+		sb.append("\n  - cryptogramInformationData: ");
+		sb.append(byte2Hex(_cryptogramInformation));
+		sb.append("\n  - applicationDefaultAction: ");
+		sb.append(bytesToHexNullAllowed(_applicationDefaultAction));
+		if (_customerExclusiveData != null) {
+			sb.append("\n  - customerExclusiveData: ");
+			sb.append(bytesToHex(_customerExclusiveData));
+		}
+		if (_unknownByte != null) {
+			sb.append("\n  - unknownByte: " + byte2Hex(_unknownByte));
+		}
+		sb.append("\n");
+		return sb.toString();
+	}
 }

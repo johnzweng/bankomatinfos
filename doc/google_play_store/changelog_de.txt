@@ -1,9 +1,10 @@
+Version 2.0.1 (16.12.2014):
+• Experimenteller Support für Mastercard NFC Karten
+• Experimenteller Support für VISA NFC Karten
+• Anzeigen der Transaktions-Logs auf Kreditkarten funktioniert möglicherweise (noch) nicht
+
 Version 2.0.0 (12.12.2014):
 • Update aus Policy-Gründen wegen Play-Store Sperre (funktional keine Änderungen zu 1.2.6)
 • "Spenden"-Dialog entfernt, da er offensichtlich gegen Google's Content Policy bzw. Developer Distribution Agreements verstoßen hat und zum <b>Ausschluss der App</b> aus dem Play Store geführt hat.
 • Neue ID für die App (dh. technisch ist es jetzt eine neue App und kein Update der alten App), da die alte Package ID dauerhaft im Play Store gesperrt bleibt (leider)
 • Name von "Bankomatkarten Infos" auf "Bankomatkarten Infos 2" geändert.
-
-Version 1.2.6 (28.11.2014):
-• Erkläre die Bedeutung des Felds "cryptogram information data" in den Log-Einträgen
-

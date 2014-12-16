@@ -1,8 +1,10 @@
+Version 2.0.1 (2014-12-16):
+• Experimental support for analyzing Mastercard NFC cards
+• Experimental support for analyzing VISA NFC cards
+• Reading transaction log entries on creditcards might not work (yet)
+
 Version 2.0.0 (2014-12-12):
 • Update for policy reasons (no functional changes to version 1.2.6)
 • completly removed the "Donation" dialog as it violated Google's Content Policy and/or Developer Distribution Agreements (and lead to the expulsion of the app from the Play Store)
 • new package ID for the app (so technically this is a <b>new app</b> and not just an update of the old app) because the old package ID stays bloccked permanently in Play Store (unfortunately)
 • changed app name from "Bankomat Card Infos" to "Bankomat Card Infos 2"
-
-Version 1.2.6 (2014-11-28):
-• explain the field "cryptogram information data" in log entries

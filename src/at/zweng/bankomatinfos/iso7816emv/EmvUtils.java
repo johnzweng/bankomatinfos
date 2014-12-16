@@ -175,6 +175,13 @@ public class EmvUtils {
 			(byte) 0x30, (byte) 0x60 };
 
 	/**
+	 * Application ID for MASTERCARD: A0000000041010
+	 */
+	public static final byte[] APPLICATION_ID_EMV_MASTERCARD = { (byte) 0xA0,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x10,
+			(byte) 0x10 };
+
+	/**
 	 * Application ID for Visa credit or debit card: A0000000031010
 	 */
 	public static final byte[] APPLICATION_ID_EMV_VISA_CREDITCARD = {
@@ -192,6 +199,12 @@ public class EmvUtils {
 			(byte) 0x78 };
 	public static final byte[] ISO4217_CURRENCY_ATS = { (byte) 0x00,
 			(byte) 0x40 };
+	public static final byte[] ISO4217_CURRENCY_USD = { (byte) 0x08,
+			(byte) 0x40 };
+	public static final byte[] ISO4217_CURRENCY_GB_POUND = { (byte) 0x08,
+			(byte) 0x26 };
+	public static final byte[] ISO4217_CURRENCY_UNREGISTERED = { (byte) 0x09,
+			(byte) 0x99 };
 
 	//
 	// Values of the status word (last 2 bytes) in the response
@@ -648,6 +661,15 @@ public class EmvUtils {
 		if (compare2byteArrays(ISO4217_CURRENCY_ATS, currencyBytes)) {
 			return "ATS";
 		}
+		if (compare2byteArrays(ISO4217_CURRENCY_USD, currencyBytes)) {
+			return "USD";
+		}
+		if (compare2byteArrays(ISO4217_CURRENCY_GB_POUND, currencyBytes)) {
+			return "£ (GBP)";
+		}
+		if (compare2byteArrays(ISO4217_CURRENCY_UNREGISTERED, currencyBytes)) {
+			return "Dummy Currency";
+		}
 		return "Unknown Currency 0x" + bytesToHex(currencyBytes);
 	}
 
@@ -728,72 +750,6 @@ public class EmvUtils {
 					"getAmountFromBcdBytes: needs 6 bytes");
 		}
 		return Long.parseLong(bytesToHex(amount));
-	}
-
-	/**
-	 * check if a response PDU looks like an TX log entry<br>
-	 * 
-	 * @param responsePdu
-	 * @return
-	 */
-	public static boolean responsePduLooksLikeTxLogEntry(byte[] responsePdu) {
-		// TODO: this is not according EMV standard!
-		// TODO: read cards FCI for getting locataion and format of log entries
-
-		// TODO: currently hardcoded to log format of Austrian cards
-
-		// 9F 4F - 1A bytes: Log Format
-		// --------------------------------------
-		// 9F 27 (01 bytes) -> Cryptogram Information Data
-		// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
-		// 5F 2A (02 bytes) -> Transaction Currency Code
-		// 9A (03 bytes) -> Transaction Date
-		// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
-		// 9F 52 (06 bytes) -> Upper Cumulative Domestic Offline Transaction
-		// Amount
-		// DF 3E (01 bytes) -> [UNHANDLED TAG]
-		// 9F 21 (03 bytes) -> Transaction Time (HHMMSS)
-		// 9F 7C (14 bytes) -> Customer Exclusive Data
-
-		if (responsePdu == null) {
-			return false;
-		}
-		// 24 bytes minimum for parsing tx log + 2 bytes status word
-		// because we read until 24th byte
-		if (responsePdu.length < 26) {
-			return false;
-		}
-
-		byte[] amount = getByteArrayPart(responsePdu, 3, 6);
-		byte[] currency = getByteArrayPart(responsePdu, 7, 8);
-		byte[] date = getByteArrayPart(responsePdu, 9, 11);
-		byte[] time = getByteArrayPart(responsePdu, 21, 23);
-
-		// check if currency bytes are "09 78" (=EURO)
-		if (!"0978".equals(bytesToHex(currency))) {
-			return false;
-		}
-
-		// AMOUNT:
-		// check if we could parse amount as decimal number (BCD encoding!)
-		try {
-			Long.parseLong(bytesToHex(amount), 10);
-		} catch (NumberFormatException nfe) {
-			return false;
-		}
-
-		// TIME:
-		// check if time bytes look like a valid time
-		if (!bytesLookLikeValidTime(time)) {
-			return false;
-		}
-
-		// DATE:
-		// check if time bytes look like a valid date
-		if (!bytesLookLikeValidDate(date)) {
-			return false;
-		}
-		return true;
 	}
 
 	/**

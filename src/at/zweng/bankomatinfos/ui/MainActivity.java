@@ -260,21 +260,17 @@ public class MainActivity extends Activity {
 			_readCardTask = null;
 
 			if (success) {
-				Log.d(TAG, "reading card finished successfully. isMaestro: "
-						+ _cardReadingResults.isMaestroCard() + ", isQuick: "
-						+ _cardReadingResults.isQuickCard());
-				if (!_cardReadingResults.isMaestroCard()
-						&& !_cardReadingResults.isQuickCard()
-						&& !_cardReadingResults.isVisaCard()) {
+				Log.d(TAG, "reading card finished successfully");
+				if (!_cardReadingResults.isSupportedCard()) {
 					showProgressAnimation(false);
 					displaySimpleAlertDialog(
 							MainActivity.this,
 							getResources()
 									.getString(
-											R.string.dialog_title_error_no_maestro_or_quick),
+											R.string.dialog_title_error_unsupported_card),
 							getResources()
 									.getString(
-											R.string.dialog_text_error_no_maestro_or_quick));
+											R.string.dialog_text_error_unsupported_card));
 				} else {
 					// show results page
 					Intent intent = new Intent(MainActivity.this,
