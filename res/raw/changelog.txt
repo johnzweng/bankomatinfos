@@ -22,9 +22,10 @@
 $ 2.0.1
   % Version 2.0.1
   _ 2014-12-16
-    * Experimental support for analyzing Mastercard NFC cards
-    * Experimental support for analyzing VISA NFC cards
-    * Reading transaction log entries on creditcards might not work (yet)
+    * experimental support for analyzing Mastercard NFC cards
+    * experimental support for analyzing VISA NFC cards
+    * reading transaction log entries on creditcards might not work (yet)
+    * try to read some additional fields (using GET DATA)
 $ 2.0.0
   % Version 2.0.0
   _ 2014-12-12

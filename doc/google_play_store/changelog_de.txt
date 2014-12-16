@@ -2,6 +2,7 @@ Version 2.0.1 (16.12.2014):
 • Experimenteller Support für Mastercard NFC Karten
 • Experimenteller Support für VISA NFC Karten
 • Anzeigen der Transaktions-Logs auf Kreditkarten funktioniert möglicherweise (noch) nicht
+• Versuche noch weitere Datenfelder zu lesen (mit GET DATA)
 
 Version 2.0.0 (12.12.2014):
 • Update aus Policy-Gründen wegen Play-Store Sperre (funktional keine Änderungen zu 1.2.6)

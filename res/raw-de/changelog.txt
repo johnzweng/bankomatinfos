@@ -1,4 +1,4 @@
-﻿﻿<html>
+﻿﻿﻿<html>
   <head>
     <style type='text/css'>
       a            { color:#a0a0e0 }
@@ -25,6 +25,7 @@ $ 2.0.1
     * Experimenteller Support für Mastercard NFC Karten
     * Experimenteller Support für VISA NFC Karten
     * Anzeigen der Transaktions-Logs auf Kreditkarten funktioniert möglicherweise (noch) nicht
+    * Versuche noch weitere Datenfelder zu lesen (mit GET DATA)
 $ 2.0.0
   % Version 2.0.0
   _ 2014-12-12
