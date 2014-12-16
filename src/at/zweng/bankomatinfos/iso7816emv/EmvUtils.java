@@ -228,24 +228,6 @@ public class EmvUtils {
 			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x03,
 			(byte) 0x10, (byte) 0x10 };
 
-	/**
-	 * Currency values<br>
-	 * <br>
-	 * currencies defined in ISO4217 numeric<br>
-	 * https://de.wikipedia.org/wiki/ISO_4217#Aktuell_g.C3.BCltige_W.C3.
-	 * A4hrungen
-	 */
-	public static final byte[] ISO4217_CURRENCY_EURO = { (byte) 0x09,
-			(byte) 0x78 };
-	public static final byte[] ISO4217_CURRENCY_ATS = { (byte) 0x00,
-			(byte) 0x40 };
-	public static final byte[] ISO4217_CURRENCY_USD = { (byte) 0x08,
-			(byte) 0x40 };
-	public static final byte[] ISO4217_CURRENCY_GB_POUND = { (byte) 0x08,
-			(byte) 0x26 };
-	public static final byte[] ISO4217_CURRENCY_UNREGISTERED = { (byte) 0x09,
-			(byte) 0x99 };
-
 	//
 	// Values of the status word (last 2 bytes) in the response
 	//
@@ -690,110 +672,6 @@ public class EmvUtils {
 	}
 
 	/**
-	 * Returns ISO3166 country codes as string (not all countries supported)
-	 * 
-	 * @param country
-	 * @return
-	 */
-	public static String getCountryAsString(byte[] country) {
-		String byteString = bytesToHex(country);
-		if ("0040".equals(byteString)) {
-			return "Austria";
-		}
-		if ("0070".equals(byteString)) {
-			return "Bosnia and Herzegovina";
-		}
-		if ("0124".equals(byteString)) {
-			return "Canada";
-		}
-		if ("0191".equals(byteString)) {
-			return "Hrvatska (Croatia)";
-		}
-		if ("0196".equals(byteString)) {
-			return "Cyprus, Republic of";
-		}
-		if ("0203".equals(byteString)) {
-			return "Czech Republic";
-		}
-		if ("0208".equals(byteString)) {
-			return "Denmark";
-		}
-		if ("0233".equals(byteString)) {
-			return "Estonia";
-		}
-		if ("0246".equals(byteString)) {
-			return "Finland";
-		}
-		if ("0250".equals(byteString)) {
-			return "France";
-		}
-		if ("0276".equals(byteString)) {
-			return "Germany";
-		}
-		if ("0300".equals(byteString)) {
-			return "Greece";
-		}
-		if ("0348".equals(byteString)) {
-			return "Hungary";
-		}
-		if ("0380".equals(byteString)) {
-			return "Italy";
-		}
-		if ("0528".equals(byteString)) {
-			return "Netherlands";
-		}
-		if ("0578".equals(byteString)) {
-			return "Norway";
-		}
-		if ("0703".equals(byteString)) {
-			return "Slovakia";
-		}
-		if ("0705".equals(byteString)) {
-			return "Slovenia";
-		}
-		if ("0724".equals(byteString)) {
-			return "Spain";
-		}
-		if ("0752".equals(byteString)) {
-			return "Sweden";
-		}
-		if ("0756".equals(byteString)) {
-			return "Switzerland";
-		}
-		if ("0840".equals(byteString)) {
-			return "USA";
-		}
-		if ("0891".equals(byteString)) {
-			return "Serbia and Montenegro";
-		}
-		return "Country Code: " + byteString + " (ISO 3166)";
-	}
-
-	/**
-	 * @param currencyByte
-	 *            2-byte representation of currency
-	 * @return String representation of currency
-	 */
-	public static String getCurrencyAsString(byte[] currencyBytes) {
-		if (compare2byteArrays(ISO4217_CURRENCY_EURO, currencyBytes)) {
-			return "€";
-		}
-		if (compare2byteArrays(ISO4217_CURRENCY_ATS, currencyBytes)) {
-			return "ATS";
-		}
-		if (compare2byteArrays(ISO4217_CURRENCY_USD, currencyBytes)) {
-			return "USD";
-		}
-		if (compare2byteArrays(ISO4217_CURRENCY_GB_POUND, currencyBytes)) {
-			return "£ (GBP)";
-		}
-		if (compare2byteArrays(ISO4217_CURRENCY_UNREGISTERED, currencyBytes)) {
-			return "<currency not set>";
-		}
-		return "Unknown Currency 0x" + bytesToHex(currencyBytes);
-	}
-
-	/**
 	 * Parses a Date object out of the given 2 byte arrays. The date and time is
 	 * strangely encoded in BCD format, which means you have to read it as
 	 * hexadeceimal string: for example:<br>
@@ -1167,7 +1045,8 @@ public class EmvUtils {
 				InfoKeyValuePair crmCurrency = new InfoKeyValuePair(ctx
 						.getResources().getString(
 								R.string.lbl_card_risk_management_currency),
-						getCurrencyAsString(tagAndValue.getValue()));
+						Iso4217CurrencyCodes.getCurrencyAsString(tagAndValue
+								.getValue()));
 				resultList.add(crmCurrency);
 			}
 
@@ -1176,7 +1055,8 @@ public class EmvUtils {
 				InfoKeyValuePair crmCountry = new InfoKeyValuePair(ctx
 						.getResources().getString(
 								R.string.lbl_card_risk_management_country),
-						getCountryAsString(tagAndValue.getValue()));
+						Iso3166CountryCodes.getCountryAsString(tagAndValue
+								.getValue()));
 				resultList.add(crmCountry);
 			}
 

@@ -26,7 +26,6 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectParentDfFil
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.filterTagsForResult;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getAmountFromBytes;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getCurrencyAsString;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getDateFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getNextTLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTagsFromBerTlvAPDUResponse;
@@ -252,7 +251,8 @@ public class NfcBankomatCardReader {
 		// parsing failed:
 		try {
 			result.setQuickBalance(getQuickCardBalance());
-			result.setQuickCurrency(getCurrencyAsString(getQuickCardCurrencyBytes()));
+			result.setQuickCurrency(Iso4217CurrencyCodes
+					.getCurrencyAsString(getQuickCardCurrencyBytes()));
 		} catch (TlvParsingException pe) {
 			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n"
 					+ pe + "\n" + pe.getMessage());
@@ -852,7 +852,8 @@ public class NfcBankomatCardReader {
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
-			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setCurrency(Iso4217CurrencyCodes
+					.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
 			tx.setTransactionTimestamp(
 					getDateFromBcdBytes(getByteArrayPart(rawRecord, 9, 11)),
 					false);
@@ -913,7 +914,8 @@ public class NfcBankomatCardReader {
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
-			tx.setCurrency(getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setCurrency(Iso4217CurrencyCodes
+					.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
 			tx.setTransactionTimestamp(
 					getTimeStampFromBcdBytes(
 							getByteArrayPart(rawRecord, 9, 11),
@@ -1064,7 +1066,8 @@ public class NfcBankomatCardReader {
 		System.arraycopy(resultPdu, 0, rawCurrency, 0, 2);
 		_ctl.log("QUICK currency = "
 				+ prettyPrintString(bytesToHex(rawCurrency), 2));
-		_ctl.log("QUICK currency = " + getCurrencyAsString(rawCurrency));
+		_ctl.log("QUICK currency = "
+				+ Iso4217CurrencyCodes.getCurrencyAsString(rawCurrency));
 		return rawCurrency;
 	}
 
