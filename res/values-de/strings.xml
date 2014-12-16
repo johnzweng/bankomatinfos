@@ -108,5 +108,7 @@
     <string name="cryptogram_type_aac">Die Karte hat diese Transaktion gleich offline abgelehnt.</string>
     <string name="cryptogram_type_rfu">Dieser Typ ist reserviert für zukünftige Anwendungen.</string>
     
-    
+    <!-- Important Update Notice -->
+    <string name="upgrade_notice_title">Update Hinweis</string>
+    <string name="upgrade_notice_text">WICHTIGER UPDATE HINWEIS!\n\nDa Google diese App (wegen des Paypal Spenden Buttons) im Play Store gesperrt hat (und leider keine Möglichkeit anbietet diese Sperre wieder rückgängig zu machen), habe ich schweren Herzens beschlossen, die App (jetzt ohne Spenden-Buttons) unter einem neuen Namen und einer neuen App-ID zu veröffentlichen.\n\nBitte deinstallieren Sie daher diese Version der App und installieren Sie die neue Version, die nun ab sofort heißt:\n\n\"Bankomat Card Infos 2\"\n\n\nDas ist dieselbe App, weiterhin Open-Source, weiterhin frei verfügbar, nur unter einem neuen Namen und ist auch im F-Droid Repository zu finden. Es tut mir aufrichtig leid für die Unannehmlichkeiten.\n\nDanke für Ihr Verständnis und Ihre Unterstützung,\n\nJohannes Zweng\n\n\nP.S.: Als kleine Entschädigung: die neue Version kann nun auch VISA und Mastercard Karten lesen. :-)</string>
 </resources>

@@ -109,4 +109,7 @@
     <string name="cryptogram_type_aac">The card immediately declined this transaction offline.</string>
     <string name="cryptogram_type_rfu">This type is reserved for future use.</string>
     
+    <!-- Important Update Notice -->
+    <string name="upgrade_notice_title">Upgrade notice</string>
+    <string name="upgrade_notice_text">IMPORTANT UPGRADE NOTE!\n\nBecause Google blocked this application ID in their Play Store (because of the Paypal donation button) and offers no way to activate it again I reluctantly decided to publish this application (now without a donation dialog) under a new name and application ID.\n\nPlease uninstall this version of the application and install the new application, which is now called:\n\n\n\"Bankomat Card Infos 2\"\n\n\nIt\'s the same application, still free, still open-source, just under a new name and can also be found in the F-Droid repository. I am really sorry for this inconvenience.\n\nThanks for your understanding and your support,\n\nJohannes Zweng\n\n\nP.S.: As a small compensation: the new version now also supports reading of VISA and Mastercard credit cards. :-)</string>
 </resources>

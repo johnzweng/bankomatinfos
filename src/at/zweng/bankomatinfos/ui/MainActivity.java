@@ -27,6 +27,7 @@ import at.zweng.bankomatinfos.iso7816emv.NfcBankomatCardReader;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.util.ChangeLog;
 import at.zweng.bankomatinfos.util.CustomAlertDialog;
+import at.zweng.bankomatinfos.util.Utils;
 
 /**
  * Startup activity
@@ -69,7 +70,10 @@ public class MainActivity extends Activity {
 		_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
 		// create last changes dialog if needed
-		displayWhatsNew();
+		// displayWhatsNew();
+		Utils.displaySimpleAlertDialog(this,
+				getString(R.string.upgrade_notice_title),
+				getString(R.string.upgrade_notice_text));
 
 	}
 
