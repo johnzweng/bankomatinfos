@@ -40,25 +40,44 @@ public class CPLC {
 	private static final Map<String, Integer> FIELD_NAMES_LENGTHS = new LinkedHashMap<String, Integer>();
 	private Map<String, String> fields = new LinkedHashMap<String, String>();
 
+	private static final String FIELD_NAME_IC_FABRICATOR = "IC Fabricator";
+	private static final String FIELD_NAME_IC_TYPE = "IC Type";
+	private static final String FIELD_NAME_OPERATING_SYSTEM = "Operating System";
+	private static final String FIELD_NAME_OPERATING_SYSTEM_REL_DATE = "Operating System Release Date";
+	private static final String FIELD_NAME_OPERATING_SYSTEM_REL_LEVEL = "Operating System Release Level";
+	private static final String FIELD_NAME_IC_FABRIC_DATE = "IC Fabrication Date";
+	private static final String FIELD_NAME_IC_SERIAL_NUMBER = "IC Serial Number";
+	private static final String FIELD_NAME_IC_BATCH_ID = "IC Batch Identifier";
+	private static final String FIELD_NAME_IC_MODULE_FABRICATOR = "IC ModuleFabricator";
+	private static final String FIELD_NAME_IC_PACKAGING_DATE = "IC ModulePackaging Date";
+	private static final String FIELD_NAME_ICC_MANUFACTURER = "ICC Manufacturer";
+	private static final String FIELD_NAME_IC_EMBEDDING_DATE = "IC Embedding Date";
+	private static final String FIELD_NAME_PREPERSO_ID = "Prepersonalizer Identifier";
+	private static final String FIELD_NAME_PREPERSO_DATE = "Prepersonalization Date";
+	private static final String FIELD_NAME_PREPERSO_EQUIPMENT = "Prepersonalization Equipment";
+	private static final String FIELD_NAME_PERSO_ID = "Personalizer Identifier";
+	private static final String FIELD_NAME_PERSO_DATE = "Personalization Date";
+	private static final String FIELD_NAME_PERSO_EQUIPMENT = "Personalization Equipment";
+
 	static {
-		FIELD_NAMES_LENGTHS.put("IC Fabricator", 2);
-		FIELD_NAMES_LENGTHS.put("IC Type", 2);
-		FIELD_NAMES_LENGTHS.put("Operating System", 2);
-		FIELD_NAMES_LENGTHS.put("Operating System Release Date", 2);
-		FIELD_NAMES_LENGTHS.put("Operating System Release Level", 2);
-		FIELD_NAMES_LENGTHS.put("IC Fabrication Date", 2);
-		FIELD_NAMES_LENGTHS.put("IC Serial Number", 4);
-		FIELD_NAMES_LENGTHS.put("IC Batch Identifier", 2);
-		FIELD_NAMES_LENGTHS.put("IC ModuleFabricator", 2);
-		FIELD_NAMES_LENGTHS.put("IC ModulePackaging Date", 2);
-		FIELD_NAMES_LENGTHS.put("ICC Manufacturer", 2);
-		FIELD_NAMES_LENGTHS.put("IC Embedding Date", 2);
-		FIELD_NAMES_LENGTHS.put("Prepersonalizer Identifier", 2);
-		FIELD_NAMES_LENGTHS.put("Prepersonalization Date", 2);
-		FIELD_NAMES_LENGTHS.put("Prepersonalization Equipment", 4);
-		FIELD_NAMES_LENGTHS.put("Personalizer Identifier", 2);
-		FIELD_NAMES_LENGTHS.put("Personalization Date", 2);
-		FIELD_NAMES_LENGTHS.put("Personalization Equipment", 4);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_FABRICATOR, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_TYPE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_OPERATING_SYSTEM, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_OPERATING_SYSTEM_REL_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_OPERATING_SYSTEM_REL_LEVEL, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_FABRIC_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_SERIAL_NUMBER, 4);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_BATCH_ID, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_MODULE_FABRICATOR, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_PACKAGING_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_ICC_MANUFACTURER, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_IC_EMBEDDING_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PREPERSO_ID, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PREPERSO_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PREPERSO_EQUIPMENT, 4);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PERSO_ID, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PERSO_DATE, 2);
+		FIELD_NAMES_LENGTHS.put(FIELD_NAME_PERSO_EQUIPMENT, 4);
 	}
 
 	private CPLC() {
@@ -68,9 +87,12 @@ public class CPLC {
 		CPLC result = new CPLC();
 
 		byte[] cplc = null;
+		// try to interpret as raw data (not TLV)
 		if (raw.length == 42) {
 			cplc = raw;
-		} else if (raw.length == 45) {
+		}
+		// or maybe it's prepended with CPLC tag:
+		else if (raw.length == 45) {
 			BERTLV tlv = getNextTLV(new ByteArrayInputStream(raw));
 			if (!tlv.getTag().equals(GPTags.CPLC)) {
 				throw new IllegalArgumentException(
@@ -103,9 +125,10 @@ public class CPLC {
 	 * @return
 	 */
 	public String createCardUniqueIdentifier() {
-		return fields.get("IC Fabricator") + fields.get("IC Type")
-				+ fields.get("IC Batch Identifier")
-				+ fields.get("IC Serial Number");
+		return fields.get(FIELD_NAME_IC_FABRICATOR)
+				+ fields.get(FIELD_NAME_IC_TYPE)
+				+ fields.get(FIELD_NAME_IC_BATCH_ID)
+				+ fields.get(FIELD_NAME_IC_SERIAL_NUMBER);
 	}
 
 	@Override
@@ -125,7 +148,7 @@ public class CPLC {
 		pw.println("Card Production Life Cycle Data (CPLC)");
 		for (String key : fields.keySet()) {
 			pw.println(String.format("%s: %s", key, fields.get(key)
-					+ ("IC Fabricator".equals(key) ? " ("
+					+ (FIELD_NAME_IC_FABRICATOR.equals(key) ? " ("
 							+ getFabricatorName(fields.get(key)) + ")" : "")));
 		}
 		pw.println(" -> Card Unique Identifier: "
@@ -150,6 +173,16 @@ public class CPLC {
 		}
 		if ("3060".equals(id)) {
 			return "Renesas";
+		}
+		if ("1180".equals(id)) {
+			return "cpi-pf (CPI Card Group)";
+		}
+		return "Unknown (0x" + id + ")";
+	}
+
+	public static String getIcTypeName(String id) {
+		if ("5032".equals(id)) {
+			return "SmartMX";
 		}
 		return "Unknown (0x" + id + ")";
 	}
@@ -191,26 +224,25 @@ public class CPLC {
 
 	public static String getHumanReadableValue(final String key,
 			final String val) {
-		if ("IC Fabricator".equals(key)) {
-			// return getFabricatorName(val) + " (0x" + val + ")";
+		if (FIELD_NAME_IC_FABRICATOR.equals(key)) {
 			return getFabricatorName(val);
 		}
-		if ("ICC Manufacturer".equals(key)) {
-			// return getFabricatorName(val) + " (0x" + val + ")";
+		if (FIELD_NAME_ICC_MANUFACTURER.equals(key)) {
 			return getFabricatorName(val);
 		}
-		if ("IC ModuleFabricator".equals(key)) {
-			// return getFabricatorName(val) + " (0x" + val + ")";
+		if (FIELD_NAME_IC_MODULE_FABRICATOR.equals(key)) {
 			return getFabricatorName(val);
 		}
-		if ("Prepersonalizer Identifier".equals(key)) {
-			// return getFabricatorName(val) + " (0x" + val + ")";
+		if (FIELD_NAME_PREPERSO_ID.equals(key)) {
 			return getFabricatorName(val);
 		}
-		if ("Operating System".equals(key)) {
-			// return getOperatingSystemprovider(val) + " (0x" + val + ")";
+		if (FIELD_NAME_OPERATING_SYSTEM.equals(key)) {
 			return getOperatingSystemprovider(val);
 		}
+		if (FIELD_NAME_IC_TYPE.equals(key)) {
+			return getIcTypeName(val);
+		}
+
 		if (key.contains("Date")) {
 			Date dateVal;
 			try {
@@ -220,8 +252,8 @@ public class CPLC {
 			}
 			return formatDateOnly(dateVal);
 		}
-		if ("IC Batch Identifier".equals(key)
-				|| "Operating System Release Level".equals(key)) {
+		if (FIELD_NAME_IC_BATCH_ID.equals(key)
+				|| FIELD_NAME_OPERATING_SYSTEM_REL_LEVEL.equals(key)) {
 			try {
 				int decimal = Integer.parseInt(val, 16);
 				return Integer.toString(decimal);
