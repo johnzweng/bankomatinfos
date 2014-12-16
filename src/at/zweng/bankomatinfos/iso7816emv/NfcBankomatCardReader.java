@@ -7,9 +7,15 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_APP_TX_COUNTER;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_CRM_COUNTRY;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_CRM_CURRENCY;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOG_FORMAT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_BALANCE;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_CURRENCY;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createApduVerifyPIN;
@@ -90,7 +96,7 @@ public class NfcBankomatCardReader {
 	// 9F 7C (0x14 bytes) -> Customer Exclusive Data
 	// total length: 44 bytes
 	private static final String LOG_FORMAT_BANKOMAT_AUSTRIA = "9F4F1A9F27019F02065F2A029A039F36029F5206DF3E019F21039F7C149000";
-	private static final int LOG_LENGTH_BANKOMAT_AUSTRIA = 44;
+	private static final int LOG_LENGTH_BANKOMAT_AUSTRIA = 46;
 
 	// until now on all cards I've seen which head a tx log, they were stored on
 	// EF11
@@ -284,7 +290,7 @@ public class NfcBankomatCardReader {
 		// scan abort, so that the user gets at least some infos where the
 		// parsing failed:
 		try {
-			result = readMaestroEmvData(selectAidResponse, result, fullFileScan);
+			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
 			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
 					+ re + "\n" + re.getMessage());
@@ -322,8 +328,7 @@ public class NfcBankomatCardReader {
 		// scan abort, so that the user gets at least some infos where the
 		// parsing failed:
 		try {
-			result = readCreditcardEmvData(selectAidResponse, result,
-					fullFileScan);
+			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
 			_ctl.log("ERROR: Catched Exception while reading mastercard infos:\n"
 					+ re + "\n" + re.getMessage());
@@ -363,8 +368,7 @@ public class NfcBankomatCardReader {
 		// scan abort, so that the user gets at least some infos where the
 		// parsing failed:
 		try {
-			result = readCreditcardEmvData(selectAidResponse, result,
-					fullFileScan);
+			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
 			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
 					+ re + "\n" + re.getMessage());
@@ -389,73 +393,17 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private CardInfo readCreditcardEmvData(byte[] selectAidResponse,
-			CardInfo result, boolean fullFileScan) throws IOException,
-			TlvParsingException {
+	private CardInfo readEmvData(byte[] selectAidResponse, CardInfo result,
+			boolean fullFileScan) throws IOException, TlvParsingException {
 		tryToReadLogFormat();
 		result = tryToReadPinRetryCounter(result);
 		tryToReadCurrentAtcValue();
 		tryToReadLastOnlineAtcRegisterValue();
 		tryToReadAllCommonSimpleTlvTags();
 		tryToReadAllCommonBerTlvTags();
-		// result = tryreadingTests(result);
+		tryToReadAdditionalGetDataFields();
 		result = searchForFiles(result, fullFileScan, true);
 		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList, false));
-		return result;
-	}
-
-	/**
-	 * Try to read some EMV data
-	 * 
-	 * @param selectAidResponse
-	 * @param result
-	 * @param fullFileScan
-	 *            <code>true</code> if we should try to iterate over all EFs,
-	 *            false if only some well known on Austrian Bankomat Cards
-	 * @return
-	 * @throws IOException
-	 * @throws TlvParsingException
-	 */
-	private CardInfo readMaestroEmvData(byte[] selectAidResponse,
-			CardInfo result, boolean fullFileScan) throws IOException,
-			TlvParsingException {
-
-		// reading transaction logs is WRONG implemented (currently hardcoded
-		// for Bank Austria style)
-
-		// Note 15.02.2014:
-		// -------------------
-		// It seems that sending GET PROCESSING OPTIONS increases the
-		// application transaction counter (ATC) on the card and all the infos
-		// also can be read without sending the ATC. Therefore I will omit
-		// sending the GPO command.
-
-		// send GET PROCESSING OPTIONS
-		// _ctl.log("trying to send GET PROCESSING OPTIONS command..");
-		// byte[] processingOptionsApdu =
-		// createGetProcessingOptionsApdu(selectAidResponse);
-		// _ctl.log("sent: " + bytesToHex(processingOptionsApdu));
-		// byte[] resultPdu = _localIsoDep.transceive(processingOptionsApdu);
-		// logResultPdu(resultPdu);
-		// if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
-		// Log.w(TAG,
-		// "GET PROCESSING OPTIONS: Response status word was not ok! Error: "
-		// + statusToString(getLast2Bytes(resultPdu))
-		// + ". In hex: " + bytesToHex(resultPdu));
-		// _ctl.log("GET PROCESSING OPTIONS did not return successfully..");
-		// return result;
-		// }
-		// logBerTlvResponse(resultPdu);
-
-		tryToReadLogFormat();
-		result = tryToReadPinRetryCounter(result);
-		tryToReadCurrentAtcValue();
-		tryToReadLastOnlineAtcRegisterValue();
-		tryToReadAllCommonSimpleTlvTags();
-		tryToReadAllCommonBerTlvTags();
-		// result = tryreadingTests(result);
-		result = searchForFiles(result, fullFileScan, true);
-		result.addKeyValuePairs(filterTagsForResult(_ctx, _tagList, true));
 		result = lookForLogEntryEmvTag(result);
 		return result;
 	}
@@ -499,6 +447,62 @@ public class NfcBankomatCardReader {
 			result.setPinRetryCounter(pinRetryCounter);
 		}
 		return result;
+	}
+
+	/**
+	 * Tries to send some additional GET DATA commands.
+	 * 
+	 * @param result
+	 * @return
+	 * @throws IOException
+	 * @throws TlvParsingException
+	 */
+	private void tryToReadAdditionalGetDataFields() throws IOException,
+			TlvParsingException {
+		_ctl.log("trying to send GET DATA for getting 'card risk management currency(?)'...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_CURRENCY));
+		byte[] resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_CRM_CURRENCY);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for getting 'card risk management country(?)'...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_COUNTRY));
+		resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_DATA_CRM_COUNTRY);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for getting 'lower consecutive offline limit(?)'...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT));
+		resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for getting 'upper consecutive offline limit(?)'...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT));
+		resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for getting 'lower cumulative offline tx amount(?)'...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT));
+		resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for getting 'upper cumulative offline tx amount(?)'...");
+		_ctl.log("sent: "
+				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT));
+		resultPdu = _localIsoDep
+				.transceive(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
 	}
 
 	/**
@@ -746,16 +750,6 @@ public class NfcBankomatCardReader {
 					// also if we find a record set counter to 0
 					consecutiveErrorRecords = 0;
 					if (tryToParse) {
-
-						if (shortEfFileIdentifier == LOG_RECORD_EF) {
-							Log.i(TAG, "JZJZ TEST lengthLooksLike TX Record: "
-									+ lengthLooksLikeTxLog(responsePdu));
-							Log.i(TAG, "JZJZ TEST responsePdu length: "
-									+ responsePdu.length);
-							Log.i(TAG, "JZJZ TEST log format: "
-									+ _logFormatResponse);
-						}
-
 						if (shortEfFileIdentifier == LOG_RECORD_EF
 								&& lengthLooksLikeTxLog(responsePdu)) {
 							TransactionLogEntry txLogEntry = tryToParseLogEntry(responsePdu);

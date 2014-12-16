@@ -96,6 +96,46 @@ public class EmvUtils {
 			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x36, (byte) 0x00 };
 
 	/**
+	 * EMV GET DATA command for reading Tag C8 (card risk management country?)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_CRM_COUNTRY = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC8, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag C9 (card risk management currency)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_CRM_CURRENCY = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC9, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag 9F14 (Lower Consecutive Offline
+	 * Limit?)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x14, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag 9F23 (Upper Consecutive Offline
+	 * Limit?)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x23, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag CA (Lower Cumulative Offline
+	 * Transaction Amount?)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xCA, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading Tag CB (Upper Cumulative Offline
+	 * Transaction Amount?)
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT = {
+			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xCB, (byte) 0x00 };
+
+	/**
 	 * EMV GET DATA command for reading Tag "Last Online ATC Register" (Tag 9F
 	 * 13)
 	 */
@@ -650,6 +690,86 @@ public class EmvUtils {
 	}
 
 	/**
+	 * Returns ISO3166 country codes as string (not all countries supported)
+	 * 
+	 * @param country
+	 * @return
+	 */
+	public static String getCountryAsString(byte[] country) {
+		String byteString = bytesToHex(country);
+		if ("0040".equals(byteString)) {
+			return "Austria";
+		}
+		if ("0070".equals(byteString)) {
+			return "Bosnia and Herzegovina";
+		}
+		if ("0124".equals(byteString)) {
+			return "Canada";
+		}
+		if ("0191".equals(byteString)) {
+			return "Hrvatska (Croatia)";
+		}
+		if ("0196".equals(byteString)) {
+			return "Cyprus, Republic of";
+		}
+		if ("0203".equals(byteString)) {
+			return "Czech Republic";
+		}
+		if ("0208".equals(byteString)) {
+			return "Denmark";
+		}
+		if ("0233".equals(byteString)) {
+			return "Estonia";
+		}
+		if ("0246".equals(byteString)) {
+			return "Finland";
+		}
+		if ("0250".equals(byteString)) {
+			return "France";
+		}
+		if ("0276".equals(byteString)) {
+			return "Germany";
+		}
+		if ("0300".equals(byteString)) {
+			return "Greece";
+		}
+		if ("0348".equals(byteString)) {
+			return "Hungary";
+		}
+		if ("0380".equals(byteString)) {
+			return "Italy";
+		}
+		if ("0528".equals(byteString)) {
+			return "Netherlands";
+		}
+		if ("0578".equals(byteString)) {
+			return "Norway";
+		}
+		if ("0703".equals(byteString)) {
+			return "Slovakia";
+		}
+		if ("0705".equals(byteString)) {
+			return "Slovenia";
+		}
+		if ("0724".equals(byteString)) {
+			return "Spain";
+		}
+		if ("0752".equals(byteString)) {
+			return "Sweden";
+		}
+		if ("0756".equals(byteString)) {
+			return "Switzerland";
+		}
+		if ("0840".equals(byteString)) {
+			return "USA";
+		}
+		if ("0891".equals(byteString)) {
+			return "Serbia and Montenegro";
+		}
+		return "Country Code: " + byteString + " (ISO 3166)";
+	}
+
+	/**
 	 * @param currencyByte
 	 *            2-byte representation of currency
 	 * @return String representation of currency
@@ -668,7 +788,7 @@ public class EmvUtils {
 			return "£ (GBP)";
 		}
 		if (compare2byteArrays(ISO4217_CURRENCY_UNREGISTERED, currencyBytes)) {
-			return "Dummy Currency";
+			return "<currency not set>";
 		}
 		return "Unknown Currency 0x" + bytesToHex(currencyBytes);
 	}
@@ -1038,6 +1158,68 @@ public class EmvUtils {
 				}
 			}
 
+			//
+			// display mastercard specific(??) stuff
+			//
+
+			// Card risk management currency ?
+			if ("C9".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair crmCurrency = new InfoKeyValuePair(ctx
+						.getResources().getString(
+								R.string.lbl_card_risk_management_currency),
+						getCurrencyAsString(tagAndValue.getValue()));
+				resultList.add(crmCurrency);
+			}
+
+			// country code for card risk management ?
+			if ("C8".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair crmCountry = new InfoKeyValuePair(ctx
+						.getResources().getString(
+								R.string.lbl_card_risk_management_country),
+						getCountryAsString(tagAndValue.getValue()));
+				resultList.add(crmCountry);
+			}
+
+			// lower consecutive offline limit
+			if ("9F14".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair kvPair = new InfoKeyValuePair(
+						ctx.getResources().getString(
+								R.string.lbl_lower_consecutive_offline_limit),
+						Integer.toString(byteArrayToInt(tagAndValue.getValue())));
+				resultList.add(kvPair);
+			}
+
+			// upper consecutive offline limit
+			if ("9F23".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair kvPair = new InfoKeyValuePair(
+						ctx.getResources().getString(
+								R.string.lbl_upper_consecutive_offline_limit),
+						Integer.toString(byteArrayToInt(tagAndValue.getValue())));
+				resultList.add(kvPair);
+			}
+
+			// lower consecutive tx amount
+			if ("CA".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair kvPair = new InfoKeyValuePair(
+						ctx.getResources()
+								.getString(
+										R.string.lbl_lower_consecutive_offline_tx_amount),
+						formatBalance(getAmountFromBcdBytes(tagAndValue
+								.getValue())));
+				resultList.add(kvPair);
+			}
+
+			// upper consecutive tx amount
+			if ("CB".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair kvPair = new InfoKeyValuePair(
+						ctx.getResources()
+								.getString(
+										R.string.lbl_upper_consecutive_offline_tx_amount),
+						formatBalance(getAmountFromBcdBytes(tagAndValue
+								.getValue())));
+				resultList.add(kvPair);
+			}
+
 			// Log.d(TAG, "  name: " + tagAndValue.getTag().getName());
 			// Log.d(TAG, "   tag: "
 			// + bytesToHex(tagAndValue.getTag().getTagBytes()));
@@ -1108,6 +1290,7 @@ public class EmvUtils {
 	 * @param time
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private static boolean bytesLookLikeValidDate(byte[] date) {
 		int digit;
 		try {
@@ -1133,6 +1316,7 @@ public class EmvUtils {
 	 * @param time
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private static boolean bytesLookLikeValidTime(byte[] time) {
 		int digit;
 		try {

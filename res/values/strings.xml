@@ -56,6 +56,14 @@
     <string name="lbl_application_transaction_counter">Transaction counter:</string>
     <!-- did we find the EMV TAG "9F 4D" ("Log Entry")?  -->
     <string name="lbl_contains_emv_log_entry_tag">Contains transaction logs:</string>
+    <string name="lbl_card_risk_management_currency">Card risk management currency:</string>
+    <string name="lbl_card_risk_management_country">Card risk management country code:</string>
+    <string name="lbl_lower_consecutive_offline_limit">Lower Consecutive Offline Limit:</string>
+    <string name="lbl_upper_consecutive_offline_limit">Upper Consecutive Offline Limit:</string>
+    <string name="lbl_lower_consecutive_offline_tx_amount">Lower Consecutive Offline Transaction Amount:</string>
+    <string name="lbl_upper_consecutive_offline_tx_amount">Upper Consecutive Offline Transaction Amount:</string>
+    
+    
     
 
     <!-- Transaction List: -->
