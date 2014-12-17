@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 2.0.2
+  % Version 2.0.2
+  _ 2014-12-17
+    * Unterstützung für zusätzliche Währungscodes
+    * CPLC Konstanten hinzugefügt
+    * wording bei Tx Ergebnissen
 $ 2.0.1
   % Version 2.0.1
   _ 2014-12-16

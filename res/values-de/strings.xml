@@ -99,9 +99,9 @@
     <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
 
     <!-- Cryptogram information data -->
-    <string name="cryptogram_type_tc">Das Terminal darf diese Transaktion offline akzeptieren (kann aber aus anderen Gründen trotzdem online gehen und die Bank fragen).</string>
+    <string name="cryptogram_type_tc">Falls NFC-Zahlung: Das Terminal darf diese Transaktion offline akzeptieren.\nFalls Kontakt-Zahlung: entweder die Karte oder die Bank (online) hat die Tx autorisiert.</string>
     <string name="cryptogram_type_arqc">Das Terminal muss online gehen und die Bank fragen, ob diese Transaktion akzeptiert werden darf.</string>
-    <string name="cryptogram_type_aac">Die Karte hat diese Transaktion gleich offline abgelehnt.</string>
+    <string name="cryptogram_type_aac">Falls NFC-Zahlung: Die Karte hat diese Transaktion gleich offline abgelehnt.\nFalls Kontakt-Zahlung: Entweder die Karte oder die Bank (online) hat die Tx abgelehnt.</string>
     <string name="cryptogram_type_rfu">Dieser Typ ist reserviert für zukünftige Anwendungen.</string>
     
     

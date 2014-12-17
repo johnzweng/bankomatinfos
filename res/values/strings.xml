@@ -105,9 +105,9 @@
     <string name="pref_description_perform_full_file_scan_false">Just scan well-known files. Scanning will be much faster.</string>
 
     <!-- Cryptogram information data -->
-    <string name="cryptogram_type_tc">The terminal is allowed accept this transaction offline (but it still may go online for other reasons).</string>
+    <string name="cryptogram_type_tc">If contactless payment: The terminal is allowed accept this transaction offline\nIf contact payment: Either the card or the bank (online) has authorized this transaction.</string>
     <string name="cryptogram_type_arqc">The terminal must go online and ask the bank if this transaction should be accepted.</string>
-    <string name="cryptogram_type_aac">The card immediately declined this transaction offline.</string>
+    <string name="cryptogram_type_aac">If contactless payment: The card immediately declined this transaction offline.\nIf contact payment: Either the card or the bank (online) has rejected this transaction.</string>
     <string name="cryptogram_type_rfu">This type is reserved for future use.</string>
     
 </resources>
