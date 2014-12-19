@@ -14,11 +14,11 @@ import at.zweng.bankomatinfos2.R;
 /**
  * A simple Fragment subclass, showing the transaction list.
  */
-public class ResultTxListFragment extends Fragment {
+public class ResultEmvTxListFragment extends Fragment {
 
 	private ListView _listView;
 	private TextView _noEntriesText;
-	private ListAdapterTransactions _listAdapter;
+	private ListAdapterEmvTransactions _listAdapter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -27,7 +27,7 @@ public class ResultTxListFragment extends Fragment {
 				false);
 		_listView = (ListView) v.findViewById(R.id.listviewTxList);
 		_noEntriesText = (TextView) v.findViewById(R.id.lblNoEntriesAvailable);
-		_listAdapter = new ListAdapterTransactions(getActivity());
+		_listAdapter = new ListAdapterEmvTransactions(getActivity());
 		_listView.setAdapter(_listAdapter);
 		_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override

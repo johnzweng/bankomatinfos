@@ -1,3 +1,8 @@
+Version 2.0.3 (2014-12-19):
+• Austrian e-purse "Quick" logs (only for Austria)
+• experimental support for VISA logs
+• added more currency codes
+
 Version 2.0.2 (2014-12-17):
 • supports now more currency codes
 • added CPLC constants

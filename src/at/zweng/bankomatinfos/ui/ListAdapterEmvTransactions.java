@@ -24,7 +24,7 @@ import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.model.TransactionLogEntry;
+import at.zweng.bankomatinfos.model.EmvTransactionLogEntry;
 import at.zweng.bankomatinfos2.R;
 
 /**
@@ -32,17 +32,17 @@ import at.zweng.bankomatinfos2.R;
  * 
  * @author Johannes Zweng <johannes@zweng.at>
  */
-public class ListAdapterTransactions extends BaseAdapter {
+public class ListAdapterEmvTransactions extends BaseAdapter {
 
 	private Context _context;
-	private List<TransactionLogEntry> _txList;
+	private List<EmvTransactionLogEntry> _txList;
 	private SparseBooleanArray itemExpandedStateMap;
 	private int expandedElementId = -1;
 
 	/**
 	 * Constructor
 	 */
-	public ListAdapterTransactions(Context ctx) {
+	public ListAdapterEmvTransactions(Context ctx) {
 		this._context = ctx;
 		this._txList = AppController.getInstance().getCardInfoNullSafe(ctx)
 				.getTransactionLog();
@@ -67,7 +67,7 @@ public class ListAdapterTransactions extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View v, ViewGroup parent) {
-		TransactionLogEntry tx;
+		EmvTransactionLogEntry tx;
 		tx = _txList.get(position);
 		// read setting value
 		boolean showFullTxData = (itemExpandedStateMap.get(position, false));
@@ -98,14 +98,18 @@ public class ListAdapterTransactions extends BaseAdapter {
 
 		// only if the stated is expanded full tx data
 		if (showFullTxData) {
+			TextView cryptogramInformationLabel = (TextView) v
+					.findViewById(R.id.txListItemCryptogramInformationDataLabel);
 			TextView cryptogramInformation = (TextView) v
 					.findViewById(R.id.txListItemCryptogramInformationData);
 			TextView cryptogramInformationExplained = (TextView) v
 					.findViewById(R.id.txListItemCryptogramInformationDataExplained);
 			TextView atc = (TextView) v.findViewById(R.id.txListItemATC);
 
+			TextView appDefaultActionLabel = (TextView) v
+					.findViewById(R.id.txListItemDefaultActionLabel);
 			TextView appDefaultAction = (TextView) v
-					.findViewById(R.id.txListItemApplicationDefaultAction);
+					.findViewById(R.id.txListItemDefaultAction);
 			TextView unknownByte = (TextView) v
 					.findViewById(R.id.txListItemUnknownByte);
 			TextView unknownByteLabel = (TextView) v
@@ -116,16 +120,27 @@ public class ListAdapterTransactions extends BaseAdapter {
 					.findViewById(R.id.txListItemCustomerExclusiveDataLabel);
 			TextView rawData = (TextView) v.findViewById(R.id.txListRawData);
 
-			cryptogramInformation.setText("0x"
-					+ byte2Hex(tx.getCryptogramInformationData()));
-			cryptogramInformationExplained
-					.setText(explainCryptogramInformationByte(
-							tx.getCryptogramInformationData(), _context));
+			if (tx.getCryptogramInformationData() != null) {
+				cryptogramInformation.setText("0x"
+						+ byte2Hex(tx.getCryptogramInformationData()));
+				cryptogramInformationExplained
+						.setText(explainCryptogramInformationByte(
+								tx.getCryptogramInformationData(), _context));
+			} else {
+				cryptogramInformationLabel.setVisibility(View.GONE);
+				cryptogramInformation.setVisibility(View.GONE);
+				cryptogramInformationExplained.setVisibility(View.GONE);
+			}
 			atc.setText(Integer.toString(tx.getAtc()));
-			appDefaultAction.setText(prettyPrintString(
-					bytesToHex(tx.getApplicationDefaultAction()), 2));
-			if (tx.getUnknownByte()!=null) {
-			unknownByte.setText(byte2Hex(tx.getUnknownByte()));
+			if (tx.getApplicationDefaultAction() != null) {
+				appDefaultAction.setText(prettyPrintString(
+						bytesToHex(tx.getApplicationDefaultAction()), 2));
+			} else {
+				appDefaultAction.setVisibility(View.GONE);
+				appDefaultActionLabel.setVisibility(View.GONE);
+			}
+			if (tx.getUnknownByte() != null) {
+				unknownByte.setText(byte2Hex(tx.getUnknownByte()));
 			} else {
 				unknownByte.setVisibility(View.GONE);
 				unknownByteLabel.setVisibility(View.GONE);

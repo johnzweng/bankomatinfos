@@ -28,7 +28,8 @@ public class CardInfo {
 	private String _quickCurrency;
 	private Context _ctx;
 
-	private List<TransactionLogEntry> _transactionLog;
+	private List<QuickTransactionLogEntry> _quickLog;
+	private List<EmvTransactionLogEntry> _transactionLog;
 	private List<InfoKeyValuePair> _infoKeyValuePairs;
 
 	/**
@@ -36,7 +37,8 @@ public class CardInfo {
 	 */
 	public CardInfo(Context ctx) {
 		// create empty list
-		this._transactionLog = new ArrayList<TransactionLogEntry>();
+		this._transactionLog = new ArrayList<EmvTransactionLogEntry>();
+		this._quickLog = new ArrayList<QuickTransactionLogEntry>();
 		this._infoKeyValuePairs = new ArrayList<InfoKeyValuePair>();
 		this._pinRetryCounter = -1;
 		this._quickCurrency = "<unknown, or parsing error>";
@@ -62,9 +64,24 @@ public class CardInfo {
 	}
 
 	/**
+	 * @return the _quickLog
+	 */
+	public List<QuickTransactionLogEntry> getQuickLog() {
+		return _quickLog;
+	}
+
+	/**
+	 * @param _quickLog
+	 *            the _quickLog to set
+	 */
+	public void setQuickLog(List<QuickTransactionLogEntry> quickLog) {
+		this._quickLog = quickLog;
+	}
+
+	/**
 	 * @return the _transactionLog
 	 */
-	public List<TransactionLogEntry> getTransactionLog() {
+	public List<EmvTransactionLogEntry> getTransactionLog() {
 		return _transactionLog;
 	}
 
@@ -72,7 +89,7 @@ public class CardInfo {
 	 * @param _transactionLog
 	 *            the _transactionLog to set
 	 */
-	public void setTransactionLog(List<TransactionLogEntry> transactionLog) {
+	public void setTransactionLog(List<EmvTransactionLogEntry> transactionLog) {
 		this._transactionLog = transactionLog;
 	}
 
@@ -155,6 +172,13 @@ public class CardInfo {
 	 */
 	public boolean isSupportedCard() {
 		return _quickCard || _maestroCard || _masterCard || _visaCard;
+	}
+
+	/**
+	 * @return true if is (one of the supported) EMV cards (not quick)
+	 */
+	public boolean isEmvCard() {
+		return  _maestroCard || _masterCard || _visaCard;
 	}
 
 	/**

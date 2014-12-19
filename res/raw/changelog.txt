@@ -19,6 +19,12 @@
     </style>
   </head>
   <body>
+$ 2.0.3
+  % Version 2.0.3
+  _ 2014-12-19
+    * support for Austrian e-purse "Quick" log entries (but not all Quick cards seem to contain meaningful logs)
+    * experimental support for reading logs from VISA
+    * added more currency codes
 $ 2.0.2
   % Version 2.0.2
   _ 2014-12-17

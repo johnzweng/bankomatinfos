@@ -29,9 +29,10 @@
 
     <!-- Result activity -->
     <string name="title_activity_result">Results</string>
-    <string name="title_section1">Infos</string>
-    <string name="title_section2">Transactions</string>
-    <string name="title_section3">Log</string>
+    <string name="title_section_infos">Infos</string>
+    <string name="title_section_emv_logs">Transactions</string>
+    <string name="title_section_quick_logs">Quick Logs</string>
+    <string name="title_section_debug_log">Log</string>
 
     <!-- General results -->
 
@@ -63,15 +64,11 @@
     <string name="lbl_lower_consecutive_offline_tx_amount">Lower Consecutive Offline Transaction Amount:</string>
     <string name="lbl_upper_consecutive_offline_tx_amount">Upper Consecutive Offline Transaction Amount:</string>
     
-    
-    
 
     <!-- Transaction List: -->
-    <string name="tx_list_no_tx_found">No transactions found</string>
+    <string name="tx_list_no_tx_found">No transaction logs found</string>
     <string name="tx_list_no_tx_log_tag_found">This card seems not to contain any transactions logs.</string>
-    <!-- alert dialog -->
-    <string name="tx_log_alertdialog_title">Note</string>
-    <string name="tx_log_alertdialog_text">Sorry.. This card seems not contain transaction logs at all. \n\nDetails: the EMV TAG \"9F 4D\" (\"Log Entry\") is not present on this card.</string>
+    
     
     <!-- Transaction List Item: -->
     <string name="tx_list_image_description_collapse_icon">Icon Collapse</string>
@@ -82,6 +79,11 @@
     <string name="tx_list_application_default_action_label">Application Default Action (ADA)??:</string>
     <string name="tx_list_unknown_byte_label">Unknown??:</string>
 
+    <!-- Quick Tx List -->
+    <string name="tx_list_remaining_balance">Remaining Balance:</string>
+    <string name="tx_list_terminfo_label">Terminal Infos??:</string>
+    
+    
     <!-- Share Subject -->
     <string name="action_share_subject">Bankomat Card Info - Results</string>
 

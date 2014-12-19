@@ -714,7 +714,7 @@ public class EmvUtils {
 	 * --> which represents 31. December 2013
 	 * 
 	 * @param date
-	 * @return
+	 * @return date or null if all 3 bytes are 0
 	 * @throws ParseException
 	 */
 	public static Date getDateFromBcdBytes(byte[] date) throws ParseException {
@@ -722,8 +722,50 @@ public class EmvUtils {
 			throw new IllegalArgumentException(
 					"getDateFromBcdBytes: date must be exactly 3 bytes long");
 		}
+		String s = prettyPrintString(bytesToHex(date), 2);
+		if ("00 00 00".equals(s)) {
+			return null;
+		}
 		DateFormat df = new SimpleDateFormat("yy MM dd", Locale.US);
-		return df.parse(prettyPrintString(bytesToHex(date), 2));
+		return df.parse(s);
+	}
+
+	/**
+	 * Parse timestamp from quick log entry
+	 * 
+	 * @param date
+	 * @param time
+	 * @return date or null if days are 0000000
+	 * @throws ParseException
+	 */
+	public static Date getTimeStampFromQuickLog(int days, byte[] time) {
+		if (days == 0) {
+			return null;
+		}
+		if (time == null || time.length != 3) {
+			throw new IllegalArgumentException(
+					"getTimeStampFromQuickLog: time must be exactly 3 bytes long");
+		}
+		Calendar logDate = getDayFromQuickLogEntry(days);
+		logDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(byte2Hex(time[0])));
+		logDate.set(Calendar.MINUTE, Integer.parseInt(byte2Hex(time[1])));
+		logDate.set(Calendar.SECOND, Integer.parseInt(byte2Hex(time[2])));
+		return logDate.getTime();
+	}
+
+	/**
+	 * @param days
+	 *            number of days after September 02, 1975 (what happened on this
+	 *            day?)
+	 * @return
+	 */
+	public static Calendar getDayFromQuickLogEntry(int days) {
+		Calendar logDay = GregorianCalendar.getInstance();
+		logDay.set(Calendar.DAY_OF_MONTH, 2);
+		logDay.set(Calendar.MONTH, Calendar.SEPTEMBER);
+		logDay.set(Calendar.YEAR, 1975);
+		logDay.add(Calendar.DAY_OF_YEAR, days);
+		return logDay;
 	}
 
 	/**

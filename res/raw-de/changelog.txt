@@ -19,6 +19,13 @@
     </style>
   </head>
   <body>
+$ 2.0.3
+  % Version 2.0.3
+  _ 2014-12-19
+    * Support für Logs der elektronischen Geldböres "Quick" (gibt's nur in Österreich)
+    * Allerdings liefern nicht alle Quick Karten sinnvolle Logs (manchmal nur Nullen)
+    * experimenteller Support für das Parsing von VISA Log Einträgen 
+    * einige zusätzliche Währungscodes
 $ 2.0.2
   % Version 2.0.2
   _ 2014-12-17

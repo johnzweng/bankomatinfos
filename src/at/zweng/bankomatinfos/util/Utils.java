@@ -217,6 +217,20 @@ public class Utils {
 	}
 
 	/**
+	 * Parses a BCD encoded integer from the given byte array
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public static int readBcdIntegerFromBytes(byte[] data) {
+		if (data.length > 4) {
+			throw new InvalidParameterException(
+					"cannot parse more than 4 bytes into int type");
+		}
+		return Integer.parseInt(bytesToHex(data));
+	}
+
+	/**
 	 * Display a alert dialog
 	 * 
 	 * @param ctx
@@ -245,6 +259,9 @@ public class Utils {
 	 * @return
 	 */
 	public static String formatDateWithTime(Date d) {
+		if (d == null) {
+			return "00.00.0000 00:00:00";
+		}
 		return fullTimeWithDateFormat.format(d);
 	}
 
@@ -255,6 +272,9 @@ public class Utils {
 	 * @return
 	 */
 	public static String formatDateOnly(Date d) {
+		if (d == null) {
+			return "00.00.0000";
+		}
 		return dateOnlyDateFormat.format(d);
 	}
 

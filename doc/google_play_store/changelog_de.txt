@@ -1,3 +1,8 @@
+Version 2.0.3 (19.12.2014):
+• Logs der elektronischen Geldböres "Quick" (Österreich only)
+• experimenteller Support VISA Logs 
+• einige zusätzliche Währungscodes
+
 Version 2.0.2 (17.12.2014):
 • Unterstützung zusätzlicher Währungscodes
 • CPLC Konstanten hinzugefügt

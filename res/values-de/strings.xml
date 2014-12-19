@@ -29,10 +29,11 @@
 
     <!-- Result activity -->
     <string name="title_activity_result">Ergebnisse</string>
-    <string name="title_section1">Infos</string>
-    <string name="title_section2">Transaktionen</string>
-    <string name="title_section3">Log</string>
-
+    <string name="title_section_infos">Infos</string>
+    <string name="title_section_emv_logs">Transaktionen</string>
+    <string name="title_section_quick_logs">Quick Logs</string>
+    <string name="title_section_debug_log">Log</string>
+    
     <!-- General results -->
 
 	<!-- section headers -->
@@ -61,21 +62,22 @@
     
     
     <!-- Transaction List: -->
-    <string name="tx_list_no_tx_found">Keine Transaktionen gefunden</string>
+    <string name="tx_list_no_tx_found">Keine Transaktionslogs gefunden</string>
     <string name="tx_list_no_tx_log_tag_found">Diese Karte scheint keine Transaktionslogs zu beinhalten.</string>
-    <!-- alert dialog -->
-    <string name="tx_log_alertdialog_title">Hinweis</string>
-    <string name="tx_log_alertdialog_text">Sorry.. Diese Karte beinhaltet offensichtlich keine Transaktions-Logs.\n\nDetails: Der EMV TAG \""9F 4D\" (\"Log Entry\") ist auf dieser Karte gar nicht vorhanden.</string>
-
+    
     <!-- Transaction List Item: -->
     <string name="tx_list_image_description_collapse_icon">Einklapp Symbol</string>
     <string name="tx_list_image_description_expand_icon">Ausklapp Symbol</string>
     <string name="tx_list_cryptogram_info_label">Cryptogram Information Data:</string>
-    <string name="tx_list_atc_label">ATC (application tx counter):</string>
+    <string name="tx_list_atc_label">ATC (Transaktionszähler):</string>
     <string name="tx_list_customer_exclusive_data_label">Customer Exclusive Data:</string>
     <string name="tx_list_application_default_action_label">Application Default Action (ADA)??:</string>
     <string name="tx_list_unknown_byte_label">Unknown??:</string>
 
+    <!-- Quick Tx List -->
+    <string name="tx_list_remaining_balance">Verbleibendes Guthaben:</string>
+    <string name="tx_list_terminfo_label">Terminal Infos??:</string>    
+    
     <!-- Share Subject -->
     <string name="action_share_subject">Bankomatkarten Infos - Ergebnisse</string>
 

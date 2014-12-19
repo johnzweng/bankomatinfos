@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.util.Utils;
 import at.zweng.bankomatinfos2.R;
 
 // TODO: maybe also add share action for general and transations fragment
@@ -34,10 +33,12 @@ public class ResultActivity extends FragmentActivity implements
 
 	private static AppController _controller = AppController.getInstance();
 	private Fragment _fragmentResultInfos;
-	private Fragment _fragmentResultTxList;
+	private Fragment _fragmentResultEmxTxList;
+	private Fragment _fragmentResultQuickTxList;
 	private Fragment _fragmentResultLog;
-
-	private boolean _alertShown = false;
+	private boolean _showQuickLog;
+	private boolean _showEmvLog;
+	private int _numLogTabs;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -58,9 +59,21 @@ public class ResultActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_result);
-
+		_showQuickLog = (_controller.getCardInfoNullSafe(this).getQuickLog()
+				.size() > 0);
+		_showEmvLog = _controller.getCardInfoNullSafe(this).isEmvCard();
+		if (_showEmvLog && _showQuickLog) {
+			_numLogTabs = 2;
+		} else {
+			_numLogTabs = 1;
+		}
 		_fragmentResultInfos = new ResultInfosListFragment();
-		_fragmentResultTxList = new ResultTxListFragment();
+		if (_showEmvLog) {
+			_fragmentResultEmxTxList = new ResultEmvTxListFragment();
+		}
+		if (_showQuickLog) {
+			_fragmentResultQuickTxList = new ResultQuickTxListFragment();
+		}
 		_fragmentResultLog = new ResultLogFragment();
 
 		// Set up the action bar.
@@ -128,7 +141,9 @@ public class ResultActivity extends FragmentActivity implements
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		// show share action only on Tab 2 (Log)
 		// (tab index starts with 0)
-		if (_viewPager.getCurrentItem() == 2) {
+		if (_viewPager.getCurrentItem() == 2 && _numLogTabs == 1) {
+			menu.findItem(R.id.action_share).setVisible(true);
+		} else if (_viewPager.getCurrentItem() == 3 && _numLogTabs == 2) {
 			menu.findItem(R.id.action_share).setVisible(true);
 		} else {
 			menu.findItem(R.id.action_share).setVisible(false);
@@ -161,23 +176,7 @@ public class ResultActivity extends FragmentActivity implements
 		// When the given tab is selected, switch to the corresponding page in
 		// the ViewPager.
 		_viewPager.setCurrentItem(tab.getPosition());
-
-		// show alert dialog for one time if card does not support tx logs
-		if (!_alertShown
-				&& tab.getPosition() == 1
-				&& !_controller.getCardInfoNullSafe(this).containsTxLogs()
-				&& _controller.getCardInfoNullSafe(this).getTransactionLog()
-						.size() == 0) {
-			_alertShown = true;
-			Utils.displaySimpleAlertDialog(
-					this,
-					getResources().getString(R.string.tx_log_alertdialog_title),
-					this.getResources().getString(
-							R.string.tx_log_alertdialog_text));
-		}
-
-		invalidateOptionsMenu(); // creates call to
-		// onPrepareOptionsMenu()
+		invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	}
 
 	@Override
@@ -204,8 +203,12 @@ public class ResultActivity extends FragmentActivity implements
 		public Fragment getItem(int position) {
 			if (position == 0) {
 				return _fragmentResultInfos;
-			} else if (position == 1) {
-				return _fragmentResultTxList;
+			} else if (position == 1 && _showEmvLog) {
+				return _fragmentResultEmxTxList;
+			} else if (position == 1 && !_showEmvLog && _showQuickLog) {
+				return _fragmentResultQuickTxList;
+			} else if (position == 2 && _showEmvLog && _showQuickLog) {
+				return _fragmentResultQuickTxList;
 			} else {
 				return _fragmentResultLog;
 			}
@@ -213,22 +216,24 @@ public class ResultActivity extends FragmentActivity implements
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
-			return 3;
+			return 2 + _numLogTabs;
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
 			Locale locale = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.title_section1).toUpperCase(locale);
-			case 1:
-				return getString(R.string.title_section2).toUpperCase(locale);
-			case 2:
-				return getString(R.string.title_section3).toUpperCase(locale);
+
+			if (position == 0) {
+				return getString(R.string.title_section_infos).toUpperCase(locale);
+			} else if (position == 1 && _showEmvLog) {
+				return getString(R.string.title_section_emv_logs).toUpperCase(locale);
+			} else if (position == 1 && !_showEmvLog && _showQuickLog) {
+				return getString(R.string.title_section_quick_logs).toUpperCase(locale);
+			} else if (position == 2 && _showEmvLog && _showQuickLog) {
+				return getString(R.string.title_section_quick_logs).toUpperCase(locale);
+			} else {
+				return getString(R.string.title_section_debug_log).toUpperCase(locale);
 			}
-			return null;
 		}
 	}
 

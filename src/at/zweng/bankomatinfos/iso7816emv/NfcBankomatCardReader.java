@@ -30,6 +30,7 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getDateFromBcdBytes;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getNextTLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTagsFromBerTlvAPDUResponse;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTimeStampFromBcdBytes;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.getTimeStampFromQuickLog;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.isStatusSuccess;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.prettyPrintBerTlvAPDUResponse;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.statusToString;
@@ -37,9 +38,12 @@ import static at.zweng.bankomatinfos.util.Utils.TAG;
 import static at.zweng.bankomatinfos.util.Utils.byteArrayToInt;
 import static at.zweng.bankomatinfos.util.Utils.bytesToHex;
 import static at.zweng.bankomatinfos.util.Utils.cutoffLast2Bytes;
+import static at.zweng.bankomatinfos.util.Utils.fromHexString;
 import static at.zweng.bankomatinfos.util.Utils.getByteArrayPart;
 import static at.zweng.bankomatinfos.util.Utils.getLast2Bytes;
 import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
+import static at.zweng.bankomatinfos.util.Utils.readBcdIntegerFromBytes;
+import static at.zweng.bankomatinfos.util.Utils.readLongFromBytes;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -56,8 +60,9 @@ import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
+import at.zweng.bankomatinfos.model.EmvTransactionLogEntry;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
-import at.zweng.bankomatinfos.model.TransactionLogEntry;
+import at.zweng.bankomatinfos.model.QuickTransactionLogEntry;
 import at.zweng.bankomatinfos2.R;
 
 /**
@@ -71,6 +76,19 @@ public class NfcBankomatCardReader {
 	private AppController _ctl;
 	private List<TagAndValue> _tagList;
 	private Context _ctx;
+
+	// 9F 4F - 18 bytes: Log Format
+	// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+	// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+	// 9F 03 (06 bytes) -> Amount, Other (Numeric)
+	// 9F 1A (02 bytes) -> Terminal Country Code
+	// 95 (05 bytes) -> Terminal Verification Results (TVR)
+	// 5F 2A (02 bytes) -> Transaction Currency Code
+	// 9A (03 bytes) -> Transaction Date
+	// 9C (01 bytes) -> Transaction Type
+	// 9F 80 04 (04 bytes) -> [UNHANDLED TAG]
+	private static final String LOG_FORMAT_VISA = "9F4F189F36029F02069F03069F1A0295055F2A029A039C019F80049000";
+	private static final int LOG_LENGTH_VISA = 33;
 
 	// 9F 4F - 11 bytes: Log Format
 	// 9F 27 (01 bytes) -> Cryptogram Information Data
@@ -96,6 +114,8 @@ public class NfcBankomatCardReader {
 	// total length: 44 bytes
 	private static final String LOG_FORMAT_BANKOMAT_AUSTRIA = "9F4F1A9F27019F02065F2A029A039F36029F5206DF3E019F21039F7C149000";
 	private static final int LOG_LENGTH_BANKOMAT_AUSTRIA = 46;
+
+	private static final int LOG_LENGTH_QUICK = 35;
 
 	// until now on all cards I've seen which head a tx log, they were stored on
 	// EF11
@@ -253,6 +273,7 @@ public class NfcBankomatCardReader {
 			result.setQuickBalance(getQuickCardBalance());
 			result.setQuickCurrency(Iso4217CurrencyCodes
 					.getCurrencyAsString(getQuickCardCurrencyBytes()));
+			result = tryReadingQuickLogEntries(result);
 		} catch (TlvParsingException pe) {
 			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n"
 					+ pe + "\n" + pe.getMessage());
@@ -589,6 +610,46 @@ public class NfcBankomatCardReader {
 		logBerTlvResponse(resultPdu);
 	}
 
+	private byte[] transceiveAndLog(byte[] data) throws IOException {
+		_ctl.log("sending: " + bytesToHex(data));
+		return _localIsoDep.transceive(data);
+	}
+
+	/**
+	 * tests with Paylife "quick" cards (that's an Austrian thing)..
+	 * 
+	 * @throws IOException
+	 */
+	private CardInfo tryReadingQuickLogEntries(CardInfo result)
+			throws IOException {
+		List<QuickTransactionLogEntry> quickLogs = new ArrayList<QuickTransactionLogEntry>();
+
+		byte[] resultPdu;
+
+		_ctl.log("-----------------------------------");
+		_ctl.log("-- reading Paylife QUICK log entries: ");
+		// selecting DF containing logs:
+		resultPdu = transceiveAndLog(fromHexString("00 a4 00 00 02 01 04"));
+		logResultPdu(resultPdu);
+		int currRecord = 1;
+		while (true) {
+			// read currently selected file
+			resultPdu = readRecord(0, currRecord, true);
+			if (isStatusSuccess(getLast2Bytes(resultPdu))) {
+				QuickTransactionLogEntry log = parseQuickTxLogEntryFromByteArray(resultPdu);
+				_ctl.log("-----------------------------------");
+				_ctl.log(log.toString());
+				quickLogs.add(log);
+				currRecord++;
+			} else {
+				break;
+			}
+		}
+		result.setQuickLog(quickLogs);
+		_ctl.log("-----------------------------------");
+		return result;
+	}
+
 	/**
 	 * some tests.. that's my "playground" for experimenting with new commands..
 	 * :-)
@@ -712,7 +773,7 @@ public class NfcBankomatCardReader {
 		// just iterate over everything.
 
 		// if we find something looking like a TX log, add it to TX list
-		List<TransactionLogEntry> txList = new ArrayList<TransactionLogEntry>();
+		List<EmvTransactionLogEntry> txList = new ArrayList<EmvTransactionLogEntry>();
 
 		int consecutiveErrorRecords = 0;
 
@@ -752,7 +813,7 @@ public class NfcBankomatCardReader {
 					if (tryToParse) {
 						if (shortEfFileIdentifier == LOG_RECORD_EF
 								&& lengthLooksLikeTxLog(responsePdu)) {
-							TransactionLogEntry txLogEntry = tryToParseLogEntry(responsePdu);
+							EmvTransactionLogEntry txLogEntry = tryToParseLogEntry(responsePdu);
 							if (txLogEntry != null) {
 								txList.add(txLogEntry);
 								_ctl.log(txLogEntry.toString());
@@ -795,6 +856,8 @@ public class NfcBankomatCardReader {
 			return (rawRecord.length == LOG_LENGTH_BANKOMAT_AUSTRIA);
 		} else if (LOG_FORMAT_MASTERCARD.equals(_logFormatResponse)) {
 			return (rawRecord.length == LOG_LENGTH_MASTERCARD);
+		} else if (LOG_FORMAT_VISA.equals(_logFormatResponse)) {
+			return (rawRecord.length == LOG_LENGTH_VISA);
 		}
 		return false;
 	}
@@ -803,11 +866,13 @@ public class NfcBankomatCardReader {
 	 * @param rawRecord
 	 * @return
 	 */
-	private TransactionLogEntry tryToParseLogEntry(byte[] rawRecord) {
+	private EmvTransactionLogEntry tryToParseLogEntry(byte[] rawRecord) {
 		if (LOG_FORMAT_BANKOMAT_AUSTRIA.equals(_logFormatResponse)) {
 			return parseBankomatTxLogEntryFromByteArray(rawRecord);
 		} else if (LOG_FORMAT_MASTERCARD.equals(_logFormatResponse)) {
 			return parseMastercardTxLogEntryFromByteArray(rawRecord);
+		} else if (LOG_FORMAT_VISA.equals(_logFormatResponse)) {
+			return parseVisaTxLogEntryFromByteArray(rawRecord);
 		}
 		return null;
 	}
@@ -820,16 +885,79 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private TransactionLogEntry parseMastercardTxLogEntryFromByteArray(
+	private QuickTransactionLogEntry parseQuickTxLogEntryFromByteArray(
 			byte[] rawRecord) {
-		// TODO: change this method to parse tx log entries dynamically based on
-		// format as specified by card
 
-		// UPDATE: according users' responses it seems that all Austrian
-		// Cards use the same logging structure (of course, all the cards come
-		// from the same issuer). So I keep this for now..
+		// ATC amount amount curr Term# term stat? tagBCD? zeit rest
+		// (conv to dez)
 
-		// TODO: currently hardcoded to log format of Austrian cards
+		// 0 1 2 3 6 7 10 1112 13 16 17 20 21 22 25 26 28
+		// 27 001D 000001A4 000001A4 0978 000984AB 00001AC4 90 00014339 194500
+
+		// 29 32 3334
+		// 0000014D 9000
+
+		// logformat of quick (not documented, as guessed by me)
+		//
+		// 01 bytes -> unknown byte 1, always seems to be 0x27 ??
+		// 02 bytes -> Application Transaction Counter (ATC)
+		// 04 bytes -> Amount (no BCD, stored as normal integer)
+		// 04 bytes -> Amount2 (no BCD, stored as normal integer) seems always
+		// to be the same as the first amount??
+		// 02 bytes -> Transaction Currency Code
+		// 04 bytes -> Terminal Info 1
+		// 04 bytes -> Terminal Info 2
+		// 01 bytes -> unknown byte 2, always seems to be 0x90 ??
+		// 04 bytes -> day as integer
+		// 03 bytes -> time same coding as in EMV
+		// 04 bytes -> Remaining balance afterwards (no BCD, stored as normal
+		// integer) ??
+
+		// 9A (03 bytes) -> Transaction Date
+		// 9F 52 (06 bytes) -> Application Default Action (ADA)
+
+		if (rawRecord.length < LOG_LENGTH_QUICK) {
+			Log.w(TAG,
+					"parseTxLogEntryFromByteArray: byte array is not long enough for quick log entry:\n"
+							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			return null;
+		}
+		QuickTransactionLogEntry tx = new QuickTransactionLogEntry();
+		tx.setUnknownByte1(rawRecord[0]);
+		tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 1, 2)));
+		tx.setAmount(getAmountFromBytes(getByteArrayPart(rawRecord, 3, 6)));
+		tx.setAmount2(getAmountFromBytes(getByteArrayPart(rawRecord, 7, 10)));
+		tx.setCurrency(Iso4217CurrencyCodes
+				.getCurrencyAsString(getByteArrayPart(rawRecord, 11, 12)));
+		tx.setTerminalInfos1(readLongFromBytes(
+				getByteArrayPart(rawRecord, 13, 16), 0, 4));
+		tx.setTerminalInfos2(readLongFromBytes(
+				getByteArrayPart(rawRecord, 17, 20), 0, 4));
+		tx.setUnknownByte2(rawRecord[21]);
+		tx.setTransactionTimestamp(
+				getTimeStampFromQuickLog(
+						readBcdIntegerFromBytes(getByteArrayPart(rawRecord, 22,
+								25)), getByteArrayPart(rawRecord, 26, 28)),
+				true);
+		tx.setRemainingBalance(getAmountFromBytes(getByteArrayPart(rawRecord,
+				29, 32)));
+		// and raw entry
+		tx.setRawEntry(rawRecord);
+		return tx;
+	}
+
+	/**
+	 * Try to parse the raw byte array into an object
+	 * 
+	 * @param rawRecord
+	 *            (without status word
+	 * @return the parsed record or <code>null</code> if something could not be
+	 *         parsed
+	 */
+	private EmvTransactionLogEntry parseMastercardTxLogEntryFromByteArray(
+			byte[] rawRecord) {
+
+		// hardcoded to log format of Mastercard (2014)
 
 		// 9F 4F - 1A bytes: Log Format
 		// --------------------------------------
@@ -848,7 +976,7 @@ public class NfcBankomatCardReader {
 			return null;
 		}
 
-		TransactionLogEntry tx = new TransactionLogEntry();
+		EmvTransactionLogEntry tx = new EmvTransactionLogEntry();
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
@@ -879,16 +1007,70 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private TransactionLogEntry parseBankomatTxLogEntryFromByteArray(
+	private EmvTransactionLogEntry parseVisaTxLogEntryFromByteArray(
 			byte[] rawRecord) {
-		// TODO: change this method to parse tx log entries dynamically based on
-		// format as specified by card
 
-		// UPDATE: according users' responses it seems that all Austrian
-		// Cards use the same logging structure (of course, all the cards come
-		// from the same issuer). So I keep this for now..
+		// hardcoded to log format of Mastercard (2014)
 
-		// TODO: currently hardcoded to log format of Austrian cards
+		// 9F 4F - 1A bytes: Log Format
+		// --------------------------------------
+		// 9F 36 (02 bytes) -> Application Transaction Counter (ATC)
+		// 9F 02 (06 bytes) -> Amount, Authorised (Numeric)
+		// 9F 03 (06 bytes) -> Amount, Other (Numeric)
+		// 9F 1A (02 bytes) -> Terminal Country Code
+		// 95 (05 bytes) -> Terminal Verification Results (TVR)
+		// 5F 2A (02 bytes) -> Transaction Currency Code
+		// 9A (03 bytes) -> Transaction Date
+		// 9C (01 bytes) -> Transaction Type
+		// 9F 80 (04 bytes) -> [UNHANDLED TAG]
+
+		if (rawRecord.length < LOG_LENGTH_VISA) {
+			Log.w(TAG,
+					"parseTxLogEntryFromByteArray: byte array is not long enough for VISA log entry:\n"
+							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			return null;
+		}
+
+		EmvTransactionLogEntry tx = new EmvTransactionLogEntry();
+		try {
+			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 0, 1)));
+			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 2, 7)));
+			// TODO: currently we ignore "Amount, Other" for VISA logs
+			// 8-13
+			// TODO: include terminal country code (14-15)
+			// TODO: include TVR for VISA (16-20)
+			tx.setCurrency(Iso4217CurrencyCodes
+					.getCurrencyAsString(getByteArrayPart(rawRecord, 21, 22)));
+			tx.setTransactionTimestamp(
+					getDateFromBcdBytes(getByteArrayPart(rawRecord, 23, 25)),
+					false);
+			// TODO: include Transaction Type (26)
+			// TODO: include unknown tag 9f 80 (27-30)
+
+			tx.setRawEntry(rawRecord);
+		} catch (Exception e) {
+			String msg = "Exception while trying to parse transaction entry: "
+					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2);
+			Log.w(TAG, msg, e);
+			_ctl.log(msg);
+			return null;
+		}
+		return tx;
+	}
+
+	/**
+	 * Try to parse the raw byte array into an object
+	 * 
+	 * @param rawRecord
+	 *            (without status word
+	 * @return the parsed record or <code>null</code> if something could not be
+	 *         parsed
+	 */
+	private EmvTransactionLogEntry parseBankomatTxLogEntryFromByteArray(
+			byte[] rawRecord) {
+
+		// hardcoded to log format of Austrian cards
 
 		// 9F 4F - 1A bytes: Log Format
 		// --------------------------------------
@@ -910,7 +1092,7 @@ public class NfcBankomatCardReader {
 			return null;
 		}
 
-		TransactionLogEntry tx = new TransactionLogEntry();
+		EmvTransactionLogEntry tx = new EmvTransactionLogEntry();
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
