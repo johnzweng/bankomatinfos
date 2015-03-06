@@ -45,7 +45,10 @@ import static at.zweng.bankomatinfos.util.Utils.prettyPrintString;
 import static at.zweng.bankomatinfos.util.Utils.readBcdIntegerFromBytes;
 import static at.zweng.bankomatinfos.util.Utils.readLongFromBytes;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,7 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.os.Environment;
 import android.util.Log;
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
@@ -70,6 +74,9 @@ import at.zweng.bankomatinfos2.R;
  * 
  * @author Johannes Zweng <johannes@zweng.at>
  */
+
+// TODO: print out additional log in faketag json format
+// look https://github.com/kairenken/faketag for more details
 public class NfcBankomatCardReader {
 	private Tag _nfcTag;
 	private IsoDep _localIsoDep;
@@ -1307,6 +1314,13 @@ public class NfcBankomatCardReader {
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		return resultPdu;
 	}
+
+    /**
+     * log fakebot json format
+     */
+    private void logJSON(byte[] sent, byte[] response) {
+      // TODO: log in fakebot json format here
+    }
 
 	/**
 	 * log result pdu

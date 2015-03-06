@@ -108,6 +108,9 @@
     <string name="pref_public_logfile_write">Create a public logfile</string>
     <string name="pref_public_logfile_true">Do create public logfile.</string>
     <string name="pref_public_logfile_false">Do not create public logfile.</string>
+    <string name="pref_dump_tag">Dump NFC-Tag</string>
+    <string name="pref_dump_tag_true">Dumping ofNFC tag is activated.</string>
+    <string name="pref_dump_tag_false">Dumping of NFC tag is not activated.</string>
 
     <!-- Cryptogram information data -->
     <string name="cryptogram_type_tc">If contactless payment: The terminal is allowed accept this transaction offline\nIf contact payment: Either the card or the bank (online) has authorized this transaction.</string>
