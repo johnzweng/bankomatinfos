@@ -48,8 +48,10 @@ import static at.zweng.bankomatinfos.util.Utils.readLongFromBytes;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,11 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.Environment;
 import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
@@ -133,6 +140,9 @@ public class NfcBankomatCardReader {
 
 	// FIXME: dynamic parsing of log entries, not static pattern comparison
 	private String _logFormatResponse;
+
+    // JSONObject for logging in JSON-Format
+    JSONArray jsonLog = new JSONArray();
 
 	/**
 	 * Constructor
@@ -1316,10 +1326,35 @@ public class NfcBankomatCardReader {
 	}
 
     /**
+     * write the created json based log to file
+     */
+    private void writeJSONFile() {
+        // TODO: Check in preferences if writing fakebot.json is activated
+        // write the collected data to json file here
+        try {
+            File logfile = new File(Environment.getExternalStorageDirectory(), "fakebot.json");
+            FileOutputStream outputStream = new FileOutputStream(logfile);
+            outputStream.write(jsonLog.toString().getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * log fakebot json format
      */
-    private void logJSON(byte[] sent, byte[] response) {
-      // TODO: log in fakebot json format here
+    private void logJSON(byte[] sent, byte[] received) {
+        // TODO: write here to json file
+        // create JSONObject
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("sent",sent.toString());
+            jsonObject.put("received", received.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        jsonLog.put(jsonObject);
     }
 
 	/**

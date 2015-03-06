@@ -64,9 +64,7 @@ public class ResultLogFragment extends Fragment {
 
         if (prefs.getBoolean("pref_public_logfile_write", true) ) {
             try {
-            /* Log result to file, for further analysis
-             * TODO: adding preference to deactivate logging needed?
-             */
+            // Log result to file, for further analysis
                 File logfile = new File(Environment.getExternalStorageDirectory(), "bankomatinfos.log");
                 FileOutputStream outputStream = new FileOutputStream(logfile);
                 outputStream.write(controller.getLog().getBytes());
