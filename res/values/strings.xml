@@ -105,6 +105,9 @@
     <string name="pref_title_perform_full_file_scan">Scan all files</string>
     <string name="pref_description_perform_full_file_scan_true">Scan all files. This will take longer but *may* find more data.</string>
     <string name="pref_description_perform_full_file_scan_false">Just scan well-known files. Scanning will be much faster.</string>
+    <string name="pref_public_logfile_write">Create a public logfile</string>
+    <string name="pref_public_logfile_true">Do create public logfile.</string>
+    <string name="pref_public_logfile_false">Do not create public logfile.</string>
 
     <!-- Cryptogram information data -->
     <string name="cryptogram_type_tc">If contactless payment: The terminal is allowed accept this transaction offline\nIf contact payment: Either the card or the bank (online) has authorized this transaction.</string>

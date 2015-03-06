@@ -100,6 +100,9 @@
     <string name="pref_title_perform_full_file_scan">Scanne alle Dateien</string>
     <string name="pref_description_perform_full_file_scan_true">Scanne alle Dateien. Das Scannen dauert länger, findet aber *eventuell* auf manchen Karten mehr Daten.</string>
     <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
+    <string name="pref_public_logfile_write">Erstelle Logdatei (öffentlich)</string>
+    <string name="pref_public_logfile_true">Erstelle öffentliche Logdatei.</string>
+    <string name="pref_public_logfile_false">Keine öffentliche Logdatei erstellen.</string>
 
     <!-- Cryptogram information data -->
     <string name="cryptogram_type_tc">Falls NFC-Zahlung: Das Terminal darf diese Transaktion offline akzeptieren.\nFalls Kontakt-Zahlung: entweder die Karte oder die Bank (online) hat die Tx autorisiert.</string>

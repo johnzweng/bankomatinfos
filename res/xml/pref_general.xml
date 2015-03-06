@@ -7,6 +7,13 @@
         android:summaryOff="@string/pref_description_perform_full_file_scan_false"
         android:title="@string/pref_title_perform_full_file_scan" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="write_public_logfile"
+        android:summaryOn="@string/pref_public_logfile_true"
+        android:summaryOff="@string/pref_public_logfile_false"
+        android:title="@string/pref_public_logfile_write" />
+
     <Preference android:title="@string/pref_title_system_nfc_settings" >
         <intent android:action="android.settings.NFC_SETTINGS" />
     </Preference>
