@@ -63,6 +63,7 @@ import android.content.Context;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -1378,11 +1379,9 @@ public class NfcBankomatCardReader {
         try {
             File logfile = new File(Environment.getExternalStorageDirectory(), "faketag.json");
             FileOutputStream outputStream = new FileOutputStream(logfile);
-            outputStream.write(jsonLog.getString(0).getBytes());
+            outputStream.write(jsonLog.toString().getBytes());
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -1393,8 +1392,8 @@ public class NfcBankomatCardReader {
     private void logJSON(byte[] sent, byte[] received) {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("request",sent);
-            jsonObject.put("response", received);
+            jsonObject.put("request", Base64.encodeToString(sent, Base64.DEFAULT));
+            jsonObject.put("response", Base64.encodeToString(received, Base64.DEFAULT));
         } catch (JSONException e) {
             e.printStackTrace();
         }
