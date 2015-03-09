@@ -60,9 +60,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -1374,15 +1376,18 @@ public class NfcBankomatCardReader {
      * write the created json based log to file
      */
     private void writeJSONFile() {
-        // TODO: Check in preferences if writing fakebot.json is activated
-        // write the collected data to json file here
-        try {
-            File logfile = new File(Environment.getExternalStorageDirectory(), "faketag.json");
-            FileOutputStream outputStream = new FileOutputStream(logfile);
-            outputStream.write(jsonLog.toString().getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_ctx);
+
+        if (prefs.getBoolean("pref_dump_tag", true) ) {
+            // write the collected data to json file here
+            try {
+                File logfile = new File(Environment.getExternalStorageDirectory(), "faketag.json");
+                FileOutputStream outputStream = new FileOutputStream(logfile);
+                outputStream.write(jsonLog.toString().getBytes());
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
