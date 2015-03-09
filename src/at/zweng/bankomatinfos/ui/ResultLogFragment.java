@@ -1,7 +1,12 @@
 package at.zweng.bankomatinfos.ui;
 
 import static at.zweng.bankomatinfos.util.Utils.TAG;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.prefs.PreferenceChangeEvent;
+
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos2.R;
@@ -49,6 +60,20 @@ public class ResultLogFragment extends Fragment {
 	private void loadDataIntoUi() {
 		AppController controller = AppController.getInstance();
 		CardInfo cardInfo = controller.getCardInfoNullSafe(getActivity());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        if (prefs.getBoolean("pref_public_logfile_write", true) ) {
+            try {
+            // Log result to file, for further analysis
+                File logfile = new File(Environment.getExternalStorageDirectory(), "bankomatinfos.log");
+                FileOutputStream outputStream = new FileOutputStream(logfile);
+                outputStream.write(controller.getLog().getBytes());
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 		if (cardInfo == null) {
 			Log.e(TAG, "card info object is null");
 			return;

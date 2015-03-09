@@ -1022,9 +1022,20 @@ public class EmvUtils {
 		List<InfoKeyValuePair> resultList = new ArrayList<InfoKeyValuePair>();
 		String tagBytesHexString;
 
+        boolean cardholderNameAdded = false;
 		for (TagAndValue tagAndValue : tagList) {
 			tagBytesHexString = bytesToHex(tagAndValue.getTag().getTagBytes());
 
+            // Cardholder name
+            if ("5F20".equalsIgnoreCase(tagBytesHexString)) {
+                    InfoKeyValuePair cardholderName = new InfoKeyValuePair(ctx
+                            .getResources().getString(
+                                    R.string.lbl_cardholder_name), new String(tagAndValue.getValue())
+                            );
+                if (!cardholderNameAdded)
+                    resultList.add(cardholderName);
+                cardholderNameAdded = true;
+            }
 			// Expiration date
 			if ("5F24".equalsIgnoreCase(tagBytesHexString)) {
 				try {

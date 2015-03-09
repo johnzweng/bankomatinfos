@@ -54,6 +54,7 @@
     <string name="lbl_expiration_date">Ablaufdatum der Karte:</string>
     <string name="lbl_effective_date">Ausstellungsdatum der Karte:</string>
     <string name="lbl_primary_account_number">Kartennummer:</string>
+    <string name="lbl_cardholder_name">Karteninhaber:</string>
     <string name="lbl_application_transaction_counter">Transaktionszähler:</string>
     <!-- did we find the EMV TAG "9F 4D" ("Log Entry")? -->
     <string name="lbl_contains_emv_log_entry_tag">Karte gibt an, dass sie Transaktionslogs speichert:</string>
@@ -99,6 +100,12 @@
     <string name="pref_title_perform_full_file_scan">Scanne alle Dateien</string>
     <string name="pref_description_perform_full_file_scan_true">Scanne alle Dateien. Das Scannen dauert länger, findet aber *eventuell* auf manchen Karten mehr Daten.</string>
     <string name="pref_description_perform_full_file_scan_false">Scanne nur die Standarddateien. Das Scannen der Karte geht schneller.</string>
+    <string name="pref_public_logfile_write">Erstelle Logdatei (öffentlich)</string>
+    <string name="pref_public_logfile_true">Erstelle öffentliche Logdatei.</string>
+    <string name="pref_public_logfile_false">Keine öffentliche Logdatei erstellen.</string>
+    <string name="pref_dump_tag">Dumpe NFC-Tag</string>
+    <string name="pref_dump_tag_true">Dumpen des NFC-Tags ist aktiviert.</string>
+    <string name="pref_dump_tag_false">Dumpen des NFC-Tags nicht aktiviert.</string>
 
     <!-- Cryptogram information data -->
     <string name="cryptogram_type_tc">Falls NFC-Zahlung: Das Terminal darf diese Transaktion offline akzeptieren.\nFalls Kontakt-Zahlung: entweder die Karte oder die Bank (online) hat die Tx autorisiert.</string>

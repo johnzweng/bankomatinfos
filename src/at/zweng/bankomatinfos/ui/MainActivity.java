@@ -230,6 +230,10 @@ public class MainActivity extends Activity {
 				_cardReadingResults = reader.readAllCardData(prefs.getBoolean(
 						"perform_full_file_scan", false));
 				ctl.setCardInfo(_cardReadingResults);
+                // TODO: Create full xml dump of card here
+                // get the data out of _cardReadingResults
+                // store them as a blob
+
 				reader.disconnectIsoDep();
 			} catch (NoSmartCardException nsce) {
 				Log.w(TAG,
