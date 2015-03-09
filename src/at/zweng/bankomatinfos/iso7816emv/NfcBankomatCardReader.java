@@ -50,8 +50,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -210,6 +212,9 @@ public class NfcBankomatCardReader {
 		result = readMaestroCardInfos(result, performFullFileScan);
 		result = readVisaCardInfos(result, performFullFileScan);
 		result = readMastercardInfos(result, performFullFileScan);
+
+        // write faketag json file
+        writeJSONFile();
 		_ctl.log("FINISHED! :-)");
 		return result;
 	}
@@ -457,6 +462,9 @@ public class NfcBankomatCardReader {
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
 		_logFormatResponse = bytesToHex(resultPdu);
+
+        // log to JSON-Format
+        logJSON(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER,resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -473,6 +481,9 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER);
+
+        // log to JSON-Format
+        logJSON(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 		if (isStatusSuccess(getLast2Bytes(resultPdu))) {
@@ -501,12 +512,16 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_CURRENCY));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_CRM_CURRENCY);
+
+        logJSON(EMV_COMMAND_GET_DATA_CRM_CURRENCY, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'card risk management country(?)'...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_COUNTRY));
 		resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_DATA_CRM_COUNTRY);
+
+        logJSON(EMV_COMMAND_GET_DATA_CRM_COUNTRY, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
@@ -515,6 +530,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT));
 		resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT);
+
+        logJSON(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
@@ -523,6 +540,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT));
 		resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT);
+
+        logJSON(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT,resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
@@ -531,6 +550,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT));
 		resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT);
+
+        logJSON(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
@@ -539,6 +560,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT));
 		resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT);
+
+        logJSON(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -553,6 +576,8 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_APP_TX_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
+
+        logJSON(EMV_COMMAND_GET_DATA_APP_TX_COUNTER, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -568,6 +593,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER);
+
+        logJSON(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -583,6 +610,8 @@ public class NfcBankomatCardReader {
 				+ bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
+
+        logJSON(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -597,6 +626,8 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV));
 		byte[] resultPdu = _localIsoDep
 				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
+
+        logJSON(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV, resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -623,6 +654,8 @@ public class NfcBankomatCardReader {
 		_ctl.log("trying to VERIFY PLAINTEXT PIN: " + pin);
 		byte[] resultPdu = _localIsoDep.transceive(createApduVerifyPIN(pin,
 				true));
+
+        // TODO: check if JSON file format output is useful here
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -647,6 +680,8 @@ public class NfcBankomatCardReader {
 		_ctl.log("-- reading Paylife QUICK log entries: ");
 		// selecting DF containing logs:
 		resultPdu = transceiveAndLog(fromHexString("00 a4 00 00 02 01 04"));
+
+        logJSON(fromHexString("00 a4 00 00 02 01 04").toString().getBytes(), resultPdu);
 		logResultPdu(resultPdu);
 		int currRecord = 1;
 		while (true) {
@@ -1170,6 +1205,8 @@ public class NfcBankomatCardReader {
 			Log.d(TAG, msg);
 			_ctl.log(msg);
 			_ctl.log("sent: " + bytesToHex(readRecordApdu));
+
+            logJSON(readRecordApdu, resultPdu);
 			logResultPdu(resultPdu);
 		}
 		return resultPdu;
@@ -1191,6 +1228,7 @@ public class NfcBankomatCardReader {
 			Log.d(TAG, msg);
 			_ctl.log(msg);
 			_ctl.log("sent: " + bytesToHex(readRecordApdu));
+            logJSON(readRecordApdu, resultPdu);
 			logResultPdu(resultPdu);
 		}
 		return resultPdu;
@@ -1211,6 +1249,7 @@ public class NfcBankomatCardReader {
 			Log.d(TAG, msg);
 			_ctl.log(msg);
 			_ctl.log("sent: " + bytesToHex(readRecordApdu));
+            logJSON(readRecordApdu,resultPdu);
 			logResultPdu(resultPdu);
 		}
 		return resultPdu;
@@ -1226,6 +1265,7 @@ public class NfcBankomatCardReader {
 		byte[] resultPdu = _localIsoDep
 				.transceive(ISO_COMMAND_QUICK_READ_BALANCE);
 		logResultPdu(resultPdu);
+        logJSON(ISO_COMMAND_QUICK_READ_BALANCE, resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
 			Log.w(TAG,
 					"getQuickCardBalance: Response status word was not ok! Error: "
@@ -1251,6 +1291,7 @@ public class NfcBankomatCardReader {
 		byte[] resultPdu = _localIsoDep
 				.transceive(ISO_COMMAND_QUICK_READ_CURRENCY);
 		logResultPdu(resultPdu);
+        logJSON(ISO_COMMAND_QUICK_READ_CURRENCY, resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
 			String msg = "getQuickCardCurrencyBytes: Response status was not 'SUCCESS'! The response was: "
 					+ statusToString(getLast2Bytes(resultPdu))
@@ -1285,6 +1326,7 @@ public class NfcBankomatCardReader {
 		_ctl.log("sent: " + bytesToHex(command));
 		byte[] resultPdu = _localIsoDep.transceive(command);
 		logResultPdu(resultPdu);
+        logJSON(EmvUtils.GPCS_GET_CPLC_COMMAND, resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 
 		// some card don't return CPLC if sent with Le 00
@@ -1300,6 +1342,7 @@ public class NfcBankomatCardReader {
 			Log.d(TAG, "will send byte array: " + bytesToHex(command));
 			_ctl.log("sent: " + bytesToHex(command));
 			resultPdu = _localIsoDep.transceive(command);
+            logJSON(EmvUtils.GPCS_GET_CPLC_COMMAND_WITH_LENGTH, resultPdu);
 			logResultPdu(resultPdu);
 			Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		}
@@ -1320,6 +1363,7 @@ public class NfcBankomatCardReader {
 		Log.d(TAG, "will send byte array: " + bytesToHex(command));
 		_ctl.log("sent: " + bytesToHex(command));
 		byte[] resultPdu = _localIsoDep.transceive(command);
+        logJSON(command, resultPdu);
 		logResultPdu(resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		return resultPdu;
@@ -1332,11 +1376,13 @@ public class NfcBankomatCardReader {
         // TODO: Check in preferences if writing fakebot.json is activated
         // write the collected data to json file here
         try {
-            File logfile = new File(Environment.getExternalStorageDirectory(), "fakebot.json");
+            File logfile = new File(Environment.getExternalStorageDirectory(), "faketag.json");
             FileOutputStream outputStream = new FileOutputStream(logfile);
-            outputStream.write(jsonLog.toString().getBytes());
+            outputStream.write(jsonLog.getString(0).getBytes());
             outputStream.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -1345,12 +1391,10 @@ public class NfcBankomatCardReader {
      * log fakebot json format
      */
     private void logJSON(byte[] sent, byte[] received) {
-        // TODO: write here to json file
-        // create JSONObject
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("sent",sent.toString());
-            jsonObject.put("received", received.toString());
+            jsonObject.put("request",sent);
+            jsonObject.put("response", received);
         } catch (JSONException e) {
             e.printStackTrace();
         }
