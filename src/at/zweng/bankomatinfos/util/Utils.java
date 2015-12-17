@@ -64,6 +64,12 @@ public class Utils {
 	 * @return
 	 */
 	public static String bytesToHex(byte[] bytes) {
+		if (bytes==null) {
+			return "<null>";
+		}
+		if (bytes.length==0) {
+			return "[]";
+		}
 		final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
 				'9', 'A', 'B', 'C', 'D', 'E', 'F' };
 		char[] hexChars = new char[bytes.length * 2];

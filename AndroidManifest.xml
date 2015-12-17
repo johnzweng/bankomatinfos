@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="at.zweng.bankomatinfos2"
-    android:versionCode="16"
-    android:versionName="2.0.3" >
+    android:versionCode="17"
+    android:versionName="2.0.4-omapi-xposed" >
 
     <uses-sdk
         android:minSdkVersion="15"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="23" />
 
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="org.simalliance.openmobileapi.SMARTCARD" />
 
     <!-- Only offer it to devices with NFC in play store -->
     <uses-feature
@@ -26,6 +27,20 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
+        <uses-library
+            android:name="org.simalliance.openmobileapi"
+            android:required="false" />
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="2.0*" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="Allows access to the secure element using OpenMobileAPI for reading internal (SIM) banking card." />
+
         <!-- Startup activity.. -->
         <activity
             android:name="at.zweng.bankomatinfos.ui.MainActivity"
@@ -33,6 +48,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -42,30 +58,30 @@
             android:name="at.zweng.bankomatinfos.ui.NfcDisabledActivity"
             android:label="@string/title_activity_nfc_disabled"
             android:parentActivityName="at.zweng.bankomatinfos.ui.MainActivity" >
-	        <meta-data
-    	        android:name="android.support.PARENT_ACTIVITY"
-        	    android:value="at.zweng.bankomatinfos.ui.MainActivity" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="at.zweng.bankomatinfos.ui.MainActivity" />
         </activity>
 
         <!-- Displays reading results -->
         <activity
             android:name="at.zweng.bankomatinfos.ui.ResultActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName="at.zweng.bankomatinfos.ui.MainActivity"
-            android:label="@string/title_activity_result" >
-	        <meta-data
-    	        android:name="android.support.PARENT_ACTIVITY"
-        	    android:value="at.zweng.bankomatinfos.ui.MainActivity" />
+            android:label="@string/title_activity_result"
+            android:parentActivityName="at.zweng.bankomatinfos.ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="at.zweng.bankomatinfos.ui.MainActivity" />
         </activity>
         <!-- Settings -->
         <activity
             android:name="at.zweng.bankomatinfos.ui.SettingsActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="at.zweng.bankomatinfos.ui.MainActivity">
-	        <meta-data
-    	        android:name="android.support.PARENT_ACTIVITY"
-        	    android:value="at.zweng.bankomatinfos.ui.MainActivity" />
+            android:parentActivityName="at.zweng.bankomatinfos.ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="at.zweng.bankomatinfos.ui.MainActivity" />
         </activity>
     </application>
 

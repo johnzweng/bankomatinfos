@@ -71,8 +71,7 @@ import at.zweng.bankomatinfos2.R;
  * @author Johannes Zweng <johannes@zweng.at>
  */
 public class NfcBankomatCardReader {
-	private Tag _nfcTag;
-	private IsoDep _localIsoDep;
+	private ITag _tag;
 	private AppController _ctl;
 	private List<TagAndValue> _tagList;
 	private Context _ctx;
@@ -132,9 +131,9 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @param _nfcTag
 	 */
-	public NfcBankomatCardReader(Tag nfcTag, Context ctx) {
+	public NfcBankomatCardReader(ITag tag, Context ctx) {
 		super();
-		this._nfcTag = nfcTag;
+		this._tag = tag;
 		this._ctl = AppController.getInstance();
 		this._tagList = new ArrayList<TagAndValue>();
 		this._ctx = ctx;
@@ -145,12 +144,8 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
-	public void connectIsoDep() throws IOException, NoSmartCardException {
-		_localIsoDep = IsoDep.get(_nfcTag);
-		if (_localIsoDep == null) {
-			throw new NoSmartCardException("This NFC tag is no ISO 7816 card");
-		}
-		_localIsoDep.connect();
+	public void connect() throws IOException {
+		_tag.connect();
 	}
 
 	/**
@@ -158,8 +153,8 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
-	public void disconnectIsoDep() throws IOException {
-		_localIsoDep.close();
+	public void disconnect() throws IOException {
+		_tag.close();
 	}
 
 	/**
@@ -172,23 +167,16 @@ public class NfcBankomatCardReader {
 	 * @return
 	 * @throws IOException
 	 */
-	public CardInfo readAllCardData(boolean performFullFileScan)
-			throws IOException {
+	public CardInfo readAllCardData(boolean performFullFileScan) throws IOException {
 		CardInfo result = new CardInfo(_ctx);
 		_ctl.log("Starting to read data from card..");
-		result.addSectionHeader(_ctx.getResources().getString(
-				R.string.section_nfc));
-		result.setNfcTagId(_nfcTag.getId());
-		_ctl.log("NFC Tag ID: "
-				+ prettyPrintString(bytesToHex(_nfcTag.getId()), 2));
-		_ctl.log("Historical bytes: "
-				+ prettyPrintString(
-						bytesToHex(_localIsoDep.getHistoricalBytes()), 2));
-		result.addSectionHeader(_ctx.getResources().getString(
-				R.string.section_GPCS_CPLC));
+		result.addSectionHeader(_ctx.getResources().getString(R.string.section_nfc));
+		result.setNfcTagId(_tag.getId());
+		_ctl.log("NFC Tag ID: " + prettyPrintString(bytesToHex(_tag.getId()), 2));
+		_ctl.log("Historical bytes: " + prettyPrintString(bytesToHex(_tag.getHistoricalBytes()), 2));
+		result.addSectionHeader(_ctx.getResources().getString(R.string.section_GPCS_CPLC));
 		result = readCPLCInfos(result);
-		result.addSectionHeader(_ctx.getResources().getString(
-				R.string.section_emv));
+		result.addSectionHeader(_ctx.getResources().getString(R.string.section_emv));
 		result = readQuickInfos(result);
 		result = readMaestroCardInfos(result, performFullFileScan);
 		result = readVisaCardInfos(result, performFullFileScan);
@@ -235,16 +223,13 @@ public class NfcBankomatCardReader {
 				}
 				String humanReadableVal = CPLC.getHumanReadableValue(key, val);
 				_ctl.log("  * " + key + ":\n    " + humanReadableVal);
-				result.addKeyValuePair(new InfoKeyValuePair(key,
-						humanReadableVal));
+				result.addKeyValuePair(new InfoKeyValuePair(key, humanReadableVal));
 			}
 		} catch (TlvParsingException pe) {
-			_ctl.log("ERROR: Catched Exception while reading CPLC data:\n" + pe
-					+ "\n" + pe.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading CPLC data:\n" + pe + "\n" + pe.getMessage());
 			Log.w(TAG, "Catched Exception while reading CPLC infos: ", pe);
 		} catch (RuntimeException re) {
-			_ctl.log("ERROR: Catched Exception while reading CPLC infos:\n"
-					+ re + "\n" + re.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading CPLC infos:\n" + re + "\n" + re.getMessage());
 			Log.w(TAG, "Catched Exception while reading CPLC infos: ", re);
 		}
 		return result;
@@ -271,16 +256,13 @@ public class NfcBankomatCardReader {
 		// parsing failed:
 		try {
 			result.setQuickBalance(getQuickCardBalance());
-			result.setQuickCurrency(Iso4217CurrencyCodes
-					.getCurrencyAsString(getQuickCardCurrencyBytes()));
+			result.setQuickCurrency(Iso4217CurrencyCodes.getCurrencyAsString(getQuickCardCurrencyBytes()));
 			result = tryReadingQuickLogEntries(result);
 		} catch (TlvParsingException pe) {
-			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n"
-					+ pe + "\n" + pe.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n" + pe + "\n" + pe.getMessage());
 			Log.w(TAG, "Catched Exception while reading QUICK infos: ", pe);
 		} catch (RuntimeException re) {
-			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n"
-					+ re + "\n" + re.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading QUICK infos:\n" + re + "\n" + re.getMessage());
 			Log.w(TAG, "Catched Exception while reading QUICK infos: ", re);
 		}
 		return result;
@@ -295,8 +277,7 @@ public class NfcBankomatCardReader {
 	 *            false if only some
 	 * @throws IOException
 	 */
-	private CardInfo readMaestroCardInfos(CardInfo result, boolean fullFileScan)
-			throws IOException {
+	private CardInfo readMaestroCardInfos(CardInfo result, boolean fullFileScan) throws IOException {
 		Log.d(TAG, "check if card contains MAESTRO AID..");
 		_ctl.log("Trying to select Maestro AID..");
 		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_MAESTRO_BANKOMAT);
@@ -313,12 +294,10 @@ public class NfcBankomatCardReader {
 		try {
 			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
-			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
-					+ re + "\n" + re.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n" + re + "\n" + re.getMessage());
 			Log.w(TAG, "Catched Exception while reading Maestro infos: ", re);
 		} catch (TlvParsingException tle) {
-			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n"
-					+ tle + "\n" + tle.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading Maestro infos:\n" + tle + "\n" + tle.getMessage());
 			Log.w(TAG, "Catched Exception while reading Maestro infos: ", tle);
 		}
 		return result;
@@ -333,8 +312,7 @@ public class NfcBankomatCardReader {
 	 *            false if only some
 	 * @throws IOException
 	 */
-	private CardInfo readMastercardInfos(CardInfo result, boolean fullFileScan)
-			throws IOException {
+	private CardInfo readMastercardInfos(CardInfo result, boolean fullFileScan) throws IOException {
 		Log.d(TAG, "check if card contains Mastercard Creditcard AID..");
 		_ctl.log("Trying to select Mastercard Creditcard AID..");
 		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_MASTERCARD);
@@ -351,15 +329,11 @@ public class NfcBankomatCardReader {
 		try {
 			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
-			_ctl.log("ERROR: Catched Exception while reading mastercard infos:\n"
-					+ re + "\n" + re.getMessage());
-			Log.w(TAG, "Catched Exception while reading mastercard  infos: ",
-					re);
+			_ctl.log("ERROR: Catched Exception while reading mastercard infos:\n" + re + "\n" + re.getMessage());
+			Log.w(TAG, "Catched Exception while reading mastercard  infos: ", re);
 		} catch (TlvParsingException tle) {
-			_ctl.log("ERROR: Catched Exception while reading mastercard  infos:\n"
-					+ tle + "\n" + tle.getMessage());
-			Log.w(TAG, "Catched Exception while reading mastercard  infos: ",
-					tle);
+			_ctl.log("ERROR: Catched Exception while reading mastercard  infos:\n" + tle + "\n" + tle.getMessage());
+			Log.w(TAG, "Catched Exception while reading mastercard  infos: ", tle);
 		}
 		return result;
 	}
@@ -373,8 +347,7 @@ public class NfcBankomatCardReader {
 	 *            false if only some
 	 * @throws IOException
 	 */
-	private CardInfo readVisaCardInfos(CardInfo result, boolean fullFileScan)
-			throws IOException {
+	private CardInfo readVisaCardInfos(CardInfo result, boolean fullFileScan) throws IOException {
 		Log.d(TAG, "check if card contains VISA Creditcard AID..");
 		_ctl.log("Trying to select VISA Creditcard AID..");
 		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_VISA_CREDITCARD);
@@ -391,12 +364,10 @@ public class NfcBankomatCardReader {
 		try {
 			result = readEmvData(selectAidResponse, result, fullFileScan);
 		} catch (RuntimeException re) {
-			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
-					+ re + "\n" + re.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n" + re + "\n" + re.getMessage());
 			Log.w(TAG, "Catched Exception while reading VISA card infos: ", re);
 		} catch (TlvParsingException tle) {
-			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n"
-					+ tle + "\n" + tle.getMessage());
+			_ctl.log("ERROR: Catched Exception while reading VISA card infos:\n" + tle + "\n" + tle.getMessage());
 			Log.w(TAG, "Catched Exception while reading VISA card infos: ", tle);
 		}
 		return result;
@@ -414,8 +385,8 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private CardInfo readEmvData(byte[] selectAidResponse, CardInfo result,
-			boolean fullFileScan) throws IOException, TlvParsingException {
+	private CardInfo readEmvData(byte[] selectAidResponse, CardInfo result, boolean fullFileScan)
+			throws IOException, TlvParsingException {
 		tryToReadLogFormat();
 		result = tryToReadPinRetryCounter(result);
 		tryToReadCurrentAtcValue();
@@ -437,8 +408,7 @@ public class NfcBankomatCardReader {
 	private void tryToReadLogFormat() throws IOException {
 		_ctl.log("trying to send GET DATA to get 'Log Format' tag from  card...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_LOG_FORMAT);
 		_logFormatResponse = bytesToHex(resultPdu);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
@@ -450,20 +420,17 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private CardInfo tryToReadPinRetryCounter(CardInfo result)
-			throws IOException, TlvParsingException {
+	private CardInfo tryToReadPinRetryCounter(CardInfo result) throws IOException, TlvParsingException {
 		_ctl.log("trying to read PIN retry counter from card...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER);
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 		if (isStatusSuccess(getLast2Bytes(resultPdu))) {
 			BERTLV tlv = getNextTLV(new ByteArrayInputStream(resultPdu));
 			int pinRetryCounter = tlv.getValueBytes()[0];
 			_ctl.log("-----------------------------------------------------");
-			_ctl.log("  Current PIN retry counter: >>>>>> " + pinRetryCounter
-					+ " <<<<<<");
+			_ctl.log("  Current PIN retry counter: >>>>>> " + pinRetryCounter + " <<<<<<");
 			_ctl.log("-----------------------------------------------------");
 			result.setPinRetryCounter(pinRetryCounter);
 		}
@@ -478,50 +445,40 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private void tryToReadAdditionalGetDataFields() throws IOException,
-			TlvParsingException {
+	private void tryToReadAdditionalGetDataFields() throws IOException, TlvParsingException {
 		_ctl.log("trying to send GET DATA for getting 'card risk management currency(?)'...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_CURRENCY));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_CRM_CURRENCY);
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_CRM_CURRENCY);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'card risk management country(?)'...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_CRM_COUNTRY));
-		resultPdu = _localIsoDep.transceive(EMV_COMMAND_GET_DATA_CRM_COUNTRY);
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_CRM_COUNTRY);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'lower consecutive offline limit(?)'...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT));
-		resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT);
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'upper consecutive offline limit(?)'...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT));
-		resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT);
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'lower cumulative offline tx amount(?)'...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT));
-		resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT);
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 
 		_ctl.log("trying to send GET DATA for getting 'upper cumulative offline tx amount(?)'...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT));
-		resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT);
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -534,8 +491,7 @@ public class NfcBankomatCardReader {
 	private void tryToReadCurrentAtcValue() throws IOException {
 		_ctl.log("trying to send GET DATA for getting 'ATC' (current application transaction counter)...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_APP_TX_COUNTER));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_APP_TX_COUNTER);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -546,11 +502,10 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private void tryToReadLastOnlineAtcRegisterValue() throws IOException {
-		_ctl.log("trying to send GET DATA for getting 'Last online ATC Register' (application transaction counter of last online transaction)...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER);
+		_ctl.log(
+				"trying to send GET DATA for getting 'Last online ATC Register' (application transaction counter of last online transaction)...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER));
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -562,10 +517,8 @@ public class NfcBankomatCardReader {
 	 */
 	private void tryToReadAllCommonSimpleTlvTags() throws IOException {
 		_ctl.log("trying to send command for getting all common simple TLV tags...");
-		_ctl.log("sent: "
-				+ bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV));
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -578,8 +531,7 @@ public class NfcBankomatCardReader {
 	private void tryToReadAllCommonBerTlvTags() throws IOException {
 		_ctl.log("trying to send command for getting all common BER TLV tags...");
 		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV));
-		byte[] resultPdu = _localIsoDep
-				.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
+		byte[] resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
@@ -604,15 +556,14 @@ public class NfcBankomatCardReader {
 		// modern cards)
 		// TODO: maybe implement enciphered PIN verification..
 		_ctl.log("trying to VERIFY PLAINTEXT PIN: " + pin);
-		byte[] resultPdu = _localIsoDep.transceive(createApduVerifyPIN(pin,
-				true));
+		byte[] resultPdu = _tag.transceive(createApduVerifyPIN(pin, true));
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
 	}
 
 	private byte[] transceiveAndLog(byte[] data) throws IOException {
 		_ctl.log("sending: " + bytesToHex(data));
-		return _localIsoDep.transceive(data);
+		return _tag.transceive(data);
 	}
 
 	/**
@@ -620,8 +571,7 @@ public class NfcBankomatCardReader {
 	 * 
 	 * @throws IOException
 	 */
-	private CardInfo tryReadingQuickLogEntries(CardInfo result)
-			throws IOException {
+	private CardInfo tryReadingQuickLogEntries(CardInfo result) throws IOException {
 		List<QuickTransactionLogEntry> quickLogs = new ArrayList<QuickTransactionLogEntry>();
 
 		byte[] resultPdu;
@@ -736,12 +686,10 @@ public class NfcBankomatCardReader {
 			}
 		}
 		if (foundLogTag) {
-			Log.d(TAG, "YES! EMV Tag 'Log Entry' found! This card *may* "
-					+ "store transactions logs.");
+			Log.d(TAG, "YES! EMV Tag 'Log Entry' found! This card *may* " + "store transactions logs.");
 		} else {
-			Log.d(TAG,
-					"NO! Dit not find the EMV Tag 'Log Entry'! This means "
-							+ "that this card propably won't store transactions logs at all.");
+			Log.d(TAG, "NO! Dit not find the EMV Tag 'Log Entry'! This means "
+					+ "that this card propably won't store transactions logs at all.");
 		}
 		result.setContainsTxLogs(foundLogTag);
 		return result;
@@ -760,8 +708,7 @@ public class NfcBankomatCardReader {
 	 * @return
 	 * @throws IOException
 	 */
-	private CardInfo searchForFiles(CardInfo result, boolean fullFileScan,
-			boolean tryToParse) throws IOException {
+	private CardInfo searchForFiles(CardInfo result, boolean fullFileScan, boolean tryToParse) throws IOException {
 		_ctl.log("We ignore the cards 'Application File Locator' and just iterate over files here..");
 
 		// we now simply check in 2 loops a lot of files and records if they
@@ -783,10 +730,8 @@ public class NfcBankomatCardReader {
 			// ugly and hardcoded, but keep it for now
 			// jump to next if EF not in whitelst
 			if (!fullFileScan) {
-				if (shortEfFileIdentifier != 1 && shortEfFileIdentifier != 2
-						&& shortEfFileIdentifier != 3
-						&& shortEfFileIdentifier != 4
-						&& shortEfFileIdentifier != LOG_RECORD_EF)
+				if (shortEfFileIdentifier != 1 && shortEfFileIdentifier != 2 && shortEfFileIdentifier != 3
+						&& shortEfFileIdentifier != 4 && shortEfFileIdentifier != LOG_RECORD_EF)
 					continue;
 			}
 
@@ -797,22 +742,19 @@ public class NfcBankomatCardReader {
 
 			// iterate over records within EF
 			for (int currentRecord = 0; currentRecord < 256; currentRecord++) {
-				if ((fullFileScan && consecutiveErrorRecords > 6)
-						|| (!fullFileScan && consecutiveErrorRecords > 2)) {
+				if ((fullFileScan && consecutiveErrorRecords > 6) || (!fullFileScan && consecutiveErrorRecords > 2)) {
 					// if we had 6 errors (or 3 if we do a fast scan) in a row
 					// we assume that no more
 					// records will come and just leave this EF and go
 					// to the next
 					break;
 				}
-				byte[] responsePdu = readRecord(shortEfFileIdentifier,
-						currentRecord, false);
+				byte[] responsePdu = readRecord(shortEfFileIdentifier, currentRecord, false);
 				if (isStatusSuccess(getLast2Bytes(responsePdu))) {
 					// also if we find a record set counter to 0
 					consecutiveErrorRecords = 0;
 					if (tryToParse) {
-						if (shortEfFileIdentifier == LOG_RECORD_EF
-								&& lengthLooksLikeTxLog(responsePdu)) {
+						if (shortEfFileIdentifier == LOG_RECORD_EF && lengthLooksLikeTxLog(responsePdu)) {
 							EmvTransactionLogEntry txLogEntry = tryToParseLogEntry(responsePdu);
 							if (txLogEntry != null) {
 								txList.add(txLogEntry);
@@ -824,9 +766,7 @@ public class NfcBankomatCardReader {
 							try {
 								logBerTlvResponse(responsePdu);
 							} catch (Exception e) {
-								Log.w(TAG,
-										"Ignored exception while parsing TLV data",
-										e);
+								Log.w(TAG, "Ignored exception while parsing TLV data", e);
 							}
 						}
 					} else {
@@ -885,8 +825,7 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private QuickTransactionLogEntry parseQuickTxLogEntryFromByteArray(
-			byte[] rawRecord) {
+	private QuickTransactionLogEntry parseQuickTxLogEntryFromByteArray(byte[] rawRecord) {
 
 		// ATC amount amount curr Term# term stat? tagBCD? zeit rest
 		// (conv to dez)
@@ -917,9 +856,8 @@ public class NfcBankomatCardReader {
 		// 9F 52 (06 bytes) -> Application Default Action (ADA)
 
 		if (rawRecord.length < LOG_LENGTH_QUICK) {
-			Log.w(TAG,
-					"parseTxLogEntryFromByteArray: byte array is not long enough for quick log entry:\n"
-							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			Log.w(TAG, "parseTxLogEntryFromByteArray: byte array is not long enough for quick log entry:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2));
 			return null;
 		}
 		QuickTransactionLogEntry tx = new QuickTransactionLogEntry();
@@ -927,20 +865,15 @@ public class NfcBankomatCardReader {
 		tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 1, 2)));
 		tx.setAmount(getAmountFromBytes(getByteArrayPart(rawRecord, 3, 6)));
 		tx.setAmount2(getAmountFromBytes(getByteArrayPart(rawRecord, 7, 10)));
-		tx.setCurrency(Iso4217CurrencyCodes
-				.getCurrencyAsString(getByteArrayPart(rawRecord, 11, 12)));
-		tx.setTerminalInfos1(readLongFromBytes(
-				getByteArrayPart(rawRecord, 13, 16), 0, 4));
-		tx.setTerminalInfos2(readLongFromBytes(
-				getByteArrayPart(rawRecord, 17, 20), 0, 4));
+		tx.setCurrency(Iso4217CurrencyCodes.getCurrencyAsString(getByteArrayPart(rawRecord, 11, 12)));
+		tx.setTerminalInfos1(readLongFromBytes(getByteArrayPart(rawRecord, 13, 16), 0, 4));
+		tx.setTerminalInfos2(readLongFromBytes(getByteArrayPart(rawRecord, 17, 20), 0, 4));
 		tx.setUnknownByte2(rawRecord[21]);
 		tx.setTransactionTimestamp(
-				getTimeStampFromQuickLog(
-						readBcdIntegerFromBytes(getByteArrayPart(rawRecord, 22,
-								25)), getByteArrayPart(rawRecord, 26, 28)),
+				getTimeStampFromQuickLog(readBcdIntegerFromBytes(getByteArrayPart(rawRecord, 22, 25)),
+						getByteArrayPart(rawRecord, 26, 28)),
 				true);
-		tx.setRemainingBalance(getAmountFromBytes(getByteArrayPart(rawRecord,
-				29, 32)));
+		tx.setRemainingBalance(getAmountFromBytes(getByteArrayPart(rawRecord, 29, 32)));
 		// and raw entry
 		tx.setRawEntry(rawRecord);
 		return tx;
@@ -954,8 +887,7 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private EmvTransactionLogEntry parseMastercardTxLogEntryFromByteArray(
-			byte[] rawRecord) {
+	private EmvTransactionLogEntry parseMastercardTxLogEntryFromByteArray(byte[] rawRecord) {
 
 		// hardcoded to log format of Mastercard (2014)
 
@@ -970,9 +902,8 @@ public class NfcBankomatCardReader {
 
 		if (rawRecord.length < LOG_LENGTH_MASTERCARD) {
 			// only continue if record is at least 24(+2 status) bytes long
-			Log.w(TAG,
-					"parseTxLogEntryFromByteArray: byte array is not long enough for log entry:\n"
-							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			Log.w(TAG, "parseTxLogEntryFromByteArray: byte array is not long enough for log entry:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2));
 			return null;
 		}
 
@@ -980,18 +911,14 @@ public class NfcBankomatCardReader {
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
-			tx.setCurrency(Iso4217CurrencyCodes
-					.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
-			tx.setTransactionTimestamp(
-					getDateFromBcdBytes(getByteArrayPart(rawRecord, 9, 11)),
-					false);
+			tx.setCurrency(Iso4217CurrencyCodes.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setTransactionTimestamp(getDateFromBcdBytes(getByteArrayPart(rawRecord, 9, 11)), false);
 			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
 			tx.setApplicationDefaultAction(getByteArrayPart(rawRecord, 14, 19));
 			tx.setRawEntry(rawRecord);
 		} catch (Exception e) {
-			String msg = "Exception while trying to parse transaction entry: "
-					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
-					+ prettyPrintString(bytesToHex(rawRecord), 2);
+			String msg = "Exception while trying to parse transaction entry: " + e + "\n" + e.getMessage()
+					+ "\nraw byte array:\n" + prettyPrintString(bytesToHex(rawRecord), 2);
 			Log.w(TAG, msg, e);
 			_ctl.log(msg);
 			return null;
@@ -1007,8 +934,7 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private EmvTransactionLogEntry parseVisaTxLogEntryFromByteArray(
-			byte[] rawRecord) {
+	private EmvTransactionLogEntry parseVisaTxLogEntryFromByteArray(byte[] rawRecord) {
 
 		// hardcoded to log format of Mastercard (2014)
 
@@ -1025,9 +951,8 @@ public class NfcBankomatCardReader {
 		// 9F 80 (04 bytes) -> [UNHANDLED TAG]
 
 		if (rawRecord.length < LOG_LENGTH_VISA) {
-			Log.w(TAG,
-					"parseTxLogEntryFromByteArray: byte array is not long enough for VISA log entry:\n"
-							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			Log.w(TAG, "parseTxLogEntryFromByteArray: byte array is not long enough for VISA log entry:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2));
 			return null;
 		}
 
@@ -1039,19 +964,15 @@ public class NfcBankomatCardReader {
 			// 8-13
 			// TODO: include terminal country code (14-15)
 			// TODO: include TVR for VISA (16-20)
-			tx.setCurrency(Iso4217CurrencyCodes
-					.getCurrencyAsString(getByteArrayPart(rawRecord, 21, 22)));
-			tx.setTransactionTimestamp(
-					getDateFromBcdBytes(getByteArrayPart(rawRecord, 23, 25)),
-					false);
+			tx.setCurrency(Iso4217CurrencyCodes.getCurrencyAsString(getByteArrayPart(rawRecord, 21, 22)));
+			tx.setTransactionTimestamp(getDateFromBcdBytes(getByteArrayPart(rawRecord, 23, 25)), false);
 			// TODO: include Transaction Type (26)
 			// TODO: include unknown tag 9f 80 (27-30)
 
 			tx.setRawEntry(rawRecord);
 		} catch (Exception e) {
-			String msg = "Exception while trying to parse transaction entry: "
-					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
-					+ prettyPrintString(bytesToHex(rawRecord), 2);
+			String msg = "Exception while trying to parse transaction entry: " + e + "\n" + e.getMessage()
+					+ "\nraw byte array:\n" + prettyPrintString(bytesToHex(rawRecord), 2);
 			Log.w(TAG, msg, e);
 			_ctl.log(msg);
 			return null;
@@ -1067,8 +988,7 @@ public class NfcBankomatCardReader {
 	 * @return the parsed record or <code>null</code> if something could not be
 	 *         parsed
 	 */
-	private EmvTransactionLogEntry parseBankomatTxLogEntryFromByteArray(
-			byte[] rawRecord) {
+	private EmvTransactionLogEntry parseBankomatTxLogEntryFromByteArray(byte[] rawRecord) {
 
 		// hardcoded to log format of Austrian cards
 
@@ -1086,9 +1006,8 @@ public class NfcBankomatCardReader {
 
 		if (rawRecord.length < 24) {
 			// only continue if record is at least 24(+2 status) bytes long
-			Log.w(TAG,
-					"parseTxLogEntryFromByteArray: byte array is not long enough:\n"
-							+ prettyPrintString(bytesToHex(rawRecord), 2));
+			Log.w(TAG, "parseTxLogEntryFromByteArray: byte array is not long enough:\n"
+					+ prettyPrintString(bytesToHex(rawRecord), 2));
 			return null;
 		}
 
@@ -1096,12 +1015,10 @@ public class NfcBankomatCardReader {
 		try {
 			tx.setCryptogramInformationData(rawRecord[0]);
 			tx.setAmount(getAmountFromBcdBytes(getByteArrayPart(rawRecord, 1, 6)));
-			tx.setCurrency(Iso4217CurrencyCodes
-					.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
+			tx.setCurrency(Iso4217CurrencyCodes.getCurrencyAsString(getByteArrayPart(rawRecord, 7, 8)));
 			tx.setTransactionTimestamp(
-					getTimeStampFromBcdBytes(
-							getByteArrayPart(rawRecord, 9, 11),
-							getByteArrayPart(rawRecord, 21, 23)), true);
+					getTimeStampFromBcdBytes(getByteArrayPart(rawRecord, 9, 11), getByteArrayPart(rawRecord, 21, 23)),
+					true);
 			tx.setAtc(byteArrayToInt(getByteArrayPart(rawRecord, 12, 13)));
 			tx.setApplicationDefaultAction(getByteArrayPart(rawRecord, 14, 19));
 			tx.setUnknownByte(rawRecord[20]);
@@ -1113,15 +1030,13 @@ public class NfcBankomatCardReader {
 			} else {
 				// for being tolerant we parse from byte 25 untiil end (last 2
 				// bytes are status)
-				tx.setCustomerExclusiveData(getByteArrayPart(rawRecord, 24,
-						rawRecord.length - 3));
+				tx.setCustomerExclusiveData(getByteArrayPart(rawRecord, 24, rawRecord.length - 3));
 			}
 
 			tx.setRawEntry(rawRecord);
 		} catch (Exception e) {
-			String msg = "Exception while trying to parse transaction entry: "
-					+ e + "\n" + e.getMessage() + "\nraw byte array:\n"
-					+ prettyPrintString(bytesToHex(rawRecord), 2);
+			String msg = "Exception while trying to parse transaction entry: " + e + "\n" + e.getMessage()
+					+ "\nraw byte array:\n" + prettyPrintString(bytesToHex(rawRecord), 2);
 			Log.w(TAG, msg, e);
 			_ctl.log(msg);
 			return null;
@@ -1142,14 +1057,11 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * 
 	 */
-	private byte[] readRecord(int shortEfFileIdentifier, int recordNumber,
-			boolean logAlways) throws IOException {
-		byte[] readRecordApdu = createReadRecordApdu(shortEfFileIdentifier,
-				recordNumber);
-		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
+	private byte[] readRecord(int shortEfFileIdentifier, int recordNumber, boolean logAlways) throws IOException {
+		byte[] readRecordApdu = createReadRecordApdu(shortEfFileIdentifier, recordNumber);
+		byte[] resultPdu = _tag.transceive(readRecordApdu);
 		if (logAlways || isStatusSuccess(getLast2Bytes(resultPdu))) {
-			String msg = "READ RECORD for EF " + shortEfFileIdentifier
-					+ " and RECORD " + recordNumber;
+			String msg = "READ RECORD for EF " + shortEfFileIdentifier + " and RECORD " + recordNumber;
 			Log.d(TAG, msg);
 			_ctl.log(msg);
 			_ctl.log("sent: " + bytesToHex(readRecordApdu));
@@ -1168,7 +1080,7 @@ public class NfcBankomatCardReader {
 	@SuppressWarnings("unused")
 	private byte[] selectMasterfile() throws IOException {
 		byte[] readRecordApdu = createSelectMasterFile();
-		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
+		byte[] resultPdu = _tag.transceive(readRecordApdu);
 		if (isStatusSuccess(getLast2Bytes(resultPdu))) {
 			String msg = "SELECT MF  (cd / ) ";
 			Log.d(TAG, msg);
@@ -1188,7 +1100,7 @@ public class NfcBankomatCardReader {
 	@SuppressWarnings("unused")
 	private byte[] selectParentDf() throws IOException {
 		byte[] readRecordApdu = createSelectParentDfFile();
-		byte[] resultPdu = _localIsoDep.transceive(readRecordApdu);
+		byte[] resultPdu = _tag.transceive(readRecordApdu);
 		if (isStatusSuccess(getLast2Bytes(resultPdu))) {
 			String msg = "SELECT parent DF  (cd .. ) ";
 			Log.d(TAG, msg);
@@ -1206,14 +1118,11 @@ public class NfcBankomatCardReader {
 	private long getQuickCardBalance() throws IOException {
 		_ctl.log("Reading QUICK balance");
 		_ctl.log("sent: " + bytesToHex(ISO_COMMAND_QUICK_READ_BALANCE));
-		byte[] resultPdu = _localIsoDep
-				.transceive(ISO_COMMAND_QUICK_READ_BALANCE);
+		byte[] resultPdu = _tag.transceive(ISO_COMMAND_QUICK_READ_BALANCE);
 		logResultPdu(resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
-			Log.w(TAG,
-					"getQuickCardBalance: Response status word was not ok! Error: "
-							+ statusToString(getLast2Bytes(resultPdu))
-							+ ". In hex: " + bytesToHex(resultPdu));
+			Log.w(TAG, "getQuickCardBalance: Response status word was not ok! Error: "
+					+ statusToString(getLast2Bytes(resultPdu)) + ". In hex: " + bytesToHex(resultPdu));
 			_ctl.log("will return balance -1");
 			return -1;
 		}
@@ -1227,29 +1136,22 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 * @throws TlvParsingException
 	 */
-	private byte[] getQuickCardCurrencyBytes() throws IOException,
-			TlvParsingException {
+	private byte[] getQuickCardCurrencyBytes() throws IOException, TlvParsingException {
 		_ctl.log("Reading QUICK currency");
 		_ctl.log("sent: " + bytesToHex(ISO_COMMAND_QUICK_READ_CURRENCY));
-		byte[] resultPdu = _localIsoDep
-				.transceive(ISO_COMMAND_QUICK_READ_CURRENCY);
+		byte[] resultPdu = _tag.transceive(ISO_COMMAND_QUICK_READ_CURRENCY);
 		logResultPdu(resultPdu);
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
 			String msg = "getQuickCardCurrencyBytes: Response status was not 'SUCCESS'! The response was: "
-					+ statusToString(getLast2Bytes(resultPdu))
-					+ ". In hex: "
-					+ bytesToHex(resultPdu)
-					+ "\nThe complete response was:\n"
-					+ prettyPrintString(bytesToHex(resultPdu), 2);
+					+ statusToString(getLast2Bytes(resultPdu)) + ". In hex: " + bytesToHex(resultPdu)
+					+ "\nThe complete response was:\n" + prettyPrintString(bytesToHex(resultPdu), 2);
 			Log.w(TAG, msg);
 			throw new TlvParsingException(msg);
 		}
 		byte[] rawCurrency = new byte[2];
 		System.arraycopy(resultPdu, 0, rawCurrency, 0, 2);
-		_ctl.log("QUICK currency = "
-				+ prettyPrintString(bytesToHex(rawCurrency), 2));
-		_ctl.log("QUICK currency = "
-				+ Iso4217CurrencyCodes.getCurrencyAsString(rawCurrency));
+		_ctl.log("QUICK currency = " + prettyPrintString(bytesToHex(rawCurrency), 2));
+		_ctl.log("QUICK currency = " + Iso4217CurrencyCodes.getCurrencyAsString(rawCurrency));
 		return rawCurrency;
 	}
 
@@ -1262,11 +1164,16 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private byte[] sendGetCPLC() throws IOException {
+		// TODO: workaround:
+		if (_tag instanceof OmapiSessionTag) {
+			// return generic error for OMAPI
+			return fromHexString("6FFF");
+		}
 		Log.d(TAG, "sending GET CPLC command..");
 		byte[] command = EmvUtils.GPCS_GET_CPLC_COMMAND;
 		Log.d(TAG, "will send byte array: " + bytesToHex(command));
 		_ctl.log("sent: " + bytesToHex(command));
-		byte[] resultPdu = _localIsoDep.transceive(command);
+		byte[] resultPdu = _tag.transceive(command);
 		logResultPdu(resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 
@@ -1276,13 +1183,12 @@ public class NfcBankomatCardReader {
 		// correct length")
 		// and send specified len
 		if (!isStatusSuccess(getLast2Bytes(resultPdu))) {
-			Log.d(TAG,
-					"sending GET CPLC returned an error, will retry with Le set..");
+			Log.d(TAG, "sending GET CPLC returned an error, will retry with Le set..");
 			Log.d(TAG, "sending GET CPLC command with Le set..");
 			command = EmvUtils.GPCS_GET_CPLC_COMMAND_WITH_LENGTH;
 			Log.d(TAG, "will send byte array: " + bytesToHex(command));
 			_ctl.log("sent: " + bytesToHex(command));
-			resultPdu = _localIsoDep.transceive(command);
+			resultPdu = _tag.transceive(command);
 			logResultPdu(resultPdu);
 			Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		}
@@ -1297,12 +1203,10 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private byte[] selectApplicationGetBytes(byte[] appId) throws IOException {
-		Log.d(TAG, "sending ISO7816 SELECT command, with AID: "
-				+ bytesToHex(appId));
-		byte[] command = createSelectAid(appId);
-		Log.d(TAG, "will send byte array: " + bytesToHex(command));
-		_ctl.log("sent: " + bytesToHex(command));
-		byte[] resultPdu = _localIsoDep.transceive(command);
+		Log.d(TAG, "sending ISO7816 SELECT command, with AID: " + bytesToHex(appId));
+		byte[] resultPdu = _tag.selectAid(appId);
+		// byte[] command = createSelectAid(appId);
+		// _ctl.log("sent: " + bytesToHex(command));
 		logResultPdu(resultPdu);
 		Log.d(TAG, "received byte array:  " + bytesToHex(resultPdu));
 		return resultPdu;
@@ -1315,15 +1219,11 @@ public class NfcBankomatCardReader {
 	 */
 	private void logResultPdu(byte[] resultPdu) {
 		Log.d(TAG, "received: " + bytesToHex(resultPdu));
-		Log.d(TAG,
-				"status: "
-						+ prettyPrintString(
-								bytesToHex(getLast2Bytes(resultPdu)), 2));
+		Log.d(TAG, "status: " + prettyPrintString(bytesToHex(getLast2Bytes(resultPdu)), 2));
 		Log.d(TAG, "status: " + statusToString(getLast2Bytes(resultPdu)));
 		_ctl.log("received: " + bytesToHex(resultPdu));
-		_ctl.log("status: "
-				+ prettyPrintString(bytesToHex(getLast2Bytes(resultPdu)), 2)
-				+ " - " + statusToString(getLast2Bytes(resultPdu)));
+		_ctl.log("status: " + prettyPrintString(bytesToHex(getLast2Bytes(resultPdu)), 2) + " - "
+				+ statusToString(getLast2Bytes(resultPdu)));
 	}
 
 	/**
@@ -1341,8 +1241,9 @@ public class NfcBankomatCardReader {
 				_tagList.addAll(getTagsFromBerTlvAPDUResponse(data));
 			} catch (TlvParsingException e) {
 				_ctl.log("decoding error... maybe this data is not BER-TLV encoded?");
-				Log.w(TAG, "exception while parsing BER-TLV PDU response\n"
-						+ prettyPrintString(bytesToHex(resultPdu), 2), e);
+				Log.w(TAG,
+						"exception while parsing BER-TLV PDU response\n" + prettyPrintString(bytesToHex(resultPdu), 2),
+						e);
 			}
 		}
 	}
