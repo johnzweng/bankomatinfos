@@ -18,10 +18,8 @@ import org.simalliance.openmobileapi.SEService;
 import org.simalliance.openmobileapi.Session;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -54,9 +52,6 @@ import at.zweng.bankomatinfos2.R;
 public class MainActivity extends Activity implements NfcAdapter.ReaderCallback {
 
 	// for NFC stuff
-	private PendingIntent _pendingIntent;
-	private IntentFilter[] _filters;
-	private String[][] _techLists;
 	private NfcAdapter _nfcAdapter;
 
 	// openmobile API
@@ -91,10 +86,6 @@ public class MainActivity extends Activity implements NfcAdapter.ReaderCallback 
 		});
 
 		// NFC stuff
-		_pendingIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-		_filters = new IntentFilter[] { new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED) };
-		_techLists = new String[][] { { "android.nfc.tech.NfcA" } };
 		_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		// create last changes dialog if needed
 		displayWhatsNew();

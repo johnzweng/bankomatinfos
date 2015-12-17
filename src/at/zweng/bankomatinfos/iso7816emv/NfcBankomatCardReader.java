@@ -4,11 +4,14 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAES
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MASTERCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_VISA_CREDITCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.*;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_APP_TX_COUNTER;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_CRM_COUNTRY;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_CRM_CURRENCY;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_DF4D;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_DF50;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_DF51;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOG_FORMAT;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT;
@@ -20,7 +23,6 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.ISO_COMMAND_QUICK_READ_CURRENCY;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createApduVerifyPIN;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createReadRecordApdu;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectAid;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectMasterFile;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.createSelectParentDfFile;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.filterTagsForResult;
@@ -53,11 +55,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import android.content.Context;
-import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import android.util.Log;
 import at.zweng.bankomatinfos.AppController;
-import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.CardInfo;
 import at.zweng.bankomatinfos.model.EmvTransactionLogEntry;

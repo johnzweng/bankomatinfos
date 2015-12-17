@@ -19,6 +19,7 @@ import android.content.Context;
 import android.util.Log;
 import at.zweng.bankomatinfos.exceptions.TlvParsingException;
 import at.zweng.bankomatinfos.model.InfoKeyValuePair;
+import at.zweng.bankomatinfos.util.Utils;
 import at.zweng.bankomatinfos2.R;
 
 /**
@@ -232,6 +233,9 @@ public class EmvUtils {
 	 */
 	public static final byte[] APPLICATION_ID_EMV_MAESTRO_BANKOMAT = { (byte) 0xA0, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x04, (byte) 0x30, (byte) 0x60 };
+	
+	// unkown AID: what is this? seems to return same result from mobile maestro:
+	public static final byte[] APPLICATION_ID_EMV_MAESTR0_UNKNOWN = Utils.fromHexString("A0000000043060BB5053534101000101");;
 
 	/**
 	 * Application ID for MASTERCARD: A0000000041010
