@@ -37,12 +37,12 @@
 
     <!-- General results -->
 
-	<!-- section headers -->
-	<string name="section_nfc">NFC:</string>
-	<string name="section_GPCS_CPLC">Card infos (CPLC data):</string>
-	<string name="section_emv">EMV / Credit card / Maestro / Quick:</string>
 
-	<string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
+    <!-- section headers -->
+    <string name="section_nfc">NFC:</string>
+    <string name="section_GPCS_CPLC">Card infos (CPLC data):</string>
+    <string name="section_emv">EMV / Credit card / Maestro / Quick:</string>
+    <string name="lbl_nfc_tag_id">NFC tag ID of the card\n(This is NOT the card or account number!):</string>
     <string name="lbl_is_quick_card">Is a QUICK card:</string>
     <string name="lbl_is_maestro_card">Is a Maestro (Bankomat) card:</string>
     <string name="lbl_is_visa_card">Is a VISA Creditcard:</string>
@@ -52,11 +52,12 @@
     <string name="lbl_quick_balance">QUICK balance:</string>
     <string name="lbl_quick_currency">QUICK currency:</string>
     <string name="lbl_remaining_pin_retries">Remaining PIN entry retries:</string>
+    <string name="lbl_unknown_tag">Unknown tag</string>
     <string name="lbl_expiration_date">Expiration date:</string>
     <string name="lbl_effective_date">Activation date:</string>
     <string name="lbl_primary_account_number">Card number:</string>
     <string name="lbl_application_transaction_counter">Transaction counter:</string>
-    <!-- did we find the EMV TAG "9F 4D" ("Log Entry")?  -->
+    <!-- did we find the EMV TAG "9F 4D" ("Log Entry")? -->
     <string name="lbl_contains_emv_log_entry_tag">Contains transaction logs:</string>
     <string name="lbl_card_risk_management_currency">Card risk management currency:</string>
     <string name="lbl_card_risk_management_country">Card risk management country code:</string>
@@ -64,13 +65,11 @@
     <string name="lbl_upper_consecutive_offline_limit">Upper Consecutive Offline Limit:</string>
     <string name="lbl_lower_consecutive_offline_tx_amount">Lower Consecutive Offline Transaction Amount:</string>
     <string name="lbl_upper_consecutive_offline_tx_amount">Upper Consecutive Offline Transaction Amount:</string>
-    
 
     <!-- Transaction List: -->
     <string name="tx_list_no_tx_found">No transaction logs found</string>
     <string name="tx_list_no_tx_log_tag_found">This card seems not to contain any transactions logs.</string>
-    
-    
+
     <!-- Transaction List Item: -->
     <string name="tx_list_image_description_collapse_icon">Icon Collapse</string>
     <string name="tx_list_image_description_expand_icon">Icon Expand</string>
@@ -83,8 +82,7 @@
     <!-- Quick Tx List -->
     <string name="tx_list_remaining_balance">Remaining Balance:</string>
     <string name="tx_list_terminfo_label">Terminal Infos??:</string>
-    
-    
+
     <!-- Share Subject -->
     <string name="action_share_subject">Bankomat Card Info - Results</string>
 
@@ -112,5 +110,5 @@
     <string name="cryptogram_type_arqc">The terminal must go online and ask the bank if this transaction should be accepted.</string>
     <string name="cryptogram_type_aac">If contactless payment: The card immediately declined this transaction offline.\nIf contact payment: Either the card or the bank (online) has rejected this transaction.</string>
     <string name="cryptogram_type_rfu">This type is reserved for future use.</string>
-    
+
 </resources>

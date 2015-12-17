@@ -37,50 +37,46 @@ public class EmvUtils {
 	 * ISO command for SELECT a file directly (Direct selection by DF name (data
 	 * field=DF name)
 	 */
-	public static final byte[] ISO_COMMAND_SELECT_DIRECT = { (byte) 0x00,
-			(byte) 0xA4, (byte) 0x04, (byte) 0x00 };
+	public static final byte[] ISO_COMMAND_SELECT_DIRECT = { (byte) 0x00, (byte) 0xA4, (byte) 0x04, (byte) 0x00 };
 
 	/**
 	 * ISO command for SELECT PARENT DF file (empty data field)
 	 */
-	public static final byte[] ISO_COMMAND_SELECT_PARENT_DF = { (byte) 0x00,
-			(byte) 0xA4, (byte) 0x03, (byte) 0x00 };
+	public static final byte[] ISO_COMMAND_SELECT_PARENT_DF = { (byte) 0x00, (byte) 0xA4, (byte) 0x03, (byte) 0x00 };
 
 	/**
 	 * ISO command for SELECT FILE by file identifier (data field=file
 	 * idenntifier)
 	 */
-	public static final byte[] ISO_COMMAND_SELECT_FILE = { (byte) 0x00,
-			(byte) 0xA4, (byte) 0x00, (byte) 0x00 };
+	public static final byte[] ISO_COMMAND_SELECT_FILE = { (byte) 0x00, (byte) 0xA4, (byte) 0x00, (byte) 0x00 };
 
 	/**
 	 * command read QUICK balance: 00B0820000 (in fact this is a READ BINARY
 	 * command, reading EF 2 starting from offset 00, reading all bytes)
 	 */
-	public static final byte[] ISO_COMMAND_QUICK_READ_BALANCE = { (byte) 0x00,
-			(byte) 0xB0, (byte) 0x82, (byte) 0x00, (byte) 0x00 };
+	public static final byte[] ISO_COMMAND_QUICK_READ_BALANCE = { (byte) 0x00, (byte) 0xB0, (byte) 0x82, (byte) 0x00,
+			(byte) 0x00 };
 
 	/**
 	 * command read QUICK currency: 00B0810000 (in fact this is a READ BINARY
 	 * command, reading EF 1 starting from offset 0x15, reading 2 bytes)
 	 */
-	public static final byte[] ISO_COMMAND_QUICK_READ_CURRENCY = { (byte) 0x00,
-			(byte) 0xB0, (byte) 0x81, (byte) 0x15, (byte) 0x02 };
+	public static final byte[] ISO_COMMAND_QUICK_READ_CURRENCY = { (byte) 0x00, (byte) 0xB0, (byte) 0x81, (byte) 0x15,
+			(byte) 0x02 };
 
 	/**
 	 * GET_CPLC_COMMAND command for receiving "Card Production Life Cycle"
 	 * (CPLC) data, according the GlobalPlatform Card Specification.
 	 * 
 	 */
-	public static final byte[] GPCS_GET_CPLC_COMMAND = { (byte) 0x80,
-			(byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x00 };
+	public static final byte[] GPCS_GET_CPLC_COMMAND = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x00 };
 
 	/**
 	 * GET_CPLC_COMMAND , but with Le set to 2D (some cards seem to require it
 	 * this way)
 	 */
-	public static final byte[] GPCS_GET_CPLC_COMMAND_WITH_LENGTH = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x7F, 0x2D };
+	public static final byte[] GPCS_GET_CPLC_COMMAND_WITH_LENGTH = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x7F,
+			0x2D };
 
 	/**
 	 * EMV command GET CHALLENGE (returns 8 byte random number), used in
@@ -93,67 +89,85 @@ public class EmvUtils {
 	// GET CHALLENGE is an active command which changes the state in your
 	// card! Only use if you know what you do!
 	//
-	public static final byte[] EMV_COMMAND_GET_CHALLENGE = { (byte) 0x00,
-			(byte) 0x84, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_CHALLENGE = { (byte) 0x00, (byte) 0x84, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag "ATC" (Tag 9F 36)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_APP_TX_COUNTER = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x36, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_APP_TX_COUNTER = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F,
+			(byte) 0x36, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag C8 (card risk management country?)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_CRM_COUNTRY = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC8, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_CRM_COUNTRY = { (byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC8,
+			(byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag C9 (card risk management currency)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_CRM_CURRENCY = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC9, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_CRM_CURRENCY = { (byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xC9,
+			(byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag 9F14 (Lower Consecutive Offline
 	 * Limit?)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x14, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CONSECUTIVE_OFFLINE_LIMIT = { (byte) 0x80, (byte) 0xCA,
+			(byte) 0x9F, (byte) 0x14, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag 9F23 (Upper Consecutive Offline
 	 * Limit?)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x23, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CONSECUTIVE_OFFLINE_LIMIT = { (byte) 0x80, (byte) 0xCA,
+			(byte) 0x9F, (byte) 0x23, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag CA (Lower Cumulative Offline
 	 * Transaction Amount?)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xCA, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_LOWER_CUMULATIVE_TX_AMOUNT = { (byte) 0x80, (byte) 0xCA,
+			(byte) 0x00, (byte) 0xCA, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag CB (Upper Cumulative Offline
 	 * Transaction Amount?)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xCB, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT = { (byte) 0x80, (byte) 0xCA,
+			(byte) 0x00, (byte) 0xCB, (byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading unknown Tag "DF4D"
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_DF4D = { (byte) 0x80, (byte) 0xCA, (byte) 0xDF, (byte) 0x4D,
+			(byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading unknown Tag "DF50"
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_DF50 = { (byte) 0x80, (byte) 0xCA, (byte) 0xDF, (byte) 0x50,
+			(byte) 0x00 };
+
+	/**
+	 * EMV GET DATA command for reading unknown Tag "DF51"
+	 */
+	public static final byte[] EMV_COMMAND_GET_DATA_DF51 = { (byte) 0x80, (byte) 0xCA, (byte) 0xDF, (byte) 0x51,
+			(byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag "Last Online ATC Register" (Tag 9F
 	 * 13)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x13, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_LAST_ONLINE_APP_TX_COUNTER = { (byte) 0x80, (byte) 0xCA,
+			(byte) 0x9F, (byte) 0x13, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag "PIN retry counter" (Tag 9F 17)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x17, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_PIN_RETRY_COUNTER = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F,
+			(byte) 0x17, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading "accumulator values and limits" (BF 30)
@@ -162,8 +176,8 @@ public class EmvUtils {
 	 *      p.155f
 	 */
 	// TODO: test this command
-	public static final byte[] EMV_COMMAND_GET_DATA_ACCUMULATOR_VALUES = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x30, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_ACCUMULATOR_VALUES = { (byte) 0x80, (byte) 0xCA, (byte) 0xBF,
+			(byte) 0x30, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading "counter values and limits" (BF 35)
@@ -172,8 +186,8 @@ public class EmvUtils {
 	 *      p.155f
 	 */
 	// TODO: test this command
-	public static final byte[] EMV_COMMAND_GET_DATA_COUNTER_VALUES = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0xBF, (byte) 0x35, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_COUNTER_VALUES = { (byte) 0x80, (byte) 0xCA, (byte) 0xBF,
+			(byte) 0x35, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading "offline balance" (9F 50)
@@ -182,14 +196,14 @@ public class EmvUtils {
 	 *      p.155f
 	 */
 	// TODO: test this command
-	public static final byte[] EMV_COMMAND_GET_DATA_OFFLINE_BALANCE = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x50, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_OFFLINE_BALANCE = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F,
+			(byte) 0x50, (byte) 0x00 };
 
 	/**
 	 * EMV GET DATA command for reading Tag "Log format" (Tag 9F 4F)
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_LOG_FORMAT = { (byte) 0x80,
-			(byte) 0xCA, (byte) 0x9F, (byte) 0x4F, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_LOG_FORMAT = { (byte) 0x80, (byte) 0xCA, (byte) 0x9F, (byte) 0x4F,
+			(byte) 0x00 };
 
 	/**
 	 * EMV command for GET DATA
@@ -197,43 +211,39 @@ public class EmvUtils {
 	 * http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
 	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x00, (byte) 0xFF, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV = { (byte) 0x80, (byte) 0xCA, (byte) 0x00,
+			(byte) 0xFF, (byte) 0x00 };
 	/**
 	 * EMV command for GET DATA
 	 * "all the common SIMPLE-TLV data objects readable in the context" -->
 	 * http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-
 	 * 4_6_basic_interindustry_commands.aspx#chap6_9 , Table 52
 	 */
-	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV = {
-			(byte) 0x80, (byte) 0xCA, (byte) 0x02, (byte) 0xFF, (byte) 0x00 };
+	public static final byte[] EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV = { (byte) 0x80, (byte) 0xCA, (byte) 0x02,
+			(byte) 0xFF, (byte) 0x00 };
 
 	/**
 	 * Application ID for Quick (IEP): D040000001000002
 	 */
-	public static final byte[] APPLICATION_ID_QUICK = { (byte) 0xD0,
-			(byte) 0x40, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x00,
-			(byte) 0x00, (byte) 0x02 };
+	public static final byte[] APPLICATION_ID_QUICK = { (byte) 0xD0, (byte) 0x40, (byte) 0x00, (byte) 0x00, (byte) 0x01,
+			(byte) 0x00, (byte) 0x00, (byte) 0x02 };
 	/**
 	 * Application ID for EMV Maestro Debit (Bankomat-Karte): A0000000043060
 	 */
-	public static final byte[] APPLICATION_ID_EMV_MAESTRO_BANKOMAT = {
-			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04,
-			(byte) 0x30, (byte) 0x60 };
+	public static final byte[] APPLICATION_ID_EMV_MAESTRO_BANKOMAT = { (byte) 0xA0, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00, (byte) 0x04, (byte) 0x30, (byte) 0x60 };
 
 	/**
 	 * Application ID for MASTERCARD: A0000000041010
 	 */
-	public static final byte[] APPLICATION_ID_EMV_MASTERCARD = { (byte) 0xA0,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x10,
-			(byte) 0x10 };
+	public static final byte[] APPLICATION_ID_EMV_MASTERCARD = { (byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+			(byte) 0x04, (byte) 0x10, (byte) 0x10 };
 
 	/**
 	 * Application ID for Visa credit or debit card: A0000000031010
 	 */
-	public static final byte[] APPLICATION_ID_EMV_VISA_CREDITCARD = {
-			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x03,
-			(byte) 0x10, (byte) 0x10 };
+	public static final byte[] APPLICATION_ID_EMV_VISA_CREDITCARD = { (byte) 0xA0, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00, (byte) 0x03, (byte) 0x10, (byte) 0x10 };
 
 	//
 	// Values of the status word (last 2 bytes) in the response
@@ -242,48 +252,32 @@ public class EmvUtils {
 	public static final byte[] SW_DATA_FAILURE = { (byte) 0x62, (byte) 0x81 };
 	public static final byte[] SW_FILEEND_REACHED = { (byte) 0x62, (byte) 0x82 };
 	public static final byte[] SW_FILE_LOCKED = { (byte) 0x62, (byte) 0x83 };
-	public static final byte[] SW_FILEINFO_ISO_FAILURE = { (byte) 0x62,
-			(byte) 0x84 };
+	public static final byte[] SW_FILEINFO_ISO_FAILURE = { (byte) 0x62, (byte) 0x84 };
 	public static final byte[] SW_MEMORY_ERROR = { (byte) 0x65, (byte) 0x81 };
 	public static final byte[] SW_LENGTH_ERROR = { (byte) 0x67, (byte) 0x00 };
-	public static final byte[] SW_FUNC_CLASS_BYTE_NOT_SUPPORTED = {
-			(byte) 0x68, (byte) 0x00 };
-	public static final byte[] SW_LOGIC_CHAN_NOT_SUPPORTED = { (byte) 0x68,
-			(byte) 0x81 };
-	public static final byte[] SW_SEC_MSG_NOT_SUPPORTED = { (byte) 0x68,
-			(byte) 0x82 };
+	public static final byte[] SW_FUNC_CLASS_BYTE_NOT_SUPPORTED = { (byte) 0x68, (byte) 0x00 };
+	public static final byte[] SW_LOGIC_CHAN_NOT_SUPPORTED = { (byte) 0x68, (byte) 0x81 };
+	public static final byte[] SW_SEC_MSG_NOT_SUPPORTED = { (byte) 0x68, (byte) 0x82 };
 	public static final byte[] SW_CMD_NOT_ALLOWED = { (byte) 0x69, (byte) 0x00 };
 	public static final byte[] SW_CMD_INCOMPATIBLE = { (byte) 0x69, (byte) 0x81 };
-	public static final byte[] SW_SEC_STATE_NOT_FULFILLED = { (byte) 0x69,
-			(byte) 0x82 };
-	public static final byte[] SW_AUTH_METHOD_LOCKED = { (byte) 0x69,
-			(byte) 0x83 };
-	public static final byte[] SW_REFERENCED_DATA_LOCKED = { (byte) 0x69,
-			(byte) 0x84 };
-	public static final byte[] SW_USAGE_COND_NOT_FULFILLED = { (byte) 0x69,
-			(byte) 0x85 };
-	public static final byte[] SW_CMD_NOT_ALLOWED_NO_EF_SEL = { (byte) 0x69,
-			(byte) 0x86 };
+	public static final byte[] SW_SEC_STATE_NOT_FULFILLED = { (byte) 0x69, (byte) 0x82 };
+	public static final byte[] SW_AUTH_METHOD_LOCKED = { (byte) 0x69, (byte) 0x83 };
+	public static final byte[] SW_REFERENCED_DATA_LOCKED = { (byte) 0x69, (byte) 0x84 };
+	public static final byte[] SW_USAGE_COND_NOT_FULFILLED = { (byte) 0x69, (byte) 0x85 };
+	public static final byte[] SW_CMD_NOT_ALLOWED_NO_EF_SEL = { (byte) 0x69, (byte) 0x86 };
 	// einige ausgelassen
 	public static final byte[] SW_INCORRECT_PARAMS = { (byte) 0x6A, (byte) 0x00 };
 	public static final byte[] SW_INCORRECT_DATA = { (byte) 0x6A, (byte) 0x80 };
-	public static final byte[] SW_FUNC_NOT_SUPPORTED = { (byte) 0x6A,
-			(byte) 0x81 };
+	public static final byte[] SW_FUNC_NOT_SUPPORTED = { (byte) 0x6A, (byte) 0x81 };
 	public static final byte[] SW_FILE_NOT_FOUND = { (byte) 0x6A, (byte) 0x82 };
 	public static final byte[] SW_RECORD_NOT_FOUND = { (byte) 0x6A, (byte) 0x83 };
-	public static final byte[] SW_REFERENCED_DATA_NOT_FOUND = { (byte) 0x6A,
-			(byte) 0x88 };
-	public static final byte[] SW_INCORRECT_PARAMETERS_P1_P2 = { (byte) 0x6A,
-			(byte) 0x86 };
+	public static final byte[] SW_REFERENCED_DATA_NOT_FOUND = { (byte) 0x6A, (byte) 0x88 };
+	public static final byte[] SW_INCORRECT_PARAMETERS_P1_P2 = { (byte) 0x6A, (byte) 0x86 };
 	// ..
-	public static final byte[] SW_CMD_CLASS_NOT_SUPPORTED = { (byte) 0x6E,
-			(byte) 0x00 };
-	public static final byte[] SW_CMD_ABORTED_UNKNOWN_ERR = { (byte) 0x6F,
-			(byte) 0x00 };
-	public static final byte[] SW_INS_NOT_SUPPORTED = { (byte) 0x6D,
-			(byte) 0x00 };
-	public static final byte[] SW_COMMAND_NOT_ALLOWED = { (byte) 0x69,
-			(byte) 0x86 };
+	public static final byte[] SW_CMD_CLASS_NOT_SUPPORTED = { (byte) 0x6E, (byte) 0x00 };
+	public static final byte[] SW_CMD_ABORTED_UNKNOWN_ERR = { (byte) 0x6F, (byte) 0x00 };
+	public static final byte[] SW_INS_NOT_SUPPORTED = { (byte) 0x6D, (byte) 0x00 };
+	public static final byte[] SW_COMMAND_NOT_ALLOWED = { (byte) 0x69, (byte) 0x86 };
 	public static final short SW_APPLET_SELECT_FAILED = 0x6999;
 	public static final short SW_CLA_NOT_SUPPORTED = 0x6E00;
 	public static final short SW_SECURITY_STATUS_NOT_SATISFIED = 0x6982;
@@ -303,8 +297,7 @@ public class EmvUtils {
 	 *            the expected result length
 	 * @return
 	 */
-	public static byte[] createAPDU(byte[] command, byte[] cmdData,
-			byte lengthExpected) {
+	public static byte[] createAPDU(byte[] command, byte[] cmdData, byte lengthExpected) {
 		// Log.d(TAG, "createAPDU command length: " + command.length);
 		// Log.d(TAG, "createAPDU cmdData length: " + cmdData.length);
 
@@ -362,8 +355,7 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static byte[] createSelectMasterFile() {
-		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, new byte[0],
-				(byte) 0);
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, new byte[0], (byte) 0);
 		return result;
 	}
 
@@ -375,8 +367,7 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static byte[] createSelectFile(byte[] fileIdentifier) {
-		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, fileIdentifier,
-				(byte) 0);
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_FILE, fileIdentifier, (byte) 0);
 		return result;
 	}
 
@@ -386,8 +377,7 @@ public class EmvUtils {
 	 * @return
 	 */
 	public static byte[] createSelectParentDfFile() {
-		byte[] result = createAPDU(ISO_COMMAND_SELECT_PARENT_DF, new byte[0],
-				(byte) 0);
+		byte[] result = createAPDU(ISO_COMMAND_SELECT_PARENT_DF, new byte[0], (byte) 0);
 		return result;
 	}
 
@@ -402,8 +392,7 @@ public class EmvUtils {
 	 *            offset within the file
 	 * @return command APDU
 	 */
-	public static byte[] createReadBinaryApdu(int shortEfFileIdentifier,
-			int offset) {
+	public static byte[] createReadBinaryApdu(int shortEfFileIdentifier, int offset) {
 		int sfi = shortEfFileIdentifier;
 		StringBuilder cmd = new StringBuilder();
 		cmd.append("00B0");
@@ -438,8 +427,7 @@ public class EmvUtils {
 	 * @param record
 	 * @return command APDU
 	 */
-	public static byte[] createReadRecordApdu(int shortEfFileIdentifier,
-			int record) {
+	public static byte[] createReadRecordApdu(int shortEfFileIdentifier, int record) {
 		int sfi = shortEfFileIdentifier;
 		StringBuilder cmd = new StringBuilder();
 		cmd.append("00B2");
@@ -531,13 +519,10 @@ public class EmvUtils {
 	 *             if PIN cannot be parsed as integer
 	 * @return
 	 */
-	public static byte[] createApduVerifyPIN(String pin,
-			boolean transmitInPlaintext) throws NumberFormatException {
+	public static byte[] createApduVerifyPIN(String pin, boolean transmitInPlaintext) throws NumberFormatException {
 		int pinLength = pin.length();
 		if (pinLength < 4 || pinLength > 12) { // 0x0C
-			throw new IllegalArgumentException(
-					"Invalid PIN length. Must be in the range 4 to 12. Length="
-							+ pinLength);
+			throw new IllegalArgumentException("Invalid PIN length. Must be in the range 4 to 12. Length=" + pinLength);
 		}
 		StringBuilder builder = new StringBuilder("00 20 00 ");
 
@@ -573,8 +558,7 @@ public class EmvUtils {
 		} else {
 			builder.append(byte2Hex(p2QualifierEncipheredPIN));
 			// TODO Enciphered PIN not supported
-			throw new UnsupportedOperationException(
-					"Enciphered PIN not implemented");
+			throw new UnsupportedOperationException("Enciphered PIN not implemented");
 		}
 		return fromHexString(builder.toString());
 	}
@@ -587,8 +571,7 @@ public class EmvUtils {
 	 */
 	public static boolean isStatusSuccess(byte[] statusWord) {
 		if (statusWord == null || statusWord.length != 2) {
-			throw new IllegalArgumentException(
-					"isStatusSuccess: status word was either null or length was != 2");
+			throw new IllegalArgumentException("isStatusSuccess: status word was either null or length was != 2");
 		}
 		return compare2byteArrays(statusWord, SW_SUCCESS);
 	}
@@ -599,8 +582,7 @@ public class EmvUtils {
 	 */
 	public static String statusToString(byte[] statusWord) {
 		if (statusWord == null || statusWord.length != 2) {
-			throw new IllegalArgumentException(
-					"checkStatusWord: status word was either null or length was != 2");
+			throw new IllegalArgumentException("checkStatusWord: status word was either null or length was != 2");
 		}
 
 		if (compare2byteArrays(statusWord, SW_SUCCESS)) {
@@ -627,8 +609,7 @@ public class EmvUtils {
 			return "warning: execution error";
 		} else if (compare2byteArrays(statusWord, SW_LENGTH_ERROR)) {
 			return "length error, lc or le incorrect";
-		} else if (compare2byteArrays(statusWord,
-				SW_FUNC_CLASS_BYTE_NOT_SUPPORTED)) {
+		} else if (compare2byteArrays(statusWord, SW_FUNC_CLASS_BYTE_NOT_SUPPORTED)) {
 			return "function in class byte not supported";
 		} else if (compare2byteArrays(statusWord, SW_LOGIC_CHAN_NOT_SUPPORTED)) {
 			return "logical channels not supported";
@@ -691,19 +672,15 @@ public class EmvUtils {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Date getTimeStampFromBcdBytes(byte[] date, byte[] time)
-			throws ParseException {
+	public static Date getTimeStampFromBcdBytes(byte[] date, byte[] time) throws ParseException {
 		if (date == null || date.length != 3) {
-			throw new IllegalArgumentException(
-					"getTimeStampFromBytes: date must be exactly 3 bytes long");
+			throw new IllegalArgumentException("getTimeStampFromBytes: date must be exactly 3 bytes long");
 		}
 		if (time == null || time.length != 3) {
-			throw new IllegalArgumentException(
-					"getTimeStampFromBytes: time must be exactly 3 bytes long");
+			throw new IllegalArgumentException("getTimeStampFromBytes: time must be exactly 3 bytes long");
 		}
 		DateFormat df = new SimpleDateFormat("yy MM dd  HH mm ss", Locale.US);
-		return df.parse(prettyPrintString(bytesToHex(date), 2) + "  "
-				+ prettyPrintString(bytesToHex(time), 2));
+		return df.parse(prettyPrintString(bytesToHex(date), 2) + "  " + prettyPrintString(bytesToHex(time), 2));
 	}
 
 	/**
@@ -719,8 +696,7 @@ public class EmvUtils {
 	 */
 	public static Date getDateFromBcdBytes(byte[] date) throws ParseException {
 		if (date == null || date.length != 3) {
-			throw new IllegalArgumentException(
-					"getDateFromBcdBytes: date must be exactly 3 bytes long");
+			throw new IllegalArgumentException("getDateFromBcdBytes: date must be exactly 3 bytes long");
 		}
 		String s = prettyPrintString(bytesToHex(date), 2);
 		if ("00 00 00".equals(s)) {
@@ -743,8 +719,7 @@ public class EmvUtils {
 			return null;
 		}
 		if (time == null || time.length != 3) {
-			throw new IllegalArgumentException(
-					"getTimeStampFromQuickLog: time must be exactly 3 bytes long");
+			throw new IllegalArgumentException("getTimeStampFromQuickLog: time must be exactly 3 bytes long");
 		}
 		Calendar logDate = getDayFromQuickLogEntry(days);
 		logDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(byte2Hex(time[0])));
@@ -776,8 +751,7 @@ public class EmvUtils {
 	 */
 	public static long getAmountFromBytes(byte[] amount) {
 		if (amount == null || amount.length < 4) {
-			throw new IllegalArgumentException(
-					"getAmountFromBytes: needs at least 4 bytes");
+			throw new IllegalArgumentException("getAmountFromBytes: needs at least 4 bytes");
 		}
 		return readLongFromBytes(amount, 0, 4);
 	}
@@ -793,8 +767,7 @@ public class EmvUtils {
 	 */
 	public static long getAmountFromBcdBytes(byte[] amount) {
 		if (amount == null || amount.length != 6) {
-			throw new IllegalArgumentException(
-					"getAmountFromBcdBytes: needs 6 bytes");
+			throw new IllegalArgumentException("getAmountFromBcdBytes: needs 6 bytes");
 		}
 		return Long.parseLong(bytesToHex(amount));
 	}
@@ -807,12 +780,9 @@ public class EmvUtils {
 	 * @return
 	 * @throws NfcException
 	 */
-	public static BERTLV getNextTLV(ByteArrayInputStream stream)
-			throws TlvParsingException {
+	public static BERTLV getNextTLV(ByteArrayInputStream stream) throws TlvParsingException {
 		if (stream.available() < 2) {
-			throw new TlvParsingException(
-					"Error parsing data. Available bytes < 2 . Length="
-							+ stream.available());
+			throw new TlvParsingException("Error parsing data. Available bytes < 2 . Length=" + stream.available());
 		}
 
 		// ISO/IEC 7816 uses neither '00' nor 'FF' as tag value.
@@ -824,8 +794,7 @@ public class EmvUtils {
 		int peekInt = stream.read();
 		byte peekByte = (byte) peekInt;
 		// peekInt == 0xffffffff indicates EOS
-		while (peekInt != -1
-				&& (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
+		while (peekInt != -1 && (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
 			stream.mark(0); // Current position
 			peekInt = stream.read();
 			peekByte = (byte) peekInt;
@@ -834,9 +803,7 @@ public class EmvUtils {
 						// 0xFF
 
 		if (stream.available() < 2) {
-			throw new TlvParsingException(
-					"Error parsing data. Available bytes < 2 . Length="
-							+ stream.available());
+			throw new TlvParsingException("Error parsing data. Available bytes < 2 . Length=" + stream.available());
 		}
 
 		byte[] tagIdBytes = readTagIdBytes(stream);
@@ -873,10 +840,8 @@ public class EmvUtils {
 				curOctet = stream.read();
 				if (curOctet < 0) {
 					throw new TlvParsingException(
-							"Error parsing data. TLV "
-									+ "length byte indicated indefinite length, but EOS "
-									+ "was reached before 0x0000 was found"
-									+ stream.available());
+							"Error parsing data. TLV " + "length byte indicated indefinite length, but EOS "
+									+ "was reached before 0x0000 was found" + stream.available());
 				}
 				if (prevOctet == 0 && curOctet == 0) {
 					break;
@@ -898,8 +863,7 @@ public class EmvUtils {
 		stream.mark(0);
 		peekInt = stream.read();
 		peekByte = (byte) peekInt;
-		while (peekInt != -1
-				&& (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
+		while (peekInt != -1 && (peekByte == (byte) 0xFF || peekByte == (byte) 0x00)) {
 			stream.mark(0);
 			peekInt = stream.read();
 			peekByte = (byte) peekInt;
@@ -922,8 +886,7 @@ public class EmvUtils {
 	 * @return
 	 * @throws NfcException
 	 */
-	public static String prettyPrintBerTlvAPDUResponse(byte[] data,
-			int indentLength) throws TlvParsingException {
+	public static String prettyPrintBerTlvAPDUResponse(byte[] data, int indentLength) throws TlvParsingException {
 		StringBuilder buf = new StringBuilder();
 
 		ByteArrayInputStream stream = new ByteArrayInputStream(data);
@@ -958,18 +921,15 @@ public class EmvUtils {
 			if (tag.isConstructed()) {
 				// indentLength += extraIndent;
 				// Recursion
-				buf.append(prettyPrintBerTlvAPDUResponse(valueBytes,
-						indentLength + extraIndent));
+				buf.append(prettyPrintBerTlvAPDUResponse(valueBytes, indentLength + extraIndent));
 			} else {
 				buf.append("\n");
 				if (tag.getTagValueType() == TagValueType.DOL) {
-					buf.append(getFormattedTagAndLength(valueBytes,
-							indentLength + extraIndent));
+					buf.append(getFormattedTagAndLength(valueBytes, indentLength + extraIndent));
 				} else {
 					buf.append(getSpaces(indentLength + extraIndent));
 
-					buf.append(prettyPrintHex(bytesToHex(valueBytes),
-							indentLength + extraIndent));
+					buf.append(prettyPrintHex(bytesToHex(valueBytes), indentLength + extraIndent));
 
 					buf.append(" (");
 					buf.append(getTagValueInfo(tag, valueBytes));
@@ -991,8 +951,7 @@ public class EmvUtils {
 	 * @return
 	 * @throws NfcException
 	 */
-	public static List<TagAndValue> getTagsFromBerTlvAPDUResponse(byte[] data)
-			throws TlvParsingException {
+	public static List<TagAndValue> getTagsFromBerTlvAPDUResponse(byte[] data) throws TlvParsingException {
 		List<TagAndValue> tagList = new ArrayList<TagAndValue>();
 		ByteArrayInputStream stream = new ByteArrayInputStream(data);
 		while (stream.available() > 0) {
@@ -1002,8 +961,7 @@ public class EmvUtils {
 
 			if (tag.isConstructed()) {
 				// Recursion:
-				tagList.addAll(getTagsFromBerTlvAPDUResponse(tlv
-						.getValueBytes()));
+				tagList.addAll(getTagsFromBerTlvAPDUResponse(tlv.getValueBytes()));
 			} else {
 				tagList.add(new TagAndValue(tag, valueBytes));
 			}
@@ -1017,8 +975,8 @@ public class EmvUtils {
 	 * @param tagList
 	 * @return
 	 */
-	public static List<InfoKeyValuePair> filterTagsForResult(Context ctx,
-			List<TagAndValue> tagList, boolean cutOffLastAccountnumberDigit) {
+	public static List<InfoKeyValuePair> filterTagsForResult(Context ctx, List<TagAndValue> tagList,
+			boolean cutOffLastAccountnumberDigit) {
 		List<InfoKeyValuePair> resultList = new ArrayList<InfoKeyValuePair>();
 		String tagBytesHexString;
 
@@ -1028,11 +986,9 @@ public class EmvUtils {
 			// Expiration date
 			if ("5F24".equalsIgnoreCase(tagBytesHexString)) {
 				try {
-					InfoKeyValuePair expirationDate = new InfoKeyValuePair(ctx
-							.getResources().getString(
-									R.string.lbl_expiration_date),
-							formatDateOnly(getDateFromBcdBytes(tagAndValue
-									.getValue())));
+					InfoKeyValuePair expirationDate = new InfoKeyValuePair(
+							ctx.getResources().getString(R.string.lbl_expiration_date),
+							formatDateOnly(getDateFromBcdBytes(tagAndValue.getValue())));
 					resultList.add(expirationDate);
 				} catch (ParseException e) {
 					// dont add in case we cannot parse
@@ -1042,11 +998,9 @@ public class EmvUtils {
 			// Effective date
 			else if ("5F25".equalsIgnoreCase(tagBytesHexString)) {
 				try {
-					InfoKeyValuePair expirationDate = new InfoKeyValuePair(ctx
-							.getResources().getString(
-									R.string.lbl_effective_date),
-							formatDateOnly(getDateFromBcdBytes(tagAndValue
-									.getValue())));
+					InfoKeyValuePair expirationDate = new InfoKeyValuePair(
+							ctx.getResources().getString(R.string.lbl_effective_date),
+							formatDateOnly(getDateFromBcdBytes(tagAndValue.getValue())));
 					resultList.add(expirationDate);
 				} catch (ParseException e) {
 					// dont add in case we cannot parse
@@ -1055,33 +1009,25 @@ public class EmvUtils {
 			}
 			// Account Number
 			else if ("5A".equalsIgnoreCase(tagBytesHexString)) {
-				if (tagAndValue.getValue() != null
-						&& tagAndValue.getValue().length > 1) {
-					String primaryAccountNumber = bytesToHex(tagAndValue
-							.getValue());
+				if (tagAndValue.getValue() != null && tagAndValue.getValue().length > 1) {
+					String primaryAccountNumber = bytesToHex(tagAndValue.getValue());
 					if (cutOffLastAccountnumberDigit) {
 						// last character is always F: cut it off:
-						primaryAccountNumber = primaryAccountNumber.substring(
-								0, primaryAccountNumber.length() - 1);
+						primaryAccountNumber = primaryAccountNumber.substring(0, primaryAccountNumber.length() - 1);
 					}
-					resultList.add(new InfoKeyValuePair(ctx.getResources()
-							.getString(R.string.lbl_primary_account_number),
-							prettyPrintString(primaryAccountNumber, 4)));
+					resultList
+							.add(new InfoKeyValuePair(ctx.getResources().getString(R.string.lbl_primary_account_number),
+									prettyPrintString(primaryAccountNumber, 4)));
 				}
 			}
 
 			// Current ATC (application transaction counter) value
 			else if ("9F36".equalsIgnoreCase(tagBytesHexString)) {
-				if (tagAndValue.getValue() != null
-						&& tagAndValue.getValue().length > 1) {
-					int currentTransactionCounter = byteArrayToInt(tagAndValue
-							.getValue());
-					resultList
-							.add(new InfoKeyValuePair(
-									ctx.getResources()
-											.getString(
-													R.string.lbl_application_transaction_counter),
-									Integer.toString(currentTransactionCounter)));
+				if (tagAndValue.getValue() != null && tagAndValue.getValue().length > 1) {
+					int currentTransactionCounter = byteArrayToInt(tagAndValue.getValue());
+					resultList.add(new InfoKeyValuePair(
+							ctx.getResources().getString(R.string.lbl_application_transaction_counter),
+							Integer.toString(currentTransactionCounter)));
 				}
 			}
 
@@ -1091,29 +1037,24 @@ public class EmvUtils {
 
 			// Card risk management currency ?
 			if ("C9".equalsIgnoreCase(tagBytesHexString)) {
-				InfoKeyValuePair crmCurrency = new InfoKeyValuePair(ctx
-						.getResources().getString(
-								R.string.lbl_card_risk_management_currency),
-						Iso4217CurrencyCodes.getCurrencyAsString(tagAndValue
-								.getValue()));
+				InfoKeyValuePair crmCurrency = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_card_risk_management_currency),
+						Iso4217CurrencyCodes.getCurrencyAsString(tagAndValue.getValue()));
 				resultList.add(crmCurrency);
 			}
 
 			// country code for card risk management ?
 			if ("C8".equalsIgnoreCase(tagBytesHexString)) {
-				InfoKeyValuePair crmCountry = new InfoKeyValuePair(ctx
-						.getResources().getString(
-								R.string.lbl_card_risk_management_country),
-						Iso3166CountryCodes.getCountryAsString(tagAndValue
-								.getValue()));
+				InfoKeyValuePair crmCountry = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_card_risk_management_country),
+						Iso3166CountryCodes.getCountryAsString(tagAndValue.getValue()));
 				resultList.add(crmCountry);
 			}
 
 			// lower consecutive offline limit
 			if ("9F14".equalsIgnoreCase(tagBytesHexString)) {
 				InfoKeyValuePair kvPair = new InfoKeyValuePair(
-						ctx.getResources().getString(
-								R.string.lbl_lower_consecutive_offline_limit),
+						ctx.getResources().getString(R.string.lbl_lower_consecutive_offline_limit),
 						Integer.toString(byteArrayToInt(tagAndValue.getValue())));
 				resultList.add(kvPair);
 			}
@@ -1121,8 +1062,7 @@ public class EmvUtils {
 			// upper consecutive offline limit
 			if ("9F23".equalsIgnoreCase(tagBytesHexString)) {
 				InfoKeyValuePair kvPair = new InfoKeyValuePair(
-						ctx.getResources().getString(
-								R.string.lbl_upper_consecutive_offline_limit),
+						ctx.getResources().getString(R.string.lbl_upper_consecutive_offline_limit),
 						Integer.toString(byteArrayToInt(tagAndValue.getValue())));
 				resultList.add(kvPair);
 			}
@@ -1130,30 +1070,68 @@ public class EmvUtils {
 			// lower consecutive tx amount
 			if ("CA".equalsIgnoreCase(tagBytesHexString)) {
 				InfoKeyValuePair kvPair = new InfoKeyValuePair(
-						ctx.getResources()
-								.getString(
-										R.string.lbl_lower_consecutive_offline_tx_amount),
-						formatBalance(getAmountFromBcdBytes(tagAndValue
-								.getValue())));
+						ctx.getResources().getString(R.string.lbl_lower_consecutive_offline_tx_amount),
+						formatBalance(getAmountFromBcdBytes(tagAndValue.getValue())));
 				resultList.add(kvPair);
 			}
 
 			// upper consecutive tx amount
 			if ("CB".equalsIgnoreCase(tagBytesHexString)) {
 				InfoKeyValuePair kvPair = new InfoKeyValuePair(
-						ctx.getResources()
-								.getString(
-										R.string.lbl_upper_consecutive_offline_tx_amount),
-						formatBalance(getAmountFromBcdBytes(tagAndValue
-								.getValue())));
+						ctx.getResources().getString(R.string.lbl_upper_consecutive_offline_tx_amount),
+						formatBalance(getAmountFromBcdBytes(tagAndValue.getValue())));
 				resultList.add(kvPair);
 			}
 
-			// Log.d(TAG, "  name: " + tagAndValue.getTag().getName());
-			// Log.d(TAG, "   tag: "
+			// Unknown tag from mobile maestro cards
+			if ("DF09".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair unknownTag = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 09:",
+						prettyPrintHex(bytesToHex(tagAndValue.getValue()), 0, false));
+				resultList.add(unknownTag);
+			}
+
+			// Unknown tag from mobile maestro cards
+			if ("DF0A".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair unknownTag = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 0A:",
+						prettyPrintHex(bytesToHex(tagAndValue.getValue()), 0, false));
+				resultList.add(unknownTag);
+				InfoKeyValuePair unknownTagAsString = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 0A (interpreted as ASCII text):",
+						new String(tagAndValue.getValue()));
+				resultList.add(unknownTagAsString);
+			}
+
+			// Unknown tag from mobile maestro cards
+			if ("DF4D".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair unknownTag = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 4D:",
+						prettyPrintHex(bytesToHex(tagAndValue.getValue()), 0, false));
+				resultList.add(unknownTag);
+			}
+
+			// Unknown tag from mobile maestro cards
+			if ("DF50".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair unknownTag = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 50:",
+						prettyPrintHex(bytesToHex(tagAndValue.getValue()), 0, false));
+				resultList.add(unknownTag);
+			}
+
+			// Unknown tag from mobile maestro cards
+			if ("DF51".equalsIgnoreCase(tagBytesHexString)) {
+				InfoKeyValuePair unknownTag = new InfoKeyValuePair(
+						ctx.getResources().getString(R.string.lbl_unknown_tag) + " DF 51:",
+						prettyPrintHex(bytesToHex(tagAndValue.getValue()), 0, false));
+				resultList.add(unknownTag);
+			}
+
+			// Log.d(TAG, " name: " + tagAndValue.getTag().getName());
+			// Log.d(TAG, " tag: "
 			// + bytesToHex(tagAndValue.getTag().getTagBytes()));
 			// Log.d(TAG,
-			// "   val: "
+			// " val: "
 			// + getTagValueAsString(tagAndValue.getTag(),
 			// tagAndValue.getValue()));
 
@@ -1169,11 +1147,9 @@ public class EmvUtils {
 	 * @throws IllegalArgumentException
 	 * @return
 	 */
-	public static Date calculateCplcDate(byte[] dateBytes)
-			throws IllegalArgumentException {
+	public static Date calculateCplcDate(byte[] dateBytes) throws IllegalArgumentException {
 		if (dateBytes == null || dateBytes.length != 2) {
-			throw new IllegalArgumentException(
-					"Error! CLCP Date values consist always of exactly 2 bytes");
+			throw new IllegalArgumentException("Error! CLCP Date values consist always of exactly 2 bytes");
 		}
 		// current time
 		Calendar now = Calendar.getInstance();
@@ -1181,18 +1157,15 @@ public class EmvUtils {
 		int year = now.get(Calendar.YEAR);
 		int startYearOfCurrentDecade = year - (year % 10);
 
-		int days = 100 * (dateBytes[0] & 0xF) + 10 * (0xF & dateBytes[1] >>> 4)
-				+ (dateBytes[1] & 0xF);
+		int days = 100 * (dateBytes[0] & 0xF) + 10 * (0xF & dateBytes[1] >>> 4) + (dateBytes[1] & 0xF);
 
 		if (days > 366) {
-			throw new IllegalArgumentException(
-					"Invalid date (or are we parsing it wrong??)");
+			throw new IllegalArgumentException("Invalid date (or are we parsing it wrong??)");
 		}
 
 		Calendar calculatedDate = Calendar.getInstance();
 		calculatedDate.clear();
-		calculatedDate.set(Calendar.YEAR, startYearOfCurrentDecade
-				+ (0xF & dateBytes[0] >>> 4));
+		calculatedDate.set(Calendar.YEAR, startYearOfCurrentDecade + (0xF & dateBytes[0] >>> 4));
 		calculatedDate.set(Calendar.DAY_OF_YEAR, days);
 		while (calculatedDate.after(now)) {
 			calculatedDate.add(Calendar.YEAR, -10);
@@ -1336,7 +1309,8 @@ public class EmvUtils {
 	}
 
 	/**
-	 * Returns a string representation of a list of Tag and Lengths (eg DOLs)<br>
+	 * Returns a string representation of a list of Tag and Lengths (eg DOLs)
+	 * <br>
 	 * 
 	 * source: https://code.google.com/p/javaemvreader/
 	 * 
@@ -1415,24 +1389,20 @@ public class EmvUtils {
 	private static String getSafePrintChars(byte[] byteArray) {
 		if (byteArray == null) {
 			// return "" instead?
-			throw new IllegalArgumentException(
-					"Argument 'byteArray' cannot be null");
+			throw new IllegalArgumentException("Argument 'byteArray' cannot be null");
 		}
 		return getSafePrintChars(byteArray, 0, byteArray.length);
 	}
 
 	// source: https://code.google.com/p/javaemvreader/
-	private static String getSafePrintChars(byte[] byteArray, int startPos,
-			int length) {
+	private static String getSafePrintChars(byte[] byteArray, int startPos, int length) {
 		if (byteArray == null) {
 			// return "" instead?
-			throw new IllegalArgumentException(
-					"Argument 'byteArray' cannot be null");
+			throw new IllegalArgumentException("Argument 'byteArray' cannot be null");
 		}
 		if (byteArray.length < startPos + length) {
-			throw new IllegalArgumentException("startPos(" + startPos
-					+ ")+length(" + length + ") > byteArray.length("
-					+ byteArray.length + ")");
+			throw new IllegalArgumentException(
+					"startPos(" + startPos + ")+length(" + length + ") > byteArray.length(" + byteArray.length + ")");
 		}
 		StringBuilder buf = new StringBuilder();
 		for (int i = startPos; i < length; i++) {

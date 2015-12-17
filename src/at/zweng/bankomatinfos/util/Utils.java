@@ -38,14 +38,11 @@ public class Utils {
 	 */
 	public final static String TAG = "BankomatInfos";
 
-	private static SimpleDateFormat fullTimeWithDateFormat = new SimpleDateFormat(
-			"dd.MM.yyyy HH:mm:ss", Locale.US);
+	private static SimpleDateFormat fullTimeWithDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.US);
 
-	private static SimpleDateFormat dateOnlyDateFormat = new SimpleDateFormat(
-			"dd.MM.yyyy", Locale.US);
+	private static SimpleDateFormat dateOnlyDateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.US);
 
-	private final static SimpleDateFormat fullTimeMilliseconds = new SimpleDateFormat(
-			"HH:mm:ss.SSS", Locale.US);
+	private final static SimpleDateFormat fullTimeMilliseconds = new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
 
 	/**
 	 * Helper method, returns current time as string
@@ -64,14 +61,13 @@ public class Utils {
 	 * @return
 	 */
 	public static String bytesToHex(byte[] bytes) {
-		if (bytes==null) {
+		if (bytes == null) {
 			return "<null>";
 		}
-		if (bytes.length==0) {
+		if (bytes.length == 0) {
 			return "[]";
 		}
-		final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-				'9', 'A', 'B', 'C', 'D', 'E', 'F' };
+		final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 		char[] hexChars = new char[bytes.length * 2];
 		int v;
 		for (int j = 0; j < bytes.length; j++) {
@@ -101,8 +97,7 @@ public class Utils {
 	 * @return hex representation as string
 	 */
 	public static String byte2Hex(byte b) {
-		String[] HEX_DIGITS = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
-				"9", "A", "B", "C", "D", "E", "F" };
+		String[] HEX_DIGITS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
 		int nb = b & 0xFF;
 		int i_1 = (nb >> 4) & 0xF;
 		int i_2 = nb & 0xF;
@@ -141,8 +136,7 @@ public class Utils {
 			throw new IllegalArgumentException("getLast2Bytes: input was null");
 		}
 		if (input.length < 2) {
-			throw new IllegalArgumentException(
-					"getLast2Bytes: input was shorter than 2 bytes");
+			throw new IllegalArgumentException("getLast2Bytes: input was shorter than 2 bytes");
 		}
 		byte[] output = new byte[2];
 		output[0] = input[(input.length) - 2];
@@ -178,17 +172,13 @@ public class Utils {
 	 */
 	public static String formatBalance(long balance) {
 		if (balance < 100) {
-			return "0,"
-					+ String.format(Locale.GERMANY, "%02d",
-							Long.valueOf(balance % 100L));
+			return "0," + String.format(Locale.GERMANY, "%02d", Long.valueOf(balance % 100L));
 		}
 		String format;
 		format = "%,d";
 		// format = "%d";
-		return String.format(Locale.GERMANY, format, (balance / 100L))
-				+ ","
-				+ String.format(Locale.GERMANY, "%02d",
-						Long.valueOf(balance % 100L));
+		return String.format(Locale.GERMANY, format, (balance / 100L)) + ","
+				+ String.format(Locale.GERMANY, "%02d", Long.valueOf(balance % 100L));
 	}
 
 	/**
@@ -201,16 +191,13 @@ public class Utils {
 	 * @return
 	 * @throws InvalidParameterException
 	 */
-	public static long readLongFromBytes(byte[] rawData, int offset, int lenght)
-			throws InvalidParameterException {
+	public static long readLongFromBytes(byte[] rawData, int offset, int lenght) throws InvalidParameterException {
 		if (lenght > 8) {
-			throw new InvalidParameterException(
-					"cannot parse more than 8 bytes into LONG type");
+			throw new InvalidParameterException("cannot parse more than 8 bytes into LONG type");
 		}
 		int i = offset + lenght;
 		if (i > rawData.length) {
-			throw new InvalidParameterException(
-					"offset plus length exceeds input data");
+			throw new InvalidParameterException("offset plus length exceeds input data");
 		}
 		if (offset < 0 || lenght < 0) {
 			throw new InvalidParameterException("offset or length are <0");
@@ -230,8 +217,7 @@ public class Utils {
 	 */
 	public static int readBcdIntegerFromBytes(byte[] data) {
 		if (data.length > 4) {
-			throw new InvalidParameterException(
-					"cannot parse more than 4 bytes into int type");
+			throw new InvalidParameterException("cannot parse more than 4 bytes into int type");
 		}
 		return Integer.parseInt(bytesToHex(data));
 	}
@@ -243,8 +229,7 @@ public class Utils {
 	 * @param title
 	 * @param message
 	 */
-	public static void displaySimpleAlertDialog(Context ctx, String title,
-			String message) {
+	public static void displaySimpleAlertDialog(Context ctx, String title, String message) {
 		Builder builder = new AlertDialog.Builder(ctx);
 		if (title != null) {
 			builder.setTitle(title);
@@ -334,9 +319,7 @@ public class Utils {
 			return new byte[0];
 		}
 		if ((hexString.length() % 2) != 0) {
-			throw new IllegalArgumentException(
-					"hex string must contain an even number of characters: "
-							+ hexString);
+			throw new IllegalArgumentException("hex string must contain an even number of characters: " + hexString);
 		}
 		final byte result[] = new byte[hexString.length() / 2];
 		final char hexChars[] = hexString.toCharArray();
@@ -356,12 +339,10 @@ public class Utils {
 	 */
 	public static byte[] cutoffLast2Bytes(byte[] input) {
 		if (input == null) {
-			throw new IllegalArgumentException(
-					"cutoffLast2Bytes: input was null");
+			throw new IllegalArgumentException("cutoffLast2Bytes: input was null");
 		}
 		if (input.length < 2) {
-			throw new IllegalArgumentException(
-					"cutoffLast2Bytes: input was shorter than 2 bytes");
+			throw new IllegalArgumentException("cutoffLast2Bytes: input was shorter than 2 bytes");
 		}
 		byte[] output = new byte[input.length - 2];
 		for (int i = 0; i < input.length - 2; i++) {
@@ -380,8 +361,7 @@ public class Utils {
 	 *            (included)
 	 * @return
 	 */
-	public static byte[] getByteArrayPart(byte[] srcArray, int startIndex,
-			int endIndex) {
+	public static byte[] getByteArrayPart(byte[] srcArray, int startIndex, int endIndex) {
 		return Arrays.copyOfRange(srcArray, startIndex, endIndex + 1);
 	}
 
@@ -396,8 +376,7 @@ public class Utils {
 	public static byte[] copyByteArray(byte[] array2Copy) {
 		if (array2Copy == null) {
 			// return new byte[0] instead?
-			throw new IllegalArgumentException(
-					"Argument 'array2Copy' cannot be null");
+			throw new IllegalArgumentException("Argument 'array2Copy' cannot be null");
 		}
 		return copyByteArray(array2Copy, 0, array2Copy.length);
 	}
@@ -412,17 +391,14 @@ public class Utils {
 	 * @param length
 	 * @return
 	 */
-	public static byte[] copyByteArray(byte[] array2Copy, int startPos,
-			int length) {
+	public static byte[] copyByteArray(byte[] array2Copy, int startPos, int length) {
 		if (array2Copy == null) {
 			// return new byte[0] instead?
-			throw new IllegalArgumentException(
-					"Argument 'array2Copy' cannot be null");
+			throw new IllegalArgumentException("Argument 'array2Copy' cannot be null");
 		}
 		if (array2Copy.length < startPos + length) {
-			throw new IllegalArgumentException("startPos(" + startPos
-					+ ")+length(" + length + ") > byteArray.length("
-					+ array2Copy.length + ")");
+			throw new IllegalArgumentException(
+					"startPos(" + startPos + ")+length(" + length + ") > byteArray.length(" + array2Copy.length + ")");
 		}
 		byte[] copy = new byte[array2Copy.length];
 		System.arraycopy(array2Copy, startPos, copy, 0, length);
@@ -453,12 +429,10 @@ public class Utils {
 	 */
 	public static int byteArrayToInt(byte[] byteArray, int startPos, int length) {
 		if (byteArray == null) {
-			throw new IllegalArgumentException(
-					"Parameter 'byteArray' cannot be null");
+			throw new IllegalArgumentException("Parameter 'byteArray' cannot be null");
 		}
 		if (length <= 0 || length > 4) {
-			throw new IllegalArgumentException(
-					"Length must be between 1 and 4. Length = " + length);
+			throw new IllegalArgumentException("Length must be between 1 and 4. Length = " + length);
 		}
 		int value = 0;
 		for (int i = startPos; i < length; i++) {
@@ -478,9 +452,7 @@ public class Utils {
 	 */
 	public static boolean isBitSet(byte val, int bitPos) {
 		if (bitPos < 1 || bitPos > 8) {
-			throw new IllegalArgumentException(
-					"parameter 'bitPos' must be between 1 and 8. bitPos="
-							+ bitPos);
+			throw new IllegalArgumentException("parameter 'bitPos' must be between 1 and 8. bitPos=" + bitPos);
 		}
 		if ((val >> (bitPos - 1) & 0x1) == 1) {
 			return true;
@@ -579,8 +551,7 @@ public class Utils {
 	 * @return
 	 */
 	public static byte[] intToByteArray4(int value) {
-		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16),
-				(byte) (value >>> 8), (byte) value };
+		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
 	}
 
 	/**
@@ -632,8 +603,7 @@ public class Utils {
 	public static String getAppVersion(Context ctx) {
 		PackageManager pm = ctx.getPackageManager();
 		try {
-			PackageInfo info = pm.getPackageInfo(ctx.getPackageName(),
-					PackageManager.GET_ACTIVITIES);
+			PackageInfo info = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);
 			if (info == null) {
 				Log.w(TAG, "PackageInfo is null");
 				return "?";
@@ -711,14 +681,12 @@ public class Utils {
 	/**
 	 * show changelog dialog
 	 * 
-	 * @param <code>true</code> if full changelog should be shown,
-	 *        <code>false</code> if only changes since last installed app
-	 *        version should be shown
+	 * @param <code>true</code>
+	 *            if full changelog should be shown, <code>false</code> if only
+	 *            changes since last installed app version should be shown
 	 */
-	public static void showChangelogDialog(FragmentManager fm,
-			boolean fullChangelog) {
-		DialogFragment changelogFragment = ChangelogDialogFragment
-				.newInstance(fullChangelog);
+	public static void showChangelogDialog(FragmentManager fm, boolean fullChangelog) {
+		DialogFragment changelogFragment = ChangelogDialogFragment.newInstance(fullChangelog);
 		changelogFragment.show(fm, "dialog_changelog");
 	}
 
@@ -757,7 +725,8 @@ public class Utils {
 
 		// DOWNLOADS
 		sb.append("<b><font color=\"#ff3232\">Downloads:</font></b>");
-		sb.append("<br/>You can find this (and all previous versions) of this app here: http://johannes.zweng.at/android/Market/BankomatInfos");
+		sb.append(
+				"<br/>You can find this (and all previous versions) of this app here: http://johannes.zweng.at/android/Market/BankomatInfos");
 		sb.append("<br/><br/>");
 
 		// ICON
@@ -776,7 +745,8 @@ public class Utils {
 		sb.append("<br/>");
 
 		// changelog
-		sb.append("<br/>&#8226; Thanks to Karsten Priegnitz for his easy-to-use changelog builder: https://code.google.com/p/android-change-log/");
+		sb.append(
+				"<br/>&#8226; Thanks to Karsten Priegnitz for his easy-to-use changelog builder: https://code.google.com/p/android-change-log/");
 
 		sb.append("<br/>");
 		return Html.fromHtml(sb.toString());

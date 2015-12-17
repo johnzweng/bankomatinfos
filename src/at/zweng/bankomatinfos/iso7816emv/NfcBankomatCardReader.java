@@ -4,7 +4,7 @@ import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAES
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MASTERCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_VISA_CREDITCARD;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_QUICK;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_BER_TLV;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.*;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_ALL_COMMON_SIMPLE_TLV;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_APP_TX_COUNTER;
 import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.EMV_COMMAND_GET_DATA_CRM_COUNTRY;
@@ -484,6 +484,25 @@ public class NfcBankomatCardReader {
 		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_UPPER_CUMULATIVE_TX_AMOUNT);
 		logResultPdu(resultPdu);
 		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for unknown tag DF4D...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_DF4D));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_DF4D);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for unknown tag DF50...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_DF50));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_DF50);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
+		_ctl.log("trying to send GET DATA for unknown tag DF51...");
+		_ctl.log("sent: " + bytesToHex(EMV_COMMAND_GET_DATA_DF51));
+		resultPdu = _tag.transceive(EMV_COMMAND_GET_DATA_DF51);
+		logResultPdu(resultPdu);
+		logBerTlvResponse(resultPdu);
+
 	}
 
 	/**
@@ -734,7 +753,8 @@ public class NfcBankomatCardReader {
 			// jump to next if EF not in whitelst
 			if (!fullFileScan) {
 				if (shortEfFileIdentifier != 1 && shortEfFileIdentifier != 2 && shortEfFileIdentifier != 3
-						&& shortEfFileIdentifier != 4 && shortEfFileIdentifier != LOG_RECORD_EF)
+						&& shortEfFileIdentifier != 4 && shortEfFileIdentifier != 21
+						&& shortEfFileIdentifier != LOG_RECORD_EF)
 					continue;
 			}
 

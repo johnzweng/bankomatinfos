@@ -52,6 +52,7 @@
     <string name="lbl_quick_balance">QUICK Guthaben auf der Karte:</string>
     <string name="lbl_quick_currency">QUICK Währung:</string>
     <string name="lbl_remaining_pin_retries">Verbleibende Versuche zur PIN Eingabe:</string>
+    <string name="lbl_unknown_tag">Unbekannter tag</string>
     <string name="lbl_expiration_date">Ablaufdatum der Karte:</string>
     <string name="lbl_effective_date">Ausstellungsdatum der Karte:</string>
     <string name="lbl_primary_account_number">Kartennummer:</string>
