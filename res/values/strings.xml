@@ -8,7 +8,7 @@
     <string name="action_donate">Donation</string>
     <string name="action_changelog">Changelog</string>
     <string name="your_card_please">Please hold your card close to the back side of your device&#8230;</string>
-    <string name="use_omapi_card">Use OpenMobile API</string>
+    <string name="use_omapi_card">Read from SIM-Card</string>
     <string name="nfc_logo_description">NFC Logo</string>
     <string name="read_card_progress_status">Reading card&#8230;</string>
 

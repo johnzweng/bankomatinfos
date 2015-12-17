@@ -8,6 +8,7 @@
     <string name="action_donate">Spenden</string>
     <string name="action_changelog">Letzte Änderungen</string>
     <string name="your_card_please">Bitte halten Sie Ihre Bankomat- oder Kreditkarte an die Rückseite des Geräts&#8230;</string>
+    <string name="use_omapi_card">Lies von SIM-Karte</string>
     <string name="nfc_logo_description">NFC Logo</string>
     <string name="read_card_progress_status">Bitte warten, lese Karte&#8230;</string>
 

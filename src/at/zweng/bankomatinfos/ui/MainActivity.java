@@ -228,9 +228,6 @@ public class MainActivity extends Activity implements NfcAdapter.ReaderCallback 
 			Log.d(TAG, "disable reader mode");
 			_nfcAdapter.disableReaderMode(this);
 		}
-		if (_seService != null && _seService.isConnected()) {
-			_seService.shutdown();
-		}
 	}
 
 	@Override

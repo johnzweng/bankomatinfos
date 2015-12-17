@@ -1,11 +1,14 @@
 package at.zweng.bankomatinfos.iso7816emv;
 
+import static at.zweng.bankomatinfos.util.Utils.TAG;
+
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.simalliance.openmobileapi.Channel;
 import org.simalliance.openmobileapi.Session;
 
+import android.util.Log;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
 import at.zweng.bankomatinfos.util.Utils;
 
@@ -61,6 +64,10 @@ public class OmapiSessionTag implements ITag {
 
 	@Override
 	public byte[] transceive(byte[] cmdApdu) throws IOException {
+		if (_chan == null) {
+			Log.w(TAG, "OmapiSessionTag: canot call transmit, channel is null. Will return 6F00.");
+			return Utils.fromHexString("6F00");
+		}
 		return _chan.transmit(cmdApdu);
 	}
 

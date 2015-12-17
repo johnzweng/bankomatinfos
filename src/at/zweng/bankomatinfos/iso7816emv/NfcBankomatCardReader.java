@@ -170,12 +170,15 @@ public class NfcBankomatCardReader {
 	public CardInfo readAllCardData(boolean performFullFileScan) throws IOException {
 		CardInfo result = new CardInfo(_ctx);
 		_ctl.log("Starting to read data from card..");
-		result.addSectionHeader(_ctx.getResources().getString(R.string.section_nfc));
-		result.setNfcTagId(_tag.getId());
-		_ctl.log("NFC Tag ID: " + prettyPrintString(bytesToHex(_tag.getId()), 2));
-		_ctl.log("Historical bytes: " + prettyPrintString(bytesToHex(_tag.getHistoricalBytes()), 2));
-		result.addSectionHeader(_ctx.getResources().getString(R.string.section_GPCS_CPLC));
-		result = readCPLCInfos(result);
+		// we don't have this info over omapi:
+		if (!(_tag instanceof OmapiSessionTag)) {
+			result.addSectionHeader(_ctx.getResources().getString(R.string.section_nfc));
+			result.setNfcTagId(_tag.getId());
+			_ctl.log("NFC Tag ID: " + prettyPrintString(bytesToHex(_tag.getId()), 2));
+			_ctl.log("Historical bytes: " + prettyPrintString(bytesToHex(_tag.getHistoricalBytes()), 2));
+			result.addSectionHeader(_ctx.getResources().getString(R.string.section_GPCS_CPLC));
+			result = readCPLCInfos(result);
+		}
 		result.addSectionHeader(_ctx.getResources().getString(R.string.section_emv));
 		result = readQuickInfos(result);
 		result = readMaestroCardInfos(result, performFullFileScan);
@@ -1164,10 +1167,10 @@ public class NfcBankomatCardReader {
 	 * @throws IOException
 	 */
 	private byte[] sendGetCPLC() throws IOException {
-		// TODO: workaround:
+		// cannot read CPLC over OMAPI
 		if (_tag instanceof OmapiSessionTag) {
 			// return generic error for OMAPI
-			return fromHexString("6FFF");
+			return fromHexString("6F00");
 		}
 		Log.d(TAG, "sending GET CPLC command..");
 		byte[] command = EmvUtils.GPCS_GET_CPLC_COMMAND;
