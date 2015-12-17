@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 	private View _viewTextViewShowCard;
 	private View _viewProgressStatus;
 	private Button _btnUseOmapi;
-	private boolean _hasOmapiMaestro = false;
+	private boolean _hasOmapi = false;
 
 	private CardInfo _cardReadingResults;
 	private ReadNfcCardTask _readCardTask;
@@ -92,7 +92,7 @@ public class MainActivity extends Activity {
 		_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		// create last changes dialog if needed
 		displayWhatsNew();
-
+		checkForOmapi();
 	}
 
 	/**
@@ -100,7 +100,17 @@ public class MainActivity extends Activity {
 	 * AID
 	 */
 	private void checkForOmapi() {
+		// check if we have OpenMobile API in classpath:
 		try {
+			Class.forName("org.simalliance.openmobileapi.SEService");
+		} catch (ClassNotFoundException e1) {
+			Log.d(TAG, "Couldn't find class 'org.simalliance.openmobileapi.SEService'. "
+					+ "This devices seems not to have OpenMobile API installed.");
+			_hasOmapi = false;
+			return;
+		}
+		try {
+			// check if we can connect to it:
 			_seService = new SEService(this, new SEService.CallBack() {
 				@Override
 				public void serviceConnected(SEService seService) {
@@ -176,7 +186,7 @@ public class MainActivity extends Activity {
 		}
 		try {
 			Channel chan = sess.openLogicalChannel(APPLICATION_ID_EMV_MAESTRO_BANKOMAT);
-			_hasOmapiMaestro = true;
+			_hasOmapi = true;
 			_btnUseOmapi.setVisibility(View.VISIBLE);
 			chan.close();
 			sess.close();
@@ -211,7 +221,6 @@ public class MainActivity extends Activity {
 			_nfcAdapter.enableForegroundDispatch(this, _pendingIntent, _filters, _techLists);
 		}
 		// and check for OMAPI
-		checkForOmapi();
 	}
 
 	@Override
@@ -290,15 +299,14 @@ public class MainActivity extends Activity {
 	 * @param show
 	 */
 	private void showProgressAnimation(final boolean show) {
+		Log.d(TAG, "showProgressAnimation: " + show);
 		_viewProgressStatus.setVisibility(show ? View.VISIBLE : View.GONE);
-		// TODO FIXME: bei false wieder checken ob der button angezeigt werden
-		// muss
 		_viewNfcLogo.setVisibility(show ? View.GONE : View.VISIBLE);
 		_viewTextViewShowCard.setVisibility(show ? View.GONE : View.VISIBLE);
 		if (show) {
 			_btnUseOmapi.setVisibility(View.GONE);
 		} else {
-			if (_hasOmapiMaestro) {
+			if (_hasOmapi) {
 				_btnUseOmapi.setVisibility(View.VISIBLE);
 			}
 		}
@@ -310,7 +318,6 @@ public class MainActivity extends Activity {
 	 * @param intent
 	 */
 	private void handleNfcTag(Tag tag) {
-		showProgressAnimation(true);
 		if (_readCardTask != null) {
 			return;
 		}
@@ -325,7 +332,6 @@ public class MainActivity extends Activity {
 	 * @param intent
 	 */
 	private void handleOmapiTag(Session session) {
-		showProgressAnimation(true);
 		if (_readCardTask != null) {
 			return;
 		}

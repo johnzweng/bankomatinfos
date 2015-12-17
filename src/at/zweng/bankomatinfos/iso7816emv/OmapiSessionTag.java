@@ -43,7 +43,7 @@ public class OmapiSessionTag implements ITag {
 		if (_chan != null && !_chan.isClosed()) {
 			_chan.close();
 		}
-		// to be on the save side, close all channels within this session
+		// to be on the save side, let's close all channels within this session
 		_sess.closeChannels();
 		// and close the session
 		_sess.close();
@@ -54,8 +54,8 @@ public class OmapiSessionTag implements ITag {
 		try {
 			_chan = _sess.openLogicalChannel(aid);
 			return _chan.getSelectResponse();
-		}		catch (NoSuchElementException nse) {
-			return Utils.fromHexString("6FFF");
+		} catch (NoSuchElementException nse) {
+			return Utils.fromHexString("6A82");
 		}
 	}
 
