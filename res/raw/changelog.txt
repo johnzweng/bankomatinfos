@@ -19,6 +19,13 @@
     </style>
   </head>
   <body>
+$ 2.0.4-omapi-xposed
+  % Version 2.0.4-omapi-xposed
+  _ 2015-12-17
+    * Experimental version for reading an internal banking card (installed into the SIM card)
+    * This app uses the <a href="https://seek-for-android.github.io/">Open Mobile API</a>. If this API is not supported on the device, then the button for scanning the internal card simply will not be shown.
+    * For scanning the internal banking card the <a href="http://forum.xda-developers.com/xposed/">Xposed Framework</a> <b>must be installed</b> and this app must be activated as module in the Xposed settings app.
+    * <b>CAUTION:</b> This app circumvents the security barriers of the SIM card's Secure Element (by using Xposed). This app is intended for experienced users only! Use at your own risk! The developer <b>disclaims all warranties</b>!
 $ 2.0.3
   % Version 2.0.3
   _ 2014-12-19

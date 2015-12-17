@@ -19,6 +19,13 @@
     </style>
   </head>
   <body>
+$ 2.0.4-omapi-xposed
+  % Version 2.0.4-omapi-xposed
+  _ 2015-12-17
+    * Experimentelle Version zum Auslesen der internen (in der SIM-Karte installierten) <a href="https://www.bankomatkarte-mobil.at/">Bankomatkarte mobil</a>.
+    * Diese App nutzt die <a href="https://seek-for-android.github.io/">Open Mobile API</a>. Falls diese auf dem Gerät nicht unterstützt wird, wird der Button für das Auslesen der internen Bankcard nicht angezeigt.
+    * Zum Auslesen der internen Bankcard muss <b>zwingend</b> das <a href="http://forum.xda-developers.com/xposed/">Xposed Framework</a> auf dem Gerät installiert sein, und diese App muss in der Xposed-Einstellungs-App aktiviert sein!
+    * <b>ACHTUNG:</b> Diese App umgeht (mittels Xposed) die vorgesehenen Sicherheitsbarrieren des Secure-Elements auf der SIM-Karte! Diese App richtet sich an technisch versierte Benutzer. Der Autor übernimmt grundsätzlich keine Haftung.
 $ 2.0.3
   % Version 2.0.3
   _ 2014-12-19
