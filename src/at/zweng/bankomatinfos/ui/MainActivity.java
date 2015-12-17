@@ -1,7 +1,14 @@
 package at.zweng.bankomatinfos.ui;
 
-import static at.zweng.bankomatinfos.util.Utils.*;
-import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.*;
+import static android.nfc.NfcAdapter.FLAG_READER_NFC_A;
+import static android.nfc.NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
+import static at.zweng.bankomatinfos.iso7816emv.EmvUtils.APPLICATION_ID_EMV_MAESTRO_BANKOMAT;
+import static at.zweng.bankomatinfos.util.Utils.TAG;
+import static at.zweng.bankomatinfos.util.Utils.displaySimpleAlertDialog;
+import static at.zweng.bankomatinfos.util.Utils.getAppVersion;
+import static at.zweng.bankomatinfos.util.Utils.getStacktrace;
+import static at.zweng.bankomatinfos.util.Utils.showAboutDialog;
+import static at.zweng.bankomatinfos.util.Utils.showChangelogDialog;
 
 import java.io.IOException;
 
@@ -29,7 +36,6 @@ import android.view.View;
 import android.widget.Button;
 import at.zweng.bankomatinfos.AppController;
 import at.zweng.bankomatinfos.exceptions.NoSmartCardException;
-import at.zweng.bankomatinfos.iso7816emv.EmvUtils;
 import at.zweng.bankomatinfos.iso7816emv.ITag;
 import at.zweng.bankomatinfos.iso7816emv.IsoDepTag;
 import at.zweng.bankomatinfos.iso7816emv.NfcBankomatCardReader;
@@ -45,7 +51,7 @@ import at.zweng.bankomatinfos2.R;
  * @author Johannes Zweng <johannes@zweng.at>
  * 
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements NfcAdapter.ReaderCallback {
 
 	// for NFC stuff
 	private PendingIntent _pendingIntent;
@@ -206,29 +212,21 @@ public class MainActivity extends Activity {
 			this.finish();
 			return;
 		}
-
+		// use the reader mode, this will completly disable Peer-2-peer mode
+		// (Android Beam) so we can also scan anotther phone which runs
+		// cardemulation
 		if (_nfcAdapter != null) {
-			Log.d(TAG, "enabling foreground NFC dispatch");
-			// TESTING new ReaderMode:
-			// Log.i(TAG, "enableReaderMode without P2P only NFC A");
-			// _nfcAdapter
-			// .enableReaderMode(
-			// this,
-			// this,
-			// (NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
-			// NfcAdapter.FLAG_READER_NFC_A),
-			// null);
-			_nfcAdapter.enableForegroundDispatch(this, _pendingIntent, _filters, _techLists);
+			Log.i(TAG, "enableReaderMode without P2P only NFC A");
+			_nfcAdapter.enableReaderMode(this, this, (FLAG_READER_SKIP_NDEF_CHECK | FLAG_READER_NFC_A), null);
 		}
-		// and check for OMAPI
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		if (_nfcAdapter != null) {
-			Log.d(TAG, "disabling foreground NFC dispatch");
-			_nfcAdapter.disableForegroundDispatch(this);
+			Log.d(TAG, "disable reader mode");
+			_nfcAdapter.disableReaderMode(this);
 		}
 		if (_seService != null && _seService.isConnected()) {
 			_seService.shutdown();
@@ -276,6 +274,16 @@ public class MainActivity extends Activity {
 	}
 
 	/**
+	 * Callback when using reader mode.
+	 */
+	@Override
+	public void onTagDiscovered(Tag tag) {
+		if (tag != null) {
+			handleNfcTag(tag);
+		}
+	}
+
+	/**
 	 * @return <code>true</code> if NFC is available on this device and enabled
 	 *         in Adnroid system settings
 	 */
@@ -299,17 +307,22 @@ public class MainActivity extends Activity {
 	 * @param show
 	 */
 	private void showProgressAnimation(final boolean show) {
-		Log.d(TAG, "showProgressAnimation: " + show);
-		_viewProgressStatus.setVisibility(show ? View.VISIBLE : View.GONE);
-		_viewNfcLogo.setVisibility(show ? View.GONE : View.VISIBLE);
-		_viewTextViewShowCard.setVisibility(show ? View.GONE : View.VISIBLE);
-		if (show) {
-			_btnUseOmapi.setVisibility(View.GONE);
-		} else {
-			if (_hasOmapi) {
-				_btnUseOmapi.setVisibility(View.VISIBLE);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Log.d(TAG, "showProgressAnimation: " + show);
+				_viewProgressStatus.setVisibility(show ? View.VISIBLE : View.GONE);
+				_viewNfcLogo.setVisibility(show ? View.GONE : View.VISIBLE);
+				_viewTextViewShowCard.setVisibility(show ? View.GONE : View.VISIBLE);
+				if (show) {
+					_btnUseOmapi.setVisibility(View.GONE);
+				} else {
+					if (_hasOmapi) {
+						_btnUseOmapi.setVisibility(View.VISIBLE);
+					}
+				}
 			}
-		}
+		});
 	}
 
 	/**
