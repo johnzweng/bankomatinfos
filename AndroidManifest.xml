@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="at.zweng.bankomatinfos2"
-    android:versionCode="17"
-    android:versionName="2.0.4-omapi-xposed" >
+    android:versionCode="18"
+    android:versionName="2.0.5-omapi-xposed" >
 
     <uses-sdk
         android:minSdkVersion="19"

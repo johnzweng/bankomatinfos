@@ -31,7 +31,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
  */
 public class OverrideOmapiSEAccess implements IXposedHookLoadPackage {
 	private final static String OPENMOBILE_SERVICE = "org.simalliance.openmobileapi.service";
-	private final static String LOG_PREFIX = "BANKOMAT_INFOS: ";
+	private final static String LOG_PREFIX = "Bankomat_Card_Infos_2: ";
 
 	//
 	// =========================================================
@@ -62,7 +62,7 @@ public class OverrideOmapiSEAccess implements IXposedHookLoadPackage {
 		XposedBridge
 				.log(LOG_PREFIX + "we are in " + OPENMOBILE_SERVICE + " application. :-) Will place my method hooks.");
 
-		// try to find class:
+		// 1) try to find class:
 		Class<?> accessControlEnforcerCls;
 		try {
 			accessControlEnforcerCls = findClass("org.simalliance.openmobileapi.service.security.AccessControlEnforcer",
@@ -73,30 +73,44 @@ public class OverrideOmapiSEAccess implements IXposedHookLoadPackage {
 			return;
 		}
 
-		// try to locate method
+		// 2) try to locate one of the methods:
 		Method methodSetupChannelAccess = null;
+		
+		// first variant as used in OMAPI 3.x:
 		try {
 			methodSetupChannelAccess = findMethodExact(accessControlEnforcerCls, "setUpChannelAccess", byte[].class,
 					String.class);
 		} catch (NoSuchMethodError nsme) {
 			XposedBridge
-					.log(LOG_PREFIX + "setUpChannelAccess() with 2 parameters (as used in OMAPI v3.x) was not found.");
+					.log(LOG_PREFIX + "setUpChannelAccess() with 2 arguments (as used in OMAPI v3.x) was not found.");
 		}
+		
+		// second variant as used in OMAPI 2.x:
 		try {
 			methodSetupChannelAccess = findMethodExact(accessControlEnforcerCls, "setUpChannelAccess", byte[].class,
 					String.class, "org.simalliance.openmobileapi.service.ISmartcardServiceCallback");
 		} catch (NoSuchMethodError nsme) {
 			XposedBridge
-					.log(LOG_PREFIX + "setUpChannelAccess() with 3 parameters (as used in OMAPI v2.x) was not found.");
+					.log(LOG_PREFIX + "setUpChannelAccess() with 3 arguments (as used in OMAPI v2.x) was not found.");
 		}
+		
+		// third variant as seen on a LeEco LePro 3 (LEX720) device, running EUI 5.8.018S:
+		try {
+			methodSetupChannelAccess = findMethodExact(accessControlEnforcerCls, "setUpChannelAccess", byte[].class,
+					String.class, boolean.class, "org.simalliance.openmobileapi.service.ISmartcardServiceCallback");
+		} catch (NoSuchMethodError nsme) {
+			XposedBridge
+					.log(LOG_PREFIX + "setUpChannelAccess() with 4 parameters (as seen in LeEco EUI 5.8) was not found.");
+		}
+		
 		// if method not found, lets exit
 		if (methodSetupChannelAccess == null) {
 			XposedBridge
-					.log(LOG_PREFIX + "Could not find method setUpChannelAccess() for hooking. :-( Will do NOTHING.");
+					.log(LOG_PREFIX + "Could not find method setUpChannelAccess() for hooking. :-( Sorry, can do NOTHING.");
 			return;
 		} else {
 			XposedBridge.log(
-					LOG_PREFIX + "Found the following method to hook: " + methodSetupChannelAccess.toGenericString());
+					LOG_PREFIX + "Success! Found the following method to hook: " + methodSetupChannelAccess.toGenericString());
 		}
 
 		// hook the method:
