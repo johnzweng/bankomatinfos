@@ -283,6 +283,9 @@ public class NfcBankomatCardReader {
 		Log.d(TAG, "check if card contains MAESTRO AID..");
 		_ctl.log("Trying to select Maestro AID..");
 		byte[] selectAidResponse = selectApplicationGetBytes(APPLICATION_ID_EMV_MAESTRO_BANKOMAT);
+		if (selectAidResponse==null) {
+			return result;
+		}
 		logBerTlvResponse(selectAidResponse);
 		boolean isMaestroCard = isStatusSuccess(getLast2Bytes(selectAidResponse));
 		_ctl.log("is a MAESTRO card: " + isMaestroCard);
@@ -1241,6 +1244,9 @@ public class NfcBankomatCardReader {
 	 */
 	private void logResultPdu(byte[] resultPdu) {
 		Log.d(TAG, "received: " + bytesToHex(resultPdu));
+		if (resultPdu == null) {
+			return;
+		}
 		Log.d(TAG, "status: " + prettyPrintString(bytesToHex(getLast2Bytes(resultPdu)), 2));
 		Log.d(TAG, "status: " + statusToString(getLast2Bytes(resultPdu)));
 		_ctl.log("received: " + bytesToHex(resultPdu));
@@ -1254,6 +1260,9 @@ public class NfcBankomatCardReader {
 	 * @param resultPdu
 	 */
 	private void logBerTlvResponse(byte[] resultPdu) {
+		if (resultPdu == null) {
+			return;
+		}
 		if (resultPdu.length > 2) {
 			try {
 				byte[] data = cutoffLast2Bytes(resultPdu);
