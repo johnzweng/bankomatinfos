@@ -61,6 +61,10 @@
     <string name="lbl_contains_emv_log_entry_tag">Karte gibt an, dass sie Transaktionslogs speichert:</string>
     <string name="lbl_card_risk_management_currency">Währung für card risk management:</string>
     <string name="lbl_card_risk_management_country">Ländercode für card risk management:</string>
+    <string name="lbl_lower_consecutive_offline_limit">Lower Consecutive Offline Limit:</string>
+    <string name="lbl_upper_consecutive_offline_limit">Upper Consecutive Offline Limit:</string>
+    <string name="lbl_lower_consecutive_offline_tx_amount">Lower Consecutive Offline Transaction Amount:</string>
+    <string name="lbl_upper_consecutive_offline_tx_amount">Upper Consecutive Offline Transaction Amount:</string>
     
     
     <!-- Transaction List: -->
